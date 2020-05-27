@@ -1,125 +1,69 @@
-#include <soundio/soundio.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
 #include <iostream>
+#include <cstdlib>
+#include <rtaudio/RtAudio.h>
 
-static float seconds_offset = 0.0f;
-
-static void writeCallback(struct SoundIoOutStream *out_stream, int frame_count_min, int frame_count_max)
+// Two-channel sawtooth wave generator.
+int saw(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
+        double streamTime, RtAudioStreamStatus status, void *userData)
 {
-
-    const struct SoundIoChannelLayout *layout = &out_stream->layout;
-    float float_sample_rate = out_stream->sample_rate;
-    float seconds_per_frame = 1.0f / float_sample_rate;
-    struct SoundIoChannelArea *areas;
-    int frames_left = frame_count_max;
-    int err;
-
-    while (frames_left > 0)
+    unsigned int i, j;
+    double *buffer = (double *)outputBuffer;
+    double *lastValues = (double *)userData;
+    if (status)
+        std::cout << "Stream underflow detected!" << std::endl;
+    // Write interleaved audio data.
+    for (i = 0; i < nBufferFrames; i++)
     {
-        int frame_count = frames_left;
-
-        if ((err = soundio_outstream_begin_write(out_stream, &areas, &frame_count)))
+        for (j = 0; j < 2; j++)
         {
-            fprintf(stderr, "%s\n", soundio_strerror(err));
-            exit(1);
+            *buffer++ = lastValues[j];
+            lastValues[j] += 0.005 * (j + 1 + (j * 0.1));
+            if (lastValues[j] >= 1.0)
+                lastValues[j] -= 2.0;
         }
-
-        if (!frame_count)
-            break;
-
-        //Setup Sine Wave
-        float pitch = 440.0f;
-        float radians_per_second = pitch * 2.0f * M_PI;
-
-        //Write Sine Wave to buffer
-        for (int channel = 0; channel < layout->channel_count; channel++)
-        {
-            for (int frame = 0; frame < frame_count; frame++)
-            {
-                float sample = sin((seconds_offset + frame * seconds_per_frame) * radians_per_second);
-                float *buffer = (float *)(areas[channel].ptr + areas[channel].step * frame);
-                *buffer = sample;
-            }
-        }
-        seconds_offset = fmod(seconds_offset + seconds_per_frame * frame_count, 1.0);
-
-        if ((err = soundio_outstream_end_write(out_stream)))
-        {
-            fprintf(stderr, "%s\n", soundio_strerror(err));
-            exit(1);
-        }
-
-        frames_left -= frame_count;
     }
+    return 0;
 }
-
-int main(int argc, char *argv[])
+int main()
 {
-    int err;
-    //Create SoundIo object
-    SoundIo *soundio = soundio_create();
-    if (!soundio)
+    RtAudio dac;
+    if (dac.getDeviceCount() < 1)
     {
-        fprintf(stderr, "out of memory\n");
-        return 1;
+        std::cout << "\nNo audio devices found!\n";
+        exit(0);
     }
-    if (err = soundio_connect(soundio))
+    RtAudio::StreamParameters parameters;
+    parameters.deviceId = dac.getDefaultOutputDevice();
+    parameters.nChannels = 2;
+    parameters.firstChannel = 0;
+    unsigned int sampleRate = 44100;
+    unsigned int bufferFrames = 256; // 256 sample frames
+    double data[2];
+    try
     {
-        fprintf(stderr, "error connecting: %s\n", soundio_strerror(err));
-        return 1;
+        dac.openStream(&parameters, NULL, RTAUDIO_FLOAT64,
+                       sampleRate, &bufferFrames, &saw, (void *)&data);
+        dac.startStream();
     }
-
-    soundio_flush_events(soundio);
-
-    //Setup output device
-    int default_out_device_index = soundio_default_output_device_index(soundio);
-    if (default_out_device_index < 0)
+    catch (RtAudioError &e)
     {
-        fprintf(stderr, "no output device found\n");
-        return 1;
-    }
-    SoundIoDevice *output_device = soundio_get_output_device(soundio, default_out_device_index);
-    if (!output_device)
-    {
-        fprintf(stderr, "out of memory\n");
-        return 1;
+        e.printMessage();
+        exit(0);
     }
 
-    fprintf(stderr, "Output device: %s\n", output_device->name);
-
-    SoundIoOutStream *out_stream = soundio_outstream_create(output_device);
-    if (!out_stream)
+    char input;
+    std::cout << "\nPlaying ... press <enter> to quit.\n";
+    std::cin.get(input);
+    try
     {
-        fprintf(stderr, "out of memory\n");
-        return 1;
+        // Stop the stream
+        dac.stopStream();
     }
-    out_stream->format = SoundIoFormatFloat32NE;
-    out_stream->write_callback = writeCallback;
-
-    if ((err = soundio_outstream_open(out_stream)))
+    catch (RtAudioError &e)
     {
-        fprintf(stderr, "unable to open device: %s", soundio_strerror(err));
-        return 1;
+        e.printMessage();
     }
-
-    if (out_stream->layout_error)
-        fprintf(stderr, "unable to set channel layout: %s\n", soundio_strerror(out_stream->layout_error));
-
-    if ((err = soundio_outstream_start(out_stream)))
-    {
-        fprintf(stderr, "unable to start device: %s\n", soundio_strerror(err));
-        return 1;
-    }
-
-    for (;;)
-        soundio_wait_events(soundio);
-
-    soundio_outstream_destroy(out_stream);
-    soundio_device_unref(output_device);
-    soundio_destroy(soundio);
+    if (dac.isStreamOpen())
+        dac.closeStream();
     return 0;
 }
