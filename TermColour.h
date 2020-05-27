@@ -11,7 +11,7 @@
 //         white,
 // } ColourCode;
 
-class Colour
+class TermColour
 {
 public:
     enum ColourEnum
