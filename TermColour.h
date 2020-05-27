@@ -29,7 +29,7 @@ public:
 
     void setForegroundColour(ColourEnum code)
     {
-        std::cout << "\x1b[" + std::to_string(code) + "m";
+        std::cout << "\033[" + std::to_string(code) + "m";
     }
 
     void reset()
