@@ -2,10 +2,11 @@
 #include <iostream>
 #include <cstdlib>
 #include <math.h>
+#include <fstream>
 
 double sampleRate = 44100.0, currentAngle = 0.0, angleDelta = 0.0; // [1]
 double frequency = 110;
-
+std::ofstream file01;
 void updateAngleDelta()
 {
     auto cyclesPerSample = frequency / sampleRate; // [2]
@@ -16,23 +17,27 @@ void updateAngleDelta()
 int sin(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
         double streamTime, RtAudioStreamStatus status, void *userData)
 {
-
     unsigned int sampleIndex, channelIndex;
     double *buffer = (double *)outputBuffer;
+    double *iBuffer = (double *)inputBuffer;
+
     double *currentBufferData = (double *)userData;
     if (status)
         std::cout << "Stream underflow detected!" << std::endl;
     // Write interleaved audio data.
+    file01.open("input.txt");
     for (sampleIndex = 0; sampleIndex < nBufferFrames; sampleIndex++)
     {
         for (channelIndex = 0; channelIndex < 2; channelIndex++)
         {
             *buffer++ = currentBufferData[channelIndex];
             currentBufferData[channelIndex] = (float)std::sin(currentAngle);
+            file01 << *iBuffer++ << std::endl;
             currentAngle += angleDelta;
             updateAngleDelta();
         }
     }
+    file01.close();
     return 0;
 }
 
@@ -45,19 +50,22 @@ int main()
         std::cout << "\nNo audio devices found!\n";
         exit(0);
     }
-    RtAudio::StreamParameters parameters;
-    parameters.deviceId = dac.getDefaultOutputDevice();
-    RtAudio::DeviceInfo info = dac.getDeviceInfo(parameters.deviceId);
-    parameters.nChannels = info.outputChannels;
-    parameters.firstChannel = 0;
-    sampleRate = info.preferredSampleRate;
+    RtAudio::StreamParameters outputParams, inputParams;
+    outputParams.deviceId = dac.getDefaultOutputDevice();
+    inputParams.deviceId = dac.getDefaultInputDevice();
+    RtAudio::DeviceInfo outputInfo = dac.getDeviceInfo(outputParams.deviceId);
+    RtAudio::DeviceInfo inputInfo = dac.getDeviceInfo(inputParams.deviceId);
+    outputParams.nChannels = outputInfo.outputChannels;
+    inputParams.nChannels = inputInfo.inputChannels;
+    outputParams.firstChannel = 0;
+    inputParams.firstChannel = 0;
+    sampleRate = inputInfo.preferredSampleRate;
     unsigned int bufferFrames = 256; // 256 sample frames
     double data[2];
-
     //Start Streaming Audio
     try
     {
-        dac.openStream(&parameters, NULL, RTAUDIO_FLOAT64,
+        dac.openStream(&outputParams, &inputParams, RTAUDIO_FLOAT64,
                        sampleRate, &bufferFrames, &sin, (void *)&data);
         dac.startStream();
     }
