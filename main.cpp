@@ -1,31 +1,44 @@
+#include <rtaudio/RtAudio.h>
 #include <iostream>
 #include <cstdlib>
-#include <rtaudio/RtAudio.h>
+#include <math.h>
 
-// Two-channel sawtooth wave generator.
-int saw(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
+double sampleRate = 44100.0, currentAngle = 0.0, angleDelta = 0.0; // [1]
+double frequency = 110;
+
+void updateAngleDelta()
+{
+    auto cyclesPerSample = frequency / sampleRate; // [2]
+    angleDelta = cyclesPerSample * 2.0 * M_PI;     // [3]
+}
+
+// Two-channel sine wave generator.
+int sin(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
         double streamTime, RtAudioStreamStatus status, void *userData)
 {
-    unsigned int i, j;
+
+    unsigned int sampleIndex, channelIndex;
     double *buffer = (double *)outputBuffer;
-    double *lastValues = (double *)userData;
+    double *currentBufferData = (double *)userData;
     if (status)
         std::cout << "Stream underflow detected!" << std::endl;
     // Write interleaved audio data.
-    for (i = 0; i < nBufferFrames; i++)
+    for (sampleIndex = 0; sampleIndex < nBufferFrames; sampleIndex++)
     {
-        for (j = 0; j < 2; j++)
+        for (channelIndex = 0; channelIndex < 2; channelIndex++)
         {
-            *buffer++ = lastValues[j];
-            lastValues[j] += 0.005 * (j + 1 + (j * 0.1));
-            if (lastValues[j] >= 1.0)
-                lastValues[j] -= 2.0;
+            *buffer++ = currentBufferData[channelIndex];
+            currentBufferData[channelIndex] = (float)std::sin(currentAngle);
+            currentAngle += angleDelta;
+            updateAngleDelta();
         }
     }
     return 0;
 }
+
 int main()
 {
+    //Setup Audio Devices and Parameters
     RtAudio dac;
     if (dac.getDeviceCount() < 1)
     {
@@ -34,15 +47,18 @@ int main()
     }
     RtAudio::StreamParameters parameters;
     parameters.deviceId = dac.getDefaultOutputDevice();
-    parameters.nChannels = 2;
+    RtAudio::DeviceInfo info = dac.getDeviceInfo(parameters.deviceId);
+    parameters.nChannels = info.outputChannels;
     parameters.firstChannel = 0;
-    unsigned int sampleRate = 44100;
+    sampleRate = info.preferredSampleRate;
     unsigned int bufferFrames = 256; // 256 sample frames
     double data[2];
+
+    //Start Streaming Audio
     try
     {
         dac.openStream(&parameters, NULL, RTAUDIO_FLOAT64,
-                       sampleRate, &bufferFrames, &saw, (void *)&data);
+                       sampleRate, &bufferFrames, &sin, (void *)&data);
         dac.startStream();
     }
     catch (RtAudioError &e)
@@ -65,5 +81,6 @@ int main()
     }
     if (dac.isStreamOpen())
         dac.closeStream();
+
     return 0;
 }
