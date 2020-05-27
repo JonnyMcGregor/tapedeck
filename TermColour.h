@@ -1,4 +1,5 @@
 #include <string>
+#include <iostream>
 
 // typedef enum {
 //         black = 30,
@@ -26,8 +27,8 @@ public:
         white,
     };
 
-    std::string getColourEscape(ColourEnum code)
+    void setForegroundColour(ColourEnum code)
     {
-        return "\x1b[" + std::to_string(code) + "m";
+        std::cout << "\x1b[" + std::to_string(code) + "m";
     }
 };

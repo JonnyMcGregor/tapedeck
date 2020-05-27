@@ -3,11 +3,14 @@
 #include <map>
 #include "TermColour.h"
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv)
+{
 
     TermColour colour;
 
-    std::cout << colour.getColourEscape(colour.red) << "Test!" << "\n";
-    std::cout << colour.getColourEscape(colour.green) << "Test2!" << "\n";
+    colour.setForegroundColour(colour.red);
+    std::cout << "Test!\n";
+    colour.setForegroundColour(colour.green);
+    std::cout << "Test2!\n";
     return 0;
 }
