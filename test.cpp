@@ -2,10 +2,10 @@
 #include <string>
 #include <map>
 #include "TermColour.h"
+#include "Fracture.h"
 
 int main(int argc, char **argv)
 {
-
     TermColour colour;
 
     colour.setForegroundColour(colour.red);
@@ -14,5 +14,9 @@ int main(int argc, char **argv)
     std::cout << "Test2!\n";
     colour.reset();
     std::cout << "Default\n";
+
+    Fracture frac;
+    std::cout << frac.getWidth();
+
     return 0;
 }
