@@ -12,5 +12,7 @@ int main(int argc, char **argv)
     std::cout << "Test!\n";
     colour.setForegroundColour(colour.green);
     std::cout << "Test2!\n";
+    colour.reset();
+    std::cout << "Default\n";
     return 0;
 }

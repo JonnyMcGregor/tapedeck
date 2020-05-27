@@ -31,4 +31,9 @@ public:
     {
         std::cout << "\x1b[" + std::to_string(code) + "m";
     }
+
+    void reset()
+    {
+        std::cout << "\033[0m";
+    }
 };
