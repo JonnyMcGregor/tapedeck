@@ -22,6 +22,9 @@ struct Fracture
     }
 };
 
-class Screen
+struct ScreenCell
+{
+    char character = ' ';
+};
 {
 }
