@@ -35,7 +35,7 @@ int processAudioBlock(void *outputBuffer, void *inputBuffer, unsigned int nBuffe
     // Write interleaved audio data.
     for (sample_index = 0; sample_index < nBufferFrames; sample_index++)
     {
-        for (channel_index = 0; channel_index < 2; channel_index++, *out_buffer++)
+        for (channel_index = 0; channel_index < 2; channel_index++, *out_buffer++, *in_buffer++)
         {
             *out_buffer = current_buffer_data[channel_index];
 
@@ -43,11 +43,9 @@ int processAudioBlock(void *outputBuffer, void *inputBuffer, unsigned int nBuffe
             current_angle += angle_delta;
             updateAngleDelta();
             //Write to wave file
-            wav_gen.writeInputToFile(audio_clip, *out_buffer);
-            //*iBuffer++;
+            wav_gen.writeInputToFile(audio_clip, *in_buffer);
         }
     }
-
     return 0;
 }
 void initialiseAudioIO()
@@ -79,7 +77,6 @@ int main()
     char input01;
     std::cout << "\nPress <enter> to play.\n";
     std::cin.get(input01);
-
     //Start Streaming Audio
     try
     {
@@ -104,6 +101,7 @@ int main()
     {
         e.printMessage();
     }
+
     if (dac.isStreamOpen())
         dac.closeStream();
 
