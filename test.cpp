@@ -18,19 +18,15 @@ int main(int argc, char **argv)
     /*     Fracture frac;
     std::cout << frac.getWidth() << "\n";
  */
-    Screen screen(10, 10);
+    Screen screen = {10, 10};
     screen.draw(1, 1, 'a');
     screen.draw(4, 4, 'b');
 
     vector<string> result = screen.render();
     for (string row : result)
     {
-        std::cout << "|" + screen.render()[0] + "|"
+        std::cout << "|" + row + "|"
                   << "\n";
-    }
-    for (int i = 0; i < 10; i++)
-    {
-        std::cout << screen.getRow(i) << "\n";
     }
 
     return 0;

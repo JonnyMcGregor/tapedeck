@@ -33,11 +33,15 @@ struct Screen
 
     Screen(int width, int height)
     {
-        content.resize(height);
-        for (int i = 0; i < height; i++)
+        content = vector<vector<char>>(height); // Give size to outer vector
+        for (int y = 0; y < height; y++)
         {
-            content[i].resize(width, ' ');
-        }
+            content[y] = vector<char>(width);
+            for (int x = 0; x < width; x++)
+            {
+                content[y][x] = ' ';
+            };
+        };
         this->width = width;
         this->height = height;
     }
@@ -45,10 +49,9 @@ struct Screen
     void draw(int x, int y, char c)
     {
         content[y][x] = c;
-        printf("AAA\n");
     }
 
-    string getRow(int y)
+    string getRowAsString(int y)
     {
         string output_string;
         for (char c : content[y])
@@ -60,10 +63,10 @@ struct Screen
 
     vector<string> render()
     {
-        vector<string> outvec{};
-        for (int i = 0; i < height; i++)
+        vector<string> outvec(height);
+        for (int y = 0; y < height; y++)
         {
-            outvec.push_back(getRow(i));
+            outvec[y] = getRowAsString(y);
         }
         return outvec;
     }
