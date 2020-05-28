@@ -1,5 +1,7 @@
 #include <sys/ioctl.h> //ioctl() and TIOCGWINSZ
 #include <unistd.h>    // for STDOUT_FILENO
+#include <stdlib.h>
+#include <vector>
 
 struct Fracture
 {
@@ -26,5 +28,28 @@ struct ScreenCell
 {
     char character = ' ';
 };
+
+struct Screen
 {
+    std::vector<ScreenCell> content;
+
+    Screen(int width, int height)
+    {
+        content.resize(width);
 }
+
+    void draw(int x, int y, char c)
+    {
+        content[x].character = c;
+    }
+
+    std::string render()
+    {
+        std::string output_string;
+        for (ScreenCell i : content)
+        {
+            output_string += i.character;
+        }
+        return output_string;
+    }
+};
