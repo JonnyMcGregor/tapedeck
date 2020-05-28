@@ -2,6 +2,7 @@
 #include <unistd.h>    // for STDOUT_FILENO
 #include <stdlib.h>
 #include <vector>
+using namespace std;
 
 struct Fracture
 {
@@ -24,32 +25,46 @@ struct Fracture
     }
 };
 
-struct ScreenCell
-{
-    char character = ' ';
-};
-
 struct Screen
 {
-    std::vector<ScreenCell> content;
+    vector<vector<char>> content = {{}};
+    int width;
+    int height;
 
     Screen(int width, int height)
     {
-        content.resize(width);
-}
+        content.resize(height);
+        for (int i = 0; i < height; i++)
+        {
+            content[i].resize(width, ' ');
+        }
+        this->width = width;
+        this->height = height;
+    }
 
     void draw(int x, int y, char c)
     {
-        content[x].character = c;
+        content[y][x] = c;
+        printf("AAA\n");
     }
 
-    std::string render()
+    string getRow(int y)
     {
-        std::string output_string;
-        for (ScreenCell i : content)
+        string output_string;
+        for (char c : content[y])
         {
-            output_string += i.character;
+            output_string += c;
         }
         return output_string;
+    }
+
+    vector<string> render()
+    {
+        vector<string> outvec{};
+        for (int i = 0; i < height; i++)
+        {
+            outvec.push_back(getRow(i));
+        }
+        return outvec;
     }
 };
