@@ -8,6 +8,7 @@ public:
     {
         winsize size;
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
+        return size;
     }
 
     int getWidth()
