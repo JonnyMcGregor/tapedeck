@@ -27,7 +27,7 @@ struct Fracture
 
 struct Screen
 {
-    vector<vector<char>> content = {{}};
+    vector<vector<char>> content = {};
     int width;
     int height;
 
