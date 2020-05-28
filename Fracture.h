@@ -1,9 +1,8 @@
 #include <sys/ioctl.h> //ioctl() and TIOCGWINSZ
 #include <unistd.h>    // for STDOUT_FILENO
 
-class Fracture
+struct Fracture
 {
-public:
     winsize getSize()
     {
         winsize size;
