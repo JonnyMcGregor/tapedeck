@@ -1,16 +1,14 @@
+#include "endian.h"
 #include <fstream>
 #include <math.h>
-#include "endian.h"
 
 using namespace std;
 using namespace little_endian_io;
 
-struct WaveFileGenerator
-{
+struct WaveFileGenerator {
     WaveFileGenerator() {}
 
-    void initialise(int sample_rate, int bit_depth, int num_channels)
-    {
+    void initialise(int sample_rate, int bit_depth, int num_channels) {
         current_sample_rate = sample_rate;
         bits_per_sample = bit_depth;
         num_of_channels = num_channels;
@@ -19,8 +17,7 @@ struct WaveFileGenerator
         max_amplitude = pow(2, bits_per_sample) * 0.5 - 1;
     }
 
-    void openWaveFile(ofstream &wav_file)
-    {
+    void openWaveFile(ofstream &wav_file) {
         // Write the file headers
         wav_file << "RIFF----WAVEfmt ";               // (chunk size to be filled in later)
         write_word(wav_file, 16, 4);                  // no extension data
@@ -36,13 +33,11 @@ struct WaveFileGenerator
         wav_file << "data----"; // (chunk size to be filled in later)
     }
 
-    void writeInputToFile(ofstream &wav_file, double buffer_data)
-    {
+    void writeInputToFile(ofstream &wav_file, double buffer_data) {
         write_word(wav_file, (int)(max_amplitude * buffer_data), 2);
     }
 
-    void closeWaveFile(ofstream &wav_file)
-    {
+    void closeWaveFile(ofstream &wav_file) {
         // (We'll need the final file size to fix the chunk sizes above)
         size_t file_length = wav_file.tellp();
 
