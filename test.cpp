@@ -1,11 +1,10 @@
-#include <iostream>
-#include <string>
-#include <map>
-#include "TermColour.h"
 #include "Fracture.h"
+#include "TermColour.h"
+#include <iostream>
+#include <map>
+#include <string>
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     /*     TermColour colour;
 
     colour.setForegroundColour(colour.red);
@@ -23,8 +22,7 @@ int main(int argc, char **argv)
     screen.draw(4, 4, 'b');
 
     vector<string> result = screen.render();
-    for (string row : result)
-    {
+    for (string row : result) {
         std::cout << "|" + row + "|"
                   << "\n";
     }
