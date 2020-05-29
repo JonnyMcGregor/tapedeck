@@ -7,21 +7,35 @@
 
 using namespace std;
 
+struct Point {
+    int x;
+    int y;
+
+    Point(int x, int y) {
+        this->x = x;
+        this->y = y;
+    }
+
+    void translate(Point p) {
+        x = x + p.x;
+        y = y + p.y;
+    }
+};
+
+/* One Fracture class should exist in a program. It holds the viewport Screen,
+   as well as a vector of Windows. The viewport and all windows will resize
+   every time the terminal is resized. */
 struct Fracture {
-    winsize getSize() {
+    Point getSize() {
         winsize size;
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
-        return size;
+        return Point(size.ws_col, size.ws_row);
     };
     int getWidth() {
-        return getSize().ws_col;
-        /* size.ws_row is the number of rows, size.ws_col is the number of columns.
-     */
+        return getSize().x;
     };
     int getHeight() {
-        return getSize().ws_row;
-        /* size.ws_row is the number of rows, size.ws_col is the number of columns.
-     */
+        return getSize().y;
     }
 };
 
@@ -67,21 +81,6 @@ private:
 
 struct ScreenCell {
     char character = ' ';
-};
-
-struct Point {
-    int x;
-    int y;
-
-    Point(int x, int y) {
-        this->x = x;
-        this->y = y;
-    }
-
-    void translate(Point p) {
-        x = x + p.x;
-        y = y + p.y;
-    }
 };
 
 struct Screen {
