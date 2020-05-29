@@ -18,8 +18,8 @@ int main(int argc, char **argv) {
     std::cout << frac.getWidth() << "\n";
  */
     Screen screen = {10, 10};
-    screen.draw(1, 1, 'a');
-    screen.draw(4, 4, 'b');
+    screen.draw(Point(1, 1), 'a');
+    screen.draw(Point(4, 4), 'b');
 
     vector<string> result = screen.render();
     for (string row : result) {

@@ -27,6 +27,21 @@ struct ScreenCell {
     char character = ' ';
 };
 
+struct Point {
+    int x;
+    int y;
+
+    Point(int x, int y) {
+        this->x = x;
+        this->y = y;
+    }
+
+    void translate(Point p) {
+        x = x + p.x;
+        y = y + p.y;
+    }
+};
+
 struct Screen {
     vector<vector<ScreenCell>> content = {};
     int width;
@@ -44,8 +59,8 @@ struct Screen {
         this->height = height;
     }
 
-    void draw(int x, int y, char c) {
-        content[y][x].character = c;
+    void draw(Point p, char c) {
+        content[p.y][p.x].character = c;
     }
 
     vector<string> render() {
