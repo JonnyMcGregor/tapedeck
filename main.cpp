@@ -1,5 +1,7 @@
-#include "Session.h"
-#include "WaveFileGenerator.h"
+#pragma once
+
+#include "AudioStructure/Session.h"
+#include "WavGen/WaveFileGenerator.h"
 #include <fstream>
 #include <iostream>
 #include <math.h>
@@ -23,13 +25,8 @@ int processAudioBlock(void *outputBuffer, void *inputBuffer, unsigned int nBuffe
     if (status)
         std::cout << "Stream underflow detected!" << std::endl;
 
-    session->processBlock(in_buffer);
-    // for (sample_index = 0; sample_index < nBufferFrames; sample_index++) {
-    //     for (channel_index = 0; channel_index < 2; channel_index++, *out_buffer++, *in_buffer++) {
-    //         // Process interleaved audio data.
+    session->processBlock(in_buffer, out_buffer);
 
-    //     }
-    // }
     return 0;
 }
 
@@ -64,7 +61,7 @@ int main() {
 
     std::cout << "\nPress <enter> to record a clip.\n";
     std::cin.get(input01);
-    session.prepareClip();
+    session.prepareAudio();
     try {
         dac.openStream(&output_params, &input_params, RTAUDIO_FLOAT64,
                        sample_rate, &buffer_size, &processAudioBlock, &session);

@@ -1,3 +1,7 @@
+#pragma once
+#ifndef _CLIP_H_
+#define _CLIP_H_
+
 #include <fstream>
 #include <vector>
 
@@ -30,3 +34,5 @@ private:
     std::string clip_name;
     std::vector<double> audio_stream;
 };
+
+#endif
