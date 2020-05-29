@@ -1,6 +1,7 @@
 #include "components/Colour.h"
 #include "components/Screen.h"
 #include "components/Style.h"
+#include "components/Window.h"
 #include <iostream>
 #include <stdlib.h>
 #include <string>
@@ -50,8 +51,12 @@ struct TermSize {
    every time the terminal is resized. */
 struct Fracture {
     Screen viewport = {0, 0};
-
+    vector<Window> windows = {};
     Fracture() {
         viewport = Screen(TermSize::getSize());
+    }
+
+    void addWindow(Window window) {
+        windows.push_back(window);
     }
 };
