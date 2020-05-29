@@ -36,10 +36,10 @@ struct Screen
         content = vector<vector<char>>(height); // Give size to outer vector
         for (int y = 0; y < height; y++)
         {
-            content[y] = vector<char>(width);
+            content[y] = vector<char>(width); // Initialise the width of each row
             for (int x = 0; x < width; x++)
             {
-                content[y][x] = ' ';
+                content[y][x] = ' '; // Initialise each character of the row
             };
         };
         this->width = width;
@@ -51,16 +51,6 @@ struct Screen
         content[y][x] = c;
     }
 
-    string getRowAsString(int y)
-    {
-        string output_string;
-        for (char c : content[y])
-        {
-            output_string += c;
-        }
-        return output_string;
-    }
-
     vector<string> render()
     {
         vector<string> outvec(height);
@@ -69,5 +59,16 @@ struct Screen
             outvec[y] = getRowAsString(y);
         }
         return outvec;
+    }
+
+private:
+    string getRowAsString(int y)
+    {
+        string row_string;
+        for (char c : content[y])
+        {
+            row_string += c;
+        }
+        return row_string;
     }
 };
