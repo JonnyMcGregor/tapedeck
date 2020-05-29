@@ -1,8 +1,10 @@
+#include <iostream>
 #include <stdlib.h>
 #include <string>
 #include <sys/ioctl.h> //ioctl() and TIOCGWINSZ
 #include <unistd.h>    // for STDOUT_FILENO
 #include <vector>
+
 using namespace std;
 
 struct Fracture {
@@ -20,6 +22,46 @@ struct Fracture {
         return getSize().ws_row;
         /* size.ws_row is the number of rows, size.ws_col is the number of columns.
      */
+    }
+};
+
+enum struct Colour {
+    black = 0,
+    red,
+    green,
+    yellow,
+    blue,
+    magenta,
+    cyan,
+    white,
+    reset = 9,
+};
+
+enum struct Style {
+    bold = 1,
+    underlined = 2,
+    faint = 4,
+    reversed = 8,
+};
+
+struct TextFormat {
+    static void setForegroundColour(Colour colour) {
+        std::cout << "\033[3" + std::to_string(getColourValue(colour)) + "m";
+    }
+    static void setBackgroundColour(Colour colour) {
+        std::cout << "\033[4" + std::to_string(getColourValue(colour)) + "m";
+    }
+    static void resetColours() {
+        setForegroundColour(Colour::reset);
+        setBackgroundColour(Colour::reset);
+    }
+    static void resetAll() {
+        std::cout << "\033[0m";
+    }
+
+private:
+    static int getColourValue(Colour colour) {
+        return static_cast<int>(colour);
     }
 };
 

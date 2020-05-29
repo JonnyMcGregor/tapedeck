@@ -1,22 +1,15 @@
 #include "Fracture.h"
-#include "TermColour.h"
 #include <iostream>
 #include <map>
 #include <string>
 
 int main(int argc, char **argv) {
-    /*     TermColour colour;
+    Fracture frac;
 
-    colour.setForegroundColour(colour.red);
-    std::cout << "Test!\n";
-    colour.setForegroundColour(colour.green);
-    std::cout << "Test2!\n";
-    colour.reset();
+    TextFormat::setForegroundColour(Colour::red);
+    // colour.setBackgroundColour(Colour::blue);
     std::cout << "Default\n";
- */
-    /*     Fracture frac;
-    std::cout << frac.getWidth() << "\n";
- */
+
     Screen screen = {10, 10};
     screen.draw(Point(1, 1), 'a');
     screen.draw(Point(4, 4), 'b');
