@@ -1,3 +1,4 @@
+#include "ui_primitives.h"
 #include <iostream>
 #include <stdlib.h>
 #include <string>
@@ -6,21 +7,6 @@
 #include <vector>
 
 using namespace std;
-
-struct Point {
-    int x;
-    int y;
-
-    Point(int x, int y) {
-        this->x = x;
-        this->y = y;
-    }
-
-    void translate(Point p) {
-        x = x + p.x;
-        y = y + p.y;
-    }
-};
 
 /* One Fracture class should exist in a program. It holds the viewport Screen,
    as well as a vector of Windows. The viewport and all windows will resize
