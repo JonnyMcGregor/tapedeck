@@ -12,17 +12,6 @@ using namespace std;
    as well as a vector of Windows. The viewport and all windows will resize
    every time the terminal is resized. */
 struct Fracture {
-    Point getSize() {
-        winsize size;
-        ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
-        return Point(size.ws_col, size.ws_row);
-    };
-    int getWidth() {
-        return getSize().x;
-    };
-    int getHeight() {
-        return getSize().y;
-    }
 };
 
 enum struct Colour {
@@ -42,6 +31,20 @@ enum struct Style {
     underlined = 2,
     faint = 4,
     reversed = 8,
+};
+
+struct TermSize {
+    static Point getSize() {
+        winsize size;
+        ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
+        return Point(size.ws_col, size.ws_row);
+    };
+    static int getWidth() {
+        return getSize().x;
+    };
+    static int getHeight() {
+        return getSize().y;
+    }
 };
 
 struct TextFormat {
