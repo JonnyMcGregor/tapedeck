@@ -2,7 +2,6 @@
 #include <string>
 #include <sys/ioctl.h> //ioctl() and TIOCGWINSZ
 #include <unistd.h>    // for STDOUT_FILENO
-
 #include <vector>
 using namespace std;
 
@@ -24,17 +23,21 @@ struct Fracture {
     }
 };
 
+struct ScreenCell {
+    char character = ' ';
+};
+
 struct Screen {
-    vector<vector<char>> content = {};
+    vector<vector<ScreenCell>> content = {};
     int width;
     int height;
 
     Screen(int width, int height) {
-        content = vector<vector<char>>(height); // Give size to outer vector
+        content = vector<vector<ScreenCell>>(height); // Give size to outer vector
         for (int y = 0; y < height; y++) {
-            content[y] = vector<char>(width); // Initialise the width of each row
+            content[y] = vector<ScreenCell>(width); // Initialise the width of each row
             for (int x = 0; x < width; x++) {
-                content[y][x] = ' '; // Initialise each character of the row
+                content[y][x] = ScreenCell{}; // Initialise each character of the row
             };
         };
         this->width = width;
@@ -42,7 +45,7 @@ struct Screen {
     }
 
     void draw(int x, int y, char c) {
-        content[y][x] = c;
+        content[y][x].character = c;
     }
 
     vector<string> render() {
@@ -56,8 +59,8 @@ struct Screen {
 private:
     string getRowAsString(int y) {
         string row_string;
-        for (char c : content[y]) {
-            row_string += c;
+        for (ScreenCell sc : content[y]) {
+            row_string += sc.character;
         }
         return row_string;
     }
