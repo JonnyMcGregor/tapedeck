@@ -63,6 +63,7 @@ struct Screen {
         content[p.y][p.x].character = c;
     }
 
+    // Returns a vector containing a string for each row
     vector<string> render() {
         vector<string> outvec(height);
         for (int y = 0; y < height; y++) {
