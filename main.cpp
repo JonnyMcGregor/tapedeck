@@ -2,9 +2,6 @@
 
 #include "AudioStructure/Session.h"
 #include "WavGen/WaveFileGenerator.h"
-#include <fstream>
-#include <iostream>
-#include <math.h>
 #include <rtaudio/RtAudio.h>
 
 unsigned int sample_rate = 44100, buffer_size = 256; // [1]
@@ -33,13 +30,16 @@ int processAudioBlock(void *outputBuffer, void *inputBuffer, unsigned int nBuffe
 void initialiseAudioIO() {
     output_params.deviceId = dac.getDefaultOutputDevice();
     input_params.deviceId = dac.getDefaultInputDevice();
+
     output_info = dac.getDeviceInfo(output_params.deviceId);
-    input_info = dac.getDeviceInfo(input_params.deviceId);
     output_params.nChannels = output_info.outputChannels;
-    input_params.nChannels = input_info.inputChannels;
     output_params.firstChannel = 0;
+
+    input_info = dac.getDeviceInfo(input_params.deviceId);
+    input_params.nChannels = input_info.inputChannels;
     input_params.firstChannel = 0;
-    sample_rate = output_info.preferredSampleRate;
+
+    sample_rate = input_info.preferredSampleRate;
 }
 
 int main() {
@@ -56,7 +56,6 @@ int main() {
     char input01;
     std::cout << "\nPress <enter> to create a track.\n";
     std::cin.get(input01);
-
     session.createTrack();
 
     std::cout << "\nPress <enter> to record a clip.\n";
@@ -71,9 +70,8 @@ int main() {
         exit(0);
     }
 
-    char input02;
     std::cout << "\nRecording ... Press <enter> to stop recording clip.\n";
-    std::cin.get(input02);
+    std::cin.get(input01);
 
     try {
         // Stop the stream
@@ -86,7 +84,7 @@ int main() {
         dac.closeStream();
 
     std::cout << "\nRecording ... Press <enter> to export clip as .wav.\n";
-    std::cin.get(input02);
+    std::cin.get(input01);
     Clip clip = session.tracks[0].clips[0];
     std::ofstream audio_clip(clip.getName() + ".wav", std::ios::binary);
     wav_gen.openWaveFile(audio_clip);

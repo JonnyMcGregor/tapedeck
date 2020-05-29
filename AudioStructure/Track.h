@@ -3,17 +3,15 @@
 #define _TRACK_H_
 
 #include "Clip.h"
-#include <fstream>
 #include <iostream>
 #include <stdlib.h>
 #include <string>
-#include <vector>
 
 class Track {
 public:
-    Track(std::string name) { track_name = name; }
+    Track(std::string track_name) { this->track_name = track_name; }
 
-    void setName(std::string new_name) { track_name = new_name; }
+    void setName(std::string track_name) { this->track_name = track_name; }
 
     void createClip(double start_time) {
         int clipNum = ((int)clips.size()) + 1;
