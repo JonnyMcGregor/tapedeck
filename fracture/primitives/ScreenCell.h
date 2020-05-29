@@ -1,0 +1,3 @@
+struct ScreenCell {
+    char character = ' ';
+};
