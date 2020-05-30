@@ -13,9 +13,7 @@ struct Screen {
         Screen{0, 0};
     }
 
-    Screen(Point p) {
-        Screen(p.x, p.y);
-    }
+    Screen(Point p) : Screen(p.x, p.y) {}
 
     Screen(int width, int height) {
         content = vector<vector<ScreenCell>>(height); // Give size to outer vector
