@@ -1,11 +1,6 @@
+#include "Border.h"
 #include "Rect.h"
 #include <string>
-enum struct BorderStyle {
-    Plain,
-    Solid,
-    Ascii,
-    None,
-};
 
 struct Window {
     Rect rect = {};
@@ -15,7 +10,7 @@ struct Window {
     Screen screen = {};
     bool visible = true;
 
-    Window(Rect rect, string title = "", BorderStyle border_style = BorderStyle::Plain, int z = 0) {
+    Window(Rect rect, string title = "", BorderStyle border_style = BorderStyle::Normal, int z = 0) {
         this->title = title;
         this->rect = rect;
         this->border_style = border_style;
