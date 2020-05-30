@@ -9,6 +9,10 @@ struct Screen {
     int width;
     int height;
 
+    Screen() {
+        Screen{0, 0};
+    }
+
     Screen(Point p) {
         Screen(p.x, p.y);
     }
