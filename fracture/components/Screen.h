@@ -27,8 +27,27 @@ struct Screen {
         this->height = height;
     }
 
-    void draw(Point p, char c) {
+    void draw(Point p, Screen s) {
+        for (int i = 0; i < s.height; i++) {
+            draw(p, s.getRowAsString(i));
+            p.translate(Point(0, 1));
+        }
+    }
+
+    void draw(Point p, string s) {
+        for (int i = 0; i < s.size(); i++) {
+            draw(p, s.at(i));
+            p.translate(Point(1, 0));
+        }
+    }
+
+    // Returns true on success, false if drawing out of bounds
+    bool draw(Point p, char c) {
+        if (p.x >= this->width || p.y >= this->height || p.x < 0 || p.y < 0) {
+            return false;
+        }
         content[p.y][p.x].character = c;
+        return true;
     }
 
     // Returns a vector containing a string for each row
