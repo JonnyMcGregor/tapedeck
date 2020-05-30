@@ -3,7 +3,7 @@
 #include <string>
 
 enum struct BorderStyle {
-    Normal,
+    Plain,
     Twin,
     Solid,
     Ascii,
@@ -32,7 +32,7 @@ struct Border {
     }
 
     std::map<BorderStyle, std::string> style_map{
-        {BorderStyle::Normal, "┌┐└┘─│┼"},
+        {BorderStyle::Plain, "┌┐└┘─│┼"},
         {BorderStyle::Twin, "╔╗╚╝═║╬"},
         {BorderStyle::Solid, "┏┓┗┛━┃╋"},
         {BorderStyle::Ascii, "++++-|+"},
