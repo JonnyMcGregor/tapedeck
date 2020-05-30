@@ -1,11 +1,6 @@
+#include "Border.h"
 #include "Rect.h"
 #include <string>
-enum struct BorderStyle {
-    Plain,
-    Solid,
-    Ascii,
-    None,
-};
 
 struct Window {
     Rect rect = {};
