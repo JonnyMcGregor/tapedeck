@@ -1,10 +1,10 @@
 #include "Rect.h"
 #include <string>
 enum struct BorderStyle {
-    plain,
-    solid,
-    ascii,
-    none,
+    Plain,
+    Solid,
+    Ascii,
+    None,
 };
 
 struct Window {
@@ -14,7 +14,7 @@ struct Window {
     BorderStyle border_style;
     int z;
 
-    Window(Rect rect, string title = NULL, BorderStyle border_style = BorderStyle::plain, int z = 0) {
+    Window(Rect rect, string title = NULL, BorderStyle border_style = BorderStyle::Plain, int z = 0) {
         this->title = title;
         this->rect = rect;
         this->border_style = border_style;
