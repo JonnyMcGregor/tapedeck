@@ -1,6 +1,26 @@
 #include <map>
 #include <stdlib.h>
 #include <string>
+
+enum struct BorderStyle {
+    Normal,
+    Twin,
+    Solid,
+    Ascii,
+    None,
+    Minimal,
+};
+
+enum struct BorderElement {
+    TopLeft,
+    TopRight,
+    BottomLeft,
+    BottomRight,
+    Horizontal,
+    Vertical,
+    Intersection,
+};
+
 struct Border {
     Border(BorderStyle bs) {
         style = bs;
@@ -20,23 +40,4 @@ struct Border {
         {BorderStyle::Minimal, "┌┐└┘ │ "}};
 
     BorderStyle style;
-};
-
-enum struct BorderElement {
-    TopLeft,
-    TopRight,
-    BottomLeft,
-    BottomRight,
-    Horizontal,
-    Vertical,
-    Intersection,
-};
-
-enum struct BorderStyle {
-    Normal,
-    Twin,
-    Solid,
-    Ascii,
-    None,
-    Minimal,
 };
