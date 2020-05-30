@@ -1,5 +1,4 @@
 #include "components/Colour.h"
-#include "components/Screen.h"
 #include "components/Style.h"
 #include "components/Window.h"
 #include <iostream>
