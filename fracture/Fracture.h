@@ -59,4 +59,10 @@ struct Fracture {
     void addWindow(Window window) {
         windows.push_back(window);
     }
+
+    void render() {
+        for (string row : viewport.render()) {
+            std::cout << row << "\n";
+        }
+    }
 };
