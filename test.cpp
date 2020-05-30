@@ -6,8 +6,16 @@
 int main(int argc, char **argv) {
     Fracture frac;
 
-    TextFormat::setForegroundColour(Colour::red);
-    // colour.setBackgroundColour(Colour::blue);
+    Window new_window = Window{
+        Rect{0, 0, 10, 10},
+        "Title",
+        BorderStyle::Plain,
+        0};
+
+    frac.addWindow(new_window);
+
+    TextFormat::setForegroundColour(Colour::Red);
+    // colour.setBackgroundColour(Colour::Blue);
     std::cout << "Default\n";
 
     Screen screen = {10, 10};

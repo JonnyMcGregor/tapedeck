@@ -1,5 +1,10 @@
 #include "Screen.h"
 struct Rect {
+
+    Rect() {
+        Rect{0, 0, 0, 0};
+    };
+
     Rect(int origin_x, int origin_y, int width, int height) {
         x = origin_x;
         y = origin_y;

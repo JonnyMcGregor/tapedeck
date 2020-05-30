@@ -1,6 +1,6 @@
 enum struct Style {
-    bold = 1,
-    underlined = 2,
-    faint = 4,
-    reversed = 8,
+    Bold = 1,
+    Underlined = 2,
+    Faint = 4,
+    Reversed = 8,
 };

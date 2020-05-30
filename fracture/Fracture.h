@@ -19,8 +19,8 @@ struct TextFormat {
         std::cout << "\033[4" + std::to_string(getColourValue(colour)) + "m";
     }
     static void resetColours() {
-        setForegroundColour(Colour::reset);
-        setBackgroundColour(Colour::reset);
+        setForegroundColour(Colour::Reset);
+        setBackgroundColour(Colour::Reset);
     }
     static void resetAll() {
         std::cout << "\033[0m";
