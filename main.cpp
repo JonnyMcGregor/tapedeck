@@ -1,9 +1,10 @@
-#pragma once
-
 #include "AudioStructure/Session.h"
+#include "KeyCodes.h"
 #include "WavGen/WaveFileGenerator.h"
 #include <rtaudio/RtAudio.h>
-
+#include <stdio.h>
+#include <termios.h>
+#include <unistd.h>
 unsigned int sample_rate = 44100, buffer_size = 256; // [1]
 
 WaveFileGenerator wav_gen;
@@ -42,6 +43,45 @@ void initialiseAudioIO() {
     sample_rate = input_info.preferredSampleRate;
 }
 
+int getch(void) {
+    int ch;
+    struct termios oldt, newt;
+
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    ch = getchar();
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+
+    return ch;
+}
+
+void runTrackMenu(Session &session, char input, bool &exitCondition) {
+    std::cout << "Press + to add or - to remove tracks. Press <<backspace>> to return to main menu."
+              << "\n";
+
+    input = getch();
+    switch (input) {
+    case Key_Plus:
+        session.createTrack();
+        std::cout << "Track Created. Current number of tracks: " << session.tracks.size() << "\n"
+                  << "\n";
+        break;
+    case Key_Minus:
+        if (session.tracks.size() > 0) {
+            session.deleteTrack(session.tracks.size() - 1);
+            std::cout << "Track Deleted. Current number of tracks: " << session.tracks.size() << "\n"
+                      << "\n";
+        }
+        break;
+    case Key_backspace:
+        exitCondition = false;
+        break;
+    default:
+        std::cout << "Invalid Character..." << std::endl;
+    }
+}
 int main() {
     //Setup Audio Devices and Parameters
     if (dac.getDeviceCount() < 1) {
@@ -51,47 +91,120 @@ int main() {
     initialiseAudioIO();
     wav_gen.initialise(sample_rate, 16, input_params.nChannels);
     Session session = {sample_rate, buffer_size};
+    std::cout << "\n"
+              << "\n"
+              << "Welcome to AsciiDAW"
+              << "\n";
+    while (true) {
+        if (dac.isStreamOpen()) {
+            std::cout << "Press <<space>> to stop audio" << endl;
+            char input = getch();
+            std::cout << input;
+            if (input == Key_space) {
+                try {
+                    dac.stopStream();
+                } catch (RtAudioError &e) {
+                    e.printMessage();
+                }
+                dac.closeStream();
 
-    //Start Streaming Audio
-    char input01;
-    std::cout << "\nPress <enter> to create a track.\n";
-    std::cin.get(input01);
-    session.createTrack();
+                bool exportMenu = true;
+                while (exportMenu) {
+                    std::cout << "Press E to export recordings as .wav files" << std::endl;
+                    input = getch();
+                    if (input == Key_e || input == Key_E) {
+                        for (int i = 0; i < session.record_armed_tracks.size(); i++) {
+                            Clip clip = session.tracks[session.record_armed_tracks[i]].clips[0];
+                            std::cout << ".wav files created :)" << std::endl;
+                            std::ofstream audio_clip(clip.getName() + ".wav", std::ios::binary);
+                            wav_gen.openWaveFile(audio_clip);
+                            for (int sample = 0; sample < clip.getNumSamples(); sample++) {
+                                wav_gen.writeInputToFile(audio_clip, clip.getSample(sample));
+                            }
+                            wav_gen.closeWaveFile(audio_clip);
+                        }
 
-    std::cout << "\nPress <enter> to record a clip.\n";
-    std::cin.get(input01);
-    session.prepareAudio();
-    try {
-        dac.openStream(&output_params, &input_params, RTAUDIO_FLOAT64,
-                       sample_rate, &buffer_size, &processAudioBlock, &session);
-        dac.startStream();
-    } catch (RtAudioError &e) {
-        e.printMessage();
-        exit(0);
+                        exportMenu = false;
+                    } else
+                        std::cout << "Invalid Character..." << std::endl;
+                }
+            } else
+                std::cout << "Invalid Character..." << std::endl;
+        }
+        std::cout << "Press <<T>> to add or remove tracks"
+                  << "\n"
+                  << "Press <<Space>> to Play or Stop"
+                  << "\n";
+
+        bool trackMenu = true;
+        char input = getch();
+        std::cout << input;
+        switch (input) {
+        case Key_T:
+        case Key_t:
+            while (trackMenu) {
+                runTrackMenu(session, input, trackMenu);
+            }
+            break;
+        case Key_space:
+            if (session.tracks.size() > 0) {
+                session.prepareAudio();
+                try {
+                    dac.openStream(&output_params, &input_params, RTAUDIO_FLOAT64,
+                                   sample_rate, &buffer_size, &processAudioBlock, &session);
+                    dac.startStream();
+                    std::cout << "Playing Audio, recording to " << session.record_armed_tracks.size() << " armed track/s" << std::endl;
+                } catch (RtAudioError &e) {
+                    e.printMessage();
+                    exit(0);
+                }
+            }
+            break;
+        default:
+            std::cout << (int)input;
+        }
     }
 
-    std::cout << "\nRecording ... Press <enter> to stop recording clip.\n";
-    std::cin.get(input01);
+    // //Start Streaming Audio
+    // char input01;
+    // std::cout << "\nPress <enter> to create a track.\n";
+    // std::cin.get(input01);
+    // session.createTrack();
 
-    try {
-        // Stop the stream
-        dac.stopStream();
-    } catch (RtAudioError &e) {
-        e.printMessage();
-    }
+    // std::cout << "\nPress <enter> to record a clip.\n";
+    // std::cin.get(input01);
+    // session.prepareAudio();
+    // try {
+    //     dac.openStream(&output_params, &input_params, RTAUDIO_FLOAT64,
+    //                    sample_rate, &buffer_size, &processAudioBlock, &session);
+    //     dac.startStream();
+    // } catch (RtAudioError &e) {
+    //     e.printMessage();
+    //     exit(0);
+    // }
 
-    if (dac.isStreamOpen())
-        dac.closeStream();
+    // std::cout << "\nRecording ... Press <enter> to stop recording clip.\n";
+    // std::cin.get(input01);
 
-    std::cout << "\nRecording ... Press <enter> to export clip as .wav.\n";
-    std::cin.get(input01);
-    Clip clip = session.tracks[0].clips[0];
-    std::ofstream audio_clip(clip.getName() + ".wav", std::ios::binary);
-    wav_gen.openWaveFile(audio_clip);
-    for (int sample = 0; sample < clip.getNumSamples(); sample++) {
-        wav_gen.writeInputToFile(audio_clip, clip.getSample(sample));
-    }
-    wav_gen.closeWaveFile(audio_clip);
+    // try {
+    //     // Stop the stream
+    //     dac.stopStream();
+    // } catch (RtAudioError &e) {
+    //     e.printMessage();
+    // }
+
+    // if (dac.isStreamOpen())
+    //     dac.closeStream();
+
+    // std::cout << "\nRecording ... Press <enter> to export clip as .wav.\n";
+    // std::cin.get(input01);
+    // Clip clip = session.tracks[0].clips[0];
+    // std::ofstream audio_clip(clip.getName() + ".wav", std::ios::binary);
+    // wav_gen.openWaveFile(audio_clip);
+    // for (int sample = 0; sample < clip.getNumSamples(); sample++) {
+    //     wav_gen.writeInputToFile(audio_clip, clip.getSample(sample));
+    // }
+    // wav_gen.closeWaveFile(audio_clip);
 
     return 0;
 }

@@ -7,7 +7,11 @@ Session::Session(int sample_rate, int buffer_size) {
 void Session::createTrack() {
     tracks.push_back(Track("track" + std::to_string(tracks.size() + 1)));
 }
-
+void Session::deleteTrack(int index) {
+    std::vector<Track>::iterator it = tracks.begin();
+    advance(it, index);
+    tracks.erase(it);
+}
 void Session::prepareAudio() {
     for (int i = 0; i < tracks.size(); i++) {
         if (tracks[i].is_record_enabled) {
