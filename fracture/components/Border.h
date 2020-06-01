@@ -12,7 +12,7 @@ enum struct BorderStyle {
 };
 
 enum struct BorderElement {
-    TopLeft,
+    TopLeft = 0,
     TopRight,
     BottomLeft,
     BottomRight,
