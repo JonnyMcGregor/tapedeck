@@ -2,7 +2,7 @@ struct Point {
     int x;
     int y;
 
-    Point() : Point(0, 0) {}
+    Point() {}
 
     Point(int x, int y) {
         this->x = x;

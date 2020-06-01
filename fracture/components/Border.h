@@ -22,6 +22,9 @@ enum struct BorderElement {
 };
 
 struct Border {
+
+    Border() {}
+
     Border(BorderStyle bs) {
         style = bs;
     }
