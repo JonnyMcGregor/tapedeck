@@ -15,10 +15,13 @@ int main(int argc, char **argv) {
 
     frac.addWindow(new_window);
 
-    Screen s = Screen(10, 10);
-    s.draw(Point(1, 1), "Test stringasasd");
+    Window w = Window(Rect(0, 0, 10, 10), "Title", Border{BorderStyle::Ascii}, 0);
+    w.screen.draw(Point(0, 0), "Test stringasasd");
+    frac.viewport.draw(Point(5, 5), w.render());
 
-    frac.viewport.draw(Point(0, 0), s);
+    Window ww = Window(ScreenSpaceRect(-10, 0, -1, -1, frac.viewport), "Title", Border{BorderStyle::Ascii}, 0);
+    ww.screen.draw(Point(0, 0), "Test stringasasd");
+    frac.viewport.draw(Point(5, 5), ww.render());
 
     frac.render();
 
