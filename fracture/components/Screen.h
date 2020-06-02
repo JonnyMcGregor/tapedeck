@@ -33,7 +33,7 @@ struct Screen {
     }
 
     void draw(Point p, string s) {
-        for (int i = 0; i < s.size(); i++) {
+        for (long unsigned int i = 0; i < s.size(); i++) {
             draw(p, s.at(i));
             p.translate(Point(1, 0));
         }
