@@ -33,7 +33,6 @@ struct ScreenSpaceRect : Rect {
         if (ss_width < 0) {
             int right = parent.width + ss_width + 1;
             width = right - x;
-            printf("%d\n", width);
         }
         if (ss_height < 0) {
             int bottom = ss_height + parent.height + 1;
