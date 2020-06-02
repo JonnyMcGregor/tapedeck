@@ -1,15 +1,17 @@
 #include "Screen.h"
 
 struct Rect {
-    Rect() {
-        Rect{0, 0, 0, 0};
-    };
+    Rect(){};
 
     Rect(int origin_x, int origin_y, int width, int height) {
-        x = origin_x;
-        y = origin_y;
+        this->x = origin_x;
+        this->y = origin_y;
         this->width = width;
         this->height = height;
+    }
+
+    Point getOrigin() {
+        return Point(x, y);
     }
 
     int x = 0, y = 0, width = 0, height = 0;
@@ -17,23 +19,23 @@ struct Rect {
 
 struct ScreenSpaceRect : Rect {
     ScreenSpaceRect(int ss_left, int ss_top, int ss_width, int ss_height, Screen parent) {
-        if (ss_left >= 0)
-            x = ss_left;
-        else
-            x = parent.width - ss_left;
-        if (ss_top >= 0)
-            y = ss_top;
-        else
-            y = parent.height - ss_top;
-        if (ss_width >= 0)
-            width = ss_width;
-        else {
-            int right = ss_width + parent.width + 1;
-            width = right - ss_left;
+        x = ss_left;
+        y = ss_top;
+        width = ss_width;
+        height = ss_height;
+
+        if (ss_left < 0) {
+            this->x = parent.width + ss_left;
         }
-        if (ss_height >= 0)
-            height = ss_height;
-        else {
+        if (ss_top < 0) {
+            this->y = parent.height + ss_top;
+        }
+        if (ss_width < 0) {
+            int right = parent.width + ss_width + 1;
+            width = right - x;
+            printf("%d\n", width);
+        }
+        if (ss_height < 0) {
             int bottom = ss_height + parent.height + 1;
             height = bottom - ss_top;
         }

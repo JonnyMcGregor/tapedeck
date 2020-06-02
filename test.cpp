@@ -5,7 +5,7 @@
 
 int main(int argc, char **argv) {
     Fracture frac = {};
-    frac.viewport.draw(Point(10, 10), 'b');
+    // frac.viewport.draw(Point(10, 10), 'b');
 
     Window new_window = Window{
         Rect{0, 0, 10, 10},
@@ -15,13 +15,14 @@ int main(int argc, char **argv) {
 
     frac.addWindow(new_window);
 
-    Window w = Window(Rect(0, 0, 10, 10), "Title", Border{BorderStyle::Ascii}, 0);
-    w.screen.draw(Point(0, 0), "Test stringasasd");
-    frac.viewport.draw(Point(5, 5), w.render());
+    // Window w = Window(Rect(0, 0, 10, 10), "Title", Border{BorderStyle::Ascii}, 0);
+    // w.screen.draw(Point(0, 0), "Test stringasasd");
+    // frac.viewport.draw(Point(5, 5), w.render());
 
-    Window ww = Window(ScreenSpaceRect(-10, 0, -1, -1, frac.viewport), "Title", Border{BorderStyle::Ascii}, 0);
+    // Window ww = Window(ScreenSpaceRect(-10, 0, -1, -1, frac.viewport), "Title", Border{BorderStyle::Ascii}, 0);
+    Window ww = Window(ScreenSpaceRect(-20, 1, -1, -1, frac.viewport), "Title", Border{BorderStyle::Ascii}, 0);
     ww.screen.draw(Point(0, 0), "Test stringasasd");
-    frac.viewport.draw(Point(5, 5), ww.render());
+    frac.viewport.draw(ww.rect.getOrigin(), ww.render());
 
     frac.render();
 
