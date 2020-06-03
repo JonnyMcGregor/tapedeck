@@ -57,11 +57,18 @@ struct Fracture {
         viewport = Screen(TermSize::getSize());
     }
 
-    void addWindow(Window window) {
+    void addWindow(Window &window) {
         windows.push_back(window);
     }
 
+    void flattenWindowsToViewport() {
+        for (Window w : windows) {
+            viewport.draw(w.rect.getOrigin(), w.render());
+        }
+    }
+
     void render() {
+        flattenWindowsToViewport();
         std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
         for (u32string row : viewport.render()) {
             for (char32_t c : row) {
