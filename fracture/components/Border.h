@@ -29,18 +29,18 @@ struct Border {
         style = bs;
     }
 
-    char get(BorderElement element) {
+    std::u32string get(BorderElement element) {
         int i = static_cast<int>(element);
-        return style_map.find(style)->second.at(i);
+        return style_map.find(style)->second.substr(i);
     }
 
-    std::map<BorderStyle, std::string> style_map{
-        {BorderStyle::Plain, "┌┐└┘─│┼"},
-        {BorderStyle::Twin, "╔╗╚╝═║╬"},
-        {BorderStyle::Solid, "┏┓┗┛━┃╋"},
-        {BorderStyle::Ascii, "++++-|+"},
-        {BorderStyle::None, "       "},
-        {BorderStyle::Minimal, "┌┐└┘ │ "}};
+    std::map<BorderStyle, std::u32string> style_map{
+        {BorderStyle::Plain, U"┌┐└┘─│┼"},
+        {BorderStyle::Twin, U"╔╗╚╝═║╬"},
+        {BorderStyle::Solid, U"┏┓┗┛━┃╋"},
+        {BorderStyle::Ascii, U"++++-|+"},
+        {BorderStyle::None, U"       "},
+        {BorderStyle::Minimal, U"┌┐└┘ │ "}};
 
     BorderStyle style;
 };

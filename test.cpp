@@ -1,7 +1,6 @@
 #include "fracture/Fracture.h"
 #include <iostream>
-#include <map>
-#include <string>
+using namespace std;
 
 int main(int argc, char **argv) {
     Fracture frac = {};
@@ -15,12 +14,11 @@ int main(int argc, char **argv) {
 
     frac.addWindow(new_window);
 
-    // Window w = Window(Rect(0, 0, 10, 10), "Title", Border{BorderStyle::Ascii}, 0);
-    // w.screen.draw(Point(0, 0), "Test stringasasd");
-    // frac.viewport.draw(Point(5, 5), w.render());
+    Window w = Window(Rect(0, 0, 10, 10), "Title", Border{BorderStyle::Plain}, 0);
+    w.screen.draw(Point(0, 0), "Test stringasasd");
+    frac.viewport.draw(Point(5, 5), w.render());
 
-    // Window ww = Window(ScreenSpaceRect(-10, 0, -1, -1, frac.viewport), "Title", Border{BorderStyle::Ascii}, 0);
-    Window ww = Window(ScreenSpaceRect(-20, 1, -1, -1, frac.viewport), "Title", Border{BorderStyle::Ascii}, 0);
+    Window ww = Window(ScreenSpaceRect(-10, 0, -1, -1, frac.viewport), "Title", Border{BorderStyle::Ascii}, 0);
     ww.screen.draw(Point(0, 0), "Test stringasasd");
     frac.viewport.draw(ww.rect.getOrigin(), ww.render());
 

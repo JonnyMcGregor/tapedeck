@@ -25,25 +25,24 @@ struct Window {
     Screen render() {
         Screen output_screen = Screen(rect.width, rect.height);
 
-        string top_border = "";
-        top_border += border.get(BorderElement::TopLeft);
-        string bottom_border = "";
-        bottom_border += border.get(BorderElement::BottomLeft);
-        for (int i = 0; i < rect.width - 2; i++) {
-            top_border += border.get(BorderElement::Horizontal);
-            bottom_border += border.get(BorderElement::Horizontal);
-        };
-        top_border += border.get(BorderElement::TopRight);
-        bottom_border += border.get(BorderElement::BottomRight);
+        // Draw border corners
+        output_screen.draw(Point(0, 0), U'a');
+        output_screen.draw(Point(rect.width - 1, 0), U'b');
+        output_screen.draw(Point(0, rect.height - 1), U'c');
+        output_screen.draw(Point(rect.width - 1, rect.height - 1), U'd');
 
+        // Draw top and bottom edges
+        for (int i = 1; i < rect.width - 1; i++) {
+            output_screen.draw(Point(i, 0), U'-');
+            output_screen.draw(Point(i, rect.height - 1), U'-');
+        };
+        // Draw left and right edges
         for (int i = 1; i < rect.height - 1; i++) {
-            output_screen.draw(Point(0, i), border.get(BorderElement::Vertical));
-            output_screen.draw(Point(rect.width - 1, i), border.get(BorderElement::Vertical));
+            output_screen.draw(Point(0, i), U'|');
+            output_screen.draw(Point(rect.width - 1, i), U'|');
         };
 
-        output_screen.draw(Point(0, 0), top_border);
         output_screen.draw(Point(1, 1), screen);
-        output_screen.draw(Point(0, rect.height - 1), bottom_border);
         return output_screen;
     }
 };
