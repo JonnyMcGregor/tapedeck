@@ -1,5 +1,6 @@
 #include "../primitives/Point.h"
 #include "../primitives/ScreenCell.h"
+#include <stdexcept>
 #include <string>
 #include <vector>
 using namespace std;
@@ -25,10 +26,33 @@ struct Screen {
         this->height = height;
     }
 
-    void draw(Point p, Screen s) {
-        for (int i = 0; i < s.height; i++) {
-            draw(p, s.getRowAsString(i));
-            p.translate(Point(0, 1));
+    ScreenCell getCell(Point p) {
+        if (!isValidCoordinates(p)) {
+            throw invalid_argument("Coordinates lie outside of screen");
+        }
+        return content[p.y][p.x];
+    }
+
+    void draw(Point p, Screen screen) {
+        for (int y = 0; y < screen.height; y++) {
+            for (int x = 0; x < screen.width; x++) {
+                draw(Point(p.x + x, p.y + y), screen.getCell(Point(x, y)));
+            }
+        }
+    }
+
+    bool draw(Point p, ScreenCell screencell) {
+        if (!isValidCoordinates(p)) {
+            return false;
+        }
+        content[p.y][p.x] = screencell;
+        return true;
+    }
+
+    void draw(Point p, u32string s) {
+        for (long unsigned int i = 0; i < s.size(); i++) {
+            draw(p, s.at(i));
+            p.translate(Point(1, 0));
         }
     }
 
@@ -41,16 +65,16 @@ struct Screen {
 
     // Returns true on success, false if drawing out of bounds
     bool draw(Point p, char c) {
-        if (p.x >= this->width || p.y >= this->height || p.x < 0 || p.y < 0) {
+        if (!isValidCoordinates(p)) {
             return false;
         }
-        content[p.y][p.x].character = c;
+        content[p.y][p.x].character = (char32_t)c;
         return true;
     }
 
     // Returns a vector containing a string for each row
-    vector<string> render() {
-        vector<string> outvec(height);
+    vector<u32string> render() {
+        vector<u32string> outvec(height);
         for (int y = 0; y < height; y++) {
             outvec[y] = getRowAsString(y);
         }
@@ -58,8 +82,15 @@ struct Screen {
     }
 
 private:
-    string getRowAsString(int y) {
-        string row_string;
+    bool isValidCoordinates(Point p) {
+        if (p.x >= this->width || p.y >= this->height || p.x < 0 || p.y < 0) {
+            return false;
+        }
+        return true;
+    }
+
+    u32string getRowAsString(int y) {
+        u32string row_string;
         for (ScreenCell sc : content[y]) {
             row_string += sc.character;
         }

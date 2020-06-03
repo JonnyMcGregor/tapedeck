@@ -1,3 +1,3 @@
 struct ScreenCell {
-    char character = ' ';
+    char32_t character = ' ';
 };

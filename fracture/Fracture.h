@@ -1,7 +1,9 @@
 #include "components/Colour.h"
 #include "components/Style.h"
 #include "components/Window.h"
+#include <codecvt>
 #include <iostream>
+#include <locale>
 #include <stdlib.h>
 #include <string>
 #include <sys/ioctl.h> //ioctl() and TIOCGWINSZ
@@ -60,8 +62,12 @@ struct Fracture {
     }
 
     void render() {
-        for (string row : viewport.render()) {
-            std::cout << row << "\n";
+        std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
+        for (u32string row : viewport.render()) {
+            for (char32_t c : row) {
+                std::cout << converter.to_bytes(c);
+            }
+            std::cout << std::endl;
         }
     }
 };
