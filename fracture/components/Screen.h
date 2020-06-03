@@ -64,11 +64,11 @@ struct Screen {
     }
 
     // Returns true on success, false if drawing out of bounds
-    bool draw(Point p, char c) {
+    bool draw(Point p, char32_t c) {
         if (!isValidCoordinates(p)) {
             return false;
         }
-        content[p.y][p.x].character = (char32_t)c;
+        content[p.y][p.x].character = c;
         return true;
     }
 
@@ -81,7 +81,7 @@ struct Screen {
         return outvec;
     }
 
-private:
+    // private:
     bool isValidCoordinates(Point p) {
         if (p.x >= this->width || p.y >= this->height || p.x < 0 || p.y < 0) {
             return false;

@@ -29,9 +29,9 @@ struct Border {
         style = bs;
     }
 
-    std::u32string get(BorderElement element) {
+    char32_t get(BorderElement element) {
         int i = static_cast<int>(element);
-        return style_map.find(style)->second.substr(i);
+        return style_map.find(style)->second.at(i);
     }
 
     std::map<BorderStyle, std::u32string> style_map{
