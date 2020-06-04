@@ -120,18 +120,18 @@ private:
    every time the terminal is resized. */
 struct Fracture {
     Screen viewport = {0, 0};
-    vector<Window> windows = {};
+    vector<Window *> windows = {};
     Fracture() {
         viewport = Screen(TermSize::getSize());
     }
 
     void addWindow(Window &window) {
-        windows.push_back(window);
+        windows.push_back(&window);
     }
 
     void flattenWindowsToViewport() {
-        for (Window w : windows) {
-            viewport.draw(w.rect.getOrigin(), w.render());
+        for (Window *w : windows) {
+            viewport.draw(w->rect.getOrigin(), w->render());
         }
     }
 

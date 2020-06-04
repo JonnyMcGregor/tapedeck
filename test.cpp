@@ -17,6 +17,7 @@ int main(int argc, char **argv) {
 
     TermControl::setCursorVisible(false);
     while (true) {
+        w1.screen.draw(Point(0, 0), "AAA"); // to_string(getch());
         TermControl::moveCursorToTopLeft();
         frac.render();
         usleep(100000);
