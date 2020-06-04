@@ -16,6 +16,7 @@ int main(int argc, char **argv) {
     frac.addWindow(w2);
 
     TermControl::setCursorVisible(false);
+    TermControl::setEcho(false);
     int counter = 0;
     while (true) {
         TermControl::moveCursorToTopLeft();
