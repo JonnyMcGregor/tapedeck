@@ -69,12 +69,13 @@ struct Fracture {
 
     void render() {
         flattenWindowsToViewport();
-        std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
-        for (u32string row : viewport.render()) {
-            for (char32_t c : row) {
-                std::cout << converter.to_bytes(c);
+        wstring_convert<codecvt_utf8<char32_t>, char32_t> converter;
+        vector<u32string> rendered_viewport = viewport.render();
+
+        for (int y = 0; y < viewport.height; y++) {
+            for (int x = 0; x < viewport.width; x++) {
+                cout << converter.to_bytes(viewport.content[y][x].character);
             }
-            std::cout << std::endl;
         }
     }
 };
