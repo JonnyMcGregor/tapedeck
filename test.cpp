@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
         frac.render();
         usleep(100000);
         w1.screen.draw(Point(0, 1), "          ");
-        w1.screen.draw(Point(0, 1), to_string(getch()));
+        w1.screen.draw(Point(0, 1), to_string(TermControl::kbhit()));
         w1.screen.draw(Point(0, 4), to_string(counter));
         counter++;
     }

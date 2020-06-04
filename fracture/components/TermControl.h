@@ -18,16 +18,32 @@ enum struct Direction {
 };
 
 struct TermControl {
-    static void setEcho(bool echo) {
-        termios term;
-        tcgetattr(STDIN_FILENO, &term);
-        if (echo) {
-            term.c_lflag &= ECHO;
 
-        } else {
-            term.c_lflag &= ~ECHO;
+    static int kbhit() {
+        static const int STDIN = 0;
+        static bool initialized = false;
+
+        if (!initialized) {
+            // Use termios to turn off line buffering
+            termios term;
+            tcgetattr(STDIN, &term);
+            term.c_lflag &= ~ICANON;
+            tcsetattr(STDIN, TCSANOW, &term);
+            setbuf(stdin, NULL);
+            initialized = true;
         }
-        tcsetattr(STDIN_FILENO, TCSANOW, &term);
+
+        int bytesWaiting;
+        ioctl(STDIN, FIONREAD, &bytesWaiting);
+        return bytesWaiting;
+    }
+
+    static void setCanonical(bool canonical) {
+        setStdinFlag(ICANON, canonical);
+    }
+
+    static void setEcho(bool echo) {
+        setStdinFlag(ECHO, echo);
     }
 
     static Point getSize() {
@@ -116,5 +132,17 @@ struct TermControl {
 private:
     static int getColourValue(Colour colour) {
         return static_cast<int>(colour);
+    }
+
+    static void setStdinFlag(int flag, bool state) {
+        termios term;
+        tcgetattr(STDIN_FILENO, &term);
+        if (state) {
+            term.c_lflag &= flag;
+
+        } else {
+            term.c_lflag &= ~flag;
+        }
+        tcsetattr(STDIN_FILENO, TCSANOW, &term);
     }
 };
