@@ -1,5 +1,6 @@
 #include "fracture/Fracture.h"
 #include <iostream>
+#include <unistd.h>
 using namespace std;
 
 int main(int argc, char **argv) {
@@ -14,7 +15,18 @@ int main(int argc, char **argv) {
     w2.screen.draw(Point(0, 0), "A sidebar");
     frac.addWindow(w2);
 
-    frac.render();
+    TermControl::setCursorVisible(false);
+    while (true) {
+        TermControl::moveCursorToTopLeft();
+        frac.render();
+        usleep(100000);
+    }
+
+    // TermControl::setForegroundColour(Colour::Cyan);
+    // TermControl::clearScreen();
+    // TermControl::moveCursorToTopLeft();
+    // cout << "First\n";
+    // cout << "Second\n";
 
     // TextFormat::setForegroundColour(Colour::Red);
     // colour.setBackgroundColour(Colour::Blue);
