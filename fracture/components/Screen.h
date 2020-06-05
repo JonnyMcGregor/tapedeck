@@ -1,6 +1,8 @@
 #pragma once
 #include "Point.h"
 #include "ScreenCell.h"
+#include <codecvt>
+#include <locale>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -58,10 +60,9 @@ struct Screen {
     }
 
     void draw(Point p, string s) {
-        for (long unsigned int i = 0; i < s.size(); i++) {
-            draw(p, s.at(i));
-            p.translate(Point(1, 0));
-        }
+        wstring_convert<codecvt_utf8<char32_t>, char32_t> converter;
+        u32string us = converter.from_bytes(s);
+        draw(p, us);
     }
 
     // Returns true on success, false if drawing out of bounds
