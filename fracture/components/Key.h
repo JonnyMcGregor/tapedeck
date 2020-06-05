@@ -161,6 +161,10 @@ struct KeyCombo {
     }
 };
 
+/* This enum is deliberately separate from the main key enum above. It is
+ * unscoped to allow for explicit conversion to int, for use for automating the
+ * getKeyCombo function below.
+ */
 KeyCode num_to_keycode[26] = {
     KeyCode::K_A,
     KeyCode::K_B,
