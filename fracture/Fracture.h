@@ -1,13 +1,9 @@
 #include "components/Colour.h"
-#include "components/Style.h"
 #include "components/TermControl.h"
 #include "components/Window.h"
 #include <codecvt>
 #include <iostream>
 #include <locale>
-#include <stdlib.h>
-#include <string>
-#include <vector>
 
 using namespace std;
 
