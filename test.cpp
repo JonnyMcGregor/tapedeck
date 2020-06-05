@@ -9,7 +9,6 @@ int main(int argc, char **argv) {
     // frac.viewport.draw(Point(10, 10), 'b');
 
     Window w1 = Window(Rect(5, 5, 30, 10), "Title", Border{BorderStyle::Plain}, 0);
-    w1.screen.draw(Point(0, 0), "Character code:");
     frac.addWindow(w1);
 
     Window w2 = Window(ScreenSpaceRect(-20, 0, -1, -1, frac.viewport), "Title", Border{BorderStyle::Twin}, 0);
@@ -20,9 +19,14 @@ int main(int argc, char **argv) {
     while (true) {
         frac.updateKeyBuffer();
         frac.render();
-        usleep(250000);
-        w1.screen.clear();
-        w1.screen.draw(Point(0, 1), frac.getKey().getText());
+        usleep(10000);
+
+        KeyCombo key = frac.getKey();
+        if (!key.isNull()) {
+            w1.screen.clear();
+            w1.screen.draw(Point(0, 0), "Character code:");
+            w1.screen.draw(Point(0, 1), key.getText());
+        }
         w1.screen.draw(Point(0, 4), to_string(counter));
         counter++;
     }
