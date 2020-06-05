@@ -19,16 +19,21 @@ enum struct Direction {
 
 struct TermControl {
 
+    // static KeyCode
+
+    static int getch() {
+        setEcho(false);
+        setCanonical(false);
+        return getchar();
+    };
+
     static int kbhit() {
         static const int STDIN = 0;
         static bool initialized = false;
 
         if (!initialized) {
             // Use termios to turn off line buffering
-            termios term;
-            tcgetattr(STDIN, &term);
-            term.c_lflag &= ~ICANON;
-            tcsetattr(STDIN, TCSANOW, &term);
+            setCanonical(false);
             setbuf(stdin, NULL);
             initialized = true;
         }

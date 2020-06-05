@@ -11,20 +11,6 @@
 
 using namespace std;
 
-int getch(void) {
-    int ch;
-    struct termios oldt, newt;
-
-    tcgetattr(STDIN_FILENO, &oldt);
-    newt = oldt;
-    newt.c_lflag &= ~(ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-    ch = getchar();
-    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-
-    return ch;
-};
-
 /* One Fracture class should exist in a program. It holds the viewport Screen,
    as well as a vector of Windows. The viewport and all windows will resize
    every time the terminal is resized. */
@@ -47,6 +33,8 @@ struct Fracture {
 
     void render() {
         flattenWindowsToViewport();
+        TermControl::moveCursorToTopLeft();
+
         wstring_convert<codecvt_utf8<char32_t>, char32_t> converter;
         vector<u32string> rendered_viewport = viewport.render();
 
