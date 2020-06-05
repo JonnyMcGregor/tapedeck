@@ -1,5 +1,6 @@
 #pragma once
 #include "components/Colour.h"
+#include "components/Key.h"
 #include "components/TermControl.h"
 #include "components/Window.h"
 #include <codecvt>
@@ -13,10 +14,29 @@ using namespace std;
 struct Fracture {
     Screen viewport = {0, 0};
     vector<Window *> windows = {};
+    vector<KeyCombo> key_buffer = {};
+
     Fracture() {
         viewport = Screen(TermControl::getSize());
         TermControl::setCursorVisible(false);
         TermControl::setEcho(false);
+    }
+
+    KeyCombo getKey(bool remove_from_buffer = true) {
+        if (key_buffer.size() == 0) {
+            return KeyCombo(KeyCode::Null);
+        }
+        KeyCombo key = key_buffer.back();
+        if (remove_from_buffer) {
+            key_buffer.pop_back();
+        }
+        return key;
+    }
+
+    void updateKeyBuffer() {
+        if (TermControl::kbhit()) {
+            key_buffer.push_back(getKeyCombo());
+        }
     }
 
     void addWindow(Window &window) {
