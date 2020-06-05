@@ -1,4 +1,5 @@
 #include "fracture/Fracture.h"
+#include "fracture/components/Key.h"
 #include <iostream>
 #include <unistd.h>
 using namespace std;
@@ -19,11 +20,12 @@ int main(int argc, char **argv) {
     TermControl::setEcho(false);
     int counter = 0;
     while (true) {
-        TermControl::moveCursorToTopLeft();
         frac.render();
-        usleep(100000);
-        w1.screen.draw(Point(0, 1), "          ");
-        w1.screen.draw(Point(0, 1), to_string(TermControl::kbhit()));
+        usleep(250000);
+        w1.screen.draw(Point(0, 1), "                    ");
+        if (TermControl::kbhit()) {
+            w1.screen.draw(Point(0, 1), getKeyCombo().getText());
+        }
         w1.screen.draw(Point(0, 4), to_string(counter));
         counter++;
     }
