@@ -29,6 +29,14 @@ struct Screen {
         this->height = height;
     }
 
+    void clear() {
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                content[y][x] = ScreenCell{}; // Initialise each character of the row
+            }
+        }
+    }
+
     ScreenCell getCell(Point p) {
         if (!isValidCoordinates(p)) {
             throw invalid_argument("Coordinates lie outside of screen");
