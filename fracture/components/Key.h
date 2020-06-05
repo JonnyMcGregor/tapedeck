@@ -158,6 +158,7 @@ struct KeyCombo {
         return false;
     }
 
+    // A debug method, for converting the object state to a string for viewing
     string getText() {
         if (isNull()) {
             return "no key pressed";
