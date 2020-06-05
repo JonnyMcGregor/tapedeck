@@ -5,7 +5,7 @@
 using namespace std;
 
 enum struct KeyCode {
-    K_Null = -1,
+    Null = -1,
     K_Escape = 1,
     K_F1,
     K_F2,
@@ -214,5 +214,5 @@ getKeyCombo() {
 
     switch (keycode) {
     };
-    return KeyCombo(KeyCode::K_Null);
+    return KeyCombo(KeyCode::Null);
 }
