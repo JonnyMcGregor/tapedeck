@@ -16,16 +16,13 @@ int main(int argc, char **argv) {
     w2.screen.draw(Point(0, 0), "A sidebar");
     frac.addWindow(w2);
 
-    TermControl::setCursorVisible(false);
-    TermControl::setEcho(false);
     int counter = 0;
     while (true) {
+        frac.updateKeyBuffer();
         frac.render();
         usleep(250000);
-        w1.screen.draw(Point(0, 1), "                    ");
-        if (TermControl::kbhit()) {
-            w1.screen.draw(Point(0, 1), getKeyCombo().getText());
-        }
+        w1.screen.clear();
+        w1.screen.draw(Point(0, 1), frac.getKey().getText());
         w1.screen.draw(Point(0, 4), to_string(counter));
         counter++;
     }
