@@ -15,6 +15,8 @@ struct Fracture {
     vector<Window *> windows = {};
     Fracture() {
         viewport = Screen(TermControl::getSize());
+        TermControl::setCursorVisible(false);
+        TermControl::setEcho(false);
     }
 
     void addWindow(Window &window) {
