@@ -151,7 +151,17 @@ struct KeyCombo {
         this->modifier_keys = modifier_keys;
     }
 
+    bool isNull() {
+        if (keycode == KeyCode::Null) {
+            return true;
+        }
+        return false;
+    }
+
     string getText() {
+        if (isNull()) {
+            return "no key pressed";
+        }
         string output = "";
         if (modifier_keys & ModifierKey::Control) output += "Control+";
         if (modifier_keys & ModifierKey::Shift) output += "Shift+";
@@ -198,9 +208,9 @@ KeyCode num_to_keycode[26] = {
 KeyCombo
 getKeyCombo() {
     int keycode = TermControl::getch();
-    if (keycode == 27) {
-        keycode = TermControl::getch();
-    }
+    // if (keycode == 27) {
+    //     keycode = TermControl::getch();
+    // }
 
     if (1 <= keycode && keycode <= 26) {
         return KeyCombo(num_to_keycode[keycode - 1], ModifierKey::Control);
