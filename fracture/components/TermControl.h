@@ -1,4 +1,4 @@
-#include "../primitives/Point.h"
+#include "Point.h"
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>

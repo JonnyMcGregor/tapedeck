@@ -1,5 +1,5 @@
-#include "../primitives/Point.h"
-#include "../primitives/ScreenCell.h"
+#include "Point.h"
+#include "ScreenCell.h"
 #include <stdexcept>
 #include <string>
 #include <vector>
