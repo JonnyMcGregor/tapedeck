@@ -1,3 +1,4 @@
+#pragma once
 #include "Point.h"
 #include "ScreenCell.h"
 #include <stdexcept>

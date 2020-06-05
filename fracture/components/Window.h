@@ -1,3 +1,4 @@
+#pragma once
 #include "Border.h"
 #include "Rect.h"
 #include <string>

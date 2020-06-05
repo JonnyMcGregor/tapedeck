@@ -1,3 +1,5 @@
+#pragma once
+
 enum struct Colour {
     Black = 0,
     Red,

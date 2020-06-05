@@ -1,10 +1,10 @@
+#pragma once
 #include "components/Colour.h"
 #include "components/TermControl.h"
 #include "components/Window.h"
 #include <codecvt>
 #include <iostream>
 #include <locale>
-
 using namespace std;
 
 /* One Fracture class should exist in a program. It holds the viewport Screen,
