@@ -1,1 +1,5 @@
+# Ignore all files (not directories) in project root
+/*
+!/*/
+
 /.vscode/
