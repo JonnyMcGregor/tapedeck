@@ -20,7 +20,7 @@ public:
 
     Play_State play_state = Stop;
     std::vector<Track> tracks;
-    std::vector<int> record_armed_tracks = {};
+    std::vector<Track *> record_armed_tracks = {};
 
 private:
     double current_time = 0.0;

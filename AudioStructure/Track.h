@@ -24,6 +24,9 @@ public:
         clips.erase(it);
     }
 
+    int getSample(int time_in_samples) {
+        }
+
     std::vector<Clip> clips = {};
     bool is_record_enabled = true;
 

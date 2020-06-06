@@ -7,7 +7,7 @@
 
 class Clip {
 public:
-    Clip(std::string clip_name, float start_time) {
+    Clip(std::string clip_name, int start_time) {
         this->clip_name = clip_name;
         this->start_time = start_time;
     }
@@ -17,11 +17,11 @@ public:
     }
 
     void setName(std::string clip_name) { this->clip_name = clip_name; }
-    void setStartTime(double start_time) {
+    void setStartTime(int start_time) {
         if (start_time > 0)
             this->start_time = start_time;
     }
-    void setEndTime(double end_time) {
+    void setEndTime(int end_time) {
         if (end_time > start_time)
             this->end_time = end_time;
     }
@@ -30,7 +30,7 @@ public:
     double getSample(int index) { return audio_stream[index]; }
 
 private:
-    float start_time, end_time, length;
+    int start_time, end_time, length;
     std::string clip_name;
     std::vector<double> audio_stream;
 };
