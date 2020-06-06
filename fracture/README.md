@@ -1,1 +1,3 @@
-A component is an object that will be directly used by the user. A primitive, on the other hand, is only ever used as part of a component and is not normally used directly by the user. 
+# Fracture TUI Toolkit
+
+Fracture is a minimalist terminal user interface toolkit.
