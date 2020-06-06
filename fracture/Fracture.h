@@ -23,6 +23,7 @@ struct Fracture {
     }
 
     KeyCombo getKey(bool remove_from_buffer = true) {
+        updateKeyBuffer();
         if (key_buffer.size() == 0) {
             return KeyCombo(KeyCode::Null);
         }
@@ -34,7 +35,7 @@ struct Fracture {
     }
 
     void updateKeyBuffer() {
-        if (TermControl::kbhit()) {
+        while (TermControl::kbhit()) {
             key_buffer.push_back(getKeyCombo());
         }
     }
