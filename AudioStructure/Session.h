@@ -5,7 +5,7 @@
 
 class Session {
 public:
-    Session(int sample_rate, int buffer_size);
+    Session(unsigned int sample_rate, unsigned int buffer_size);
     void createTrack();
     void deleteTrack(int index);
     void prepareAudio();
