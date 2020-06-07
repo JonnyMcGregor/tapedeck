@@ -1,6 +1,6 @@
 #include "Session.h"
 
-Session::Session(int sample_rate, int buffer_size) {
+Session::Session(unsigned int sample_rate, unsigned int buffer_size) {
     this->sample_rate = sample_rate;
     this->buffer_size = buffer_size;
 }

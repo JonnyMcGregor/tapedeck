@@ -1,9 +1,8 @@
 #include "AudioStructure/Session.h"
-#include "KeyCodes.h"
 #include "WavGen/WaveFileGenerator.h"
+#include "fracture/Fracture.h"
 #include <rtaudio/RtAudio.h>
 #include <stdio.h>
-#include <termios.h>
 #include <unistd.h>
 
 unsigned int sample_rate = 44100, buffer_size = 256; // [1]
@@ -13,7 +12,6 @@ RtAudio dac;
 RtAudio::StreamParameters output_params, input_params;
 RtAudio::DeviceInfo output_info, input_info;
 
-// Two-channel sine wave generator.
 int processAudioBlock(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
                       double streamTime, RtAudioStreamStatus status, void *userData) {
     unsigned int sample_index, channel_index;
@@ -44,127 +42,127 @@ void initialiseAudioIO() {
     sample_rate = input_info.preferredSampleRate;
 }
 
-int getch(void) {
-    int ch;
-    struct termios oldt, newt;
-
-    tcgetattr(STDIN_FILENO, &oldt);
-    newt = oldt;
-    newt.c_lflag &= ~(ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-    ch = getchar();
-    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-
-    return ch;
-}
-
-void runTrackMenu(Session &session, char input, bool &exitCondition) {
-    std::cout << "Press + to add or - to remove tracks. Press <<backspace>> to return to main menu."
-              << "\n";
-
-    input = getch();
-    switch (input) {
-    case Key_Plus:
-        session.createTrack();
-        std::cout << "Track Created. Current number of tracks: " << session.tracks.size() << "\n"
-                  << "\n";
-        break;
-    case Key_Minus:
-        if (session.tracks.size() > 0) {
-            session.deleteTrack(session.tracks.size() - 1);
-            std::cout << "Track Deleted. Current number of tracks: " << session.tracks.size() << "\n"
-                      << "\n";
+void exportAllTracks(Session &session) {
+    for (int i = 0; i < session.record_armed_tracks.size(); i++) {
+        Clip clip = session.record_armed_tracks[i]->clips[0];
+        std::ofstream audio_clip("exported_audio/" + clip.getName() + ".wav", std::ios::binary);
+        wav_gen.openWaveFile(audio_clip);
+        for (int sample = 0; sample < clip.getNumSamples(); sample++) {
+            wav_gen.writeInputToFile(audio_clip, clip.getSample(sample));
         }
-        break;
-    case Key_backspace:
-        exitCondition = false;
-        break;
-    default:
-        std::cout << "Invalid Character..." << std::endl;
+        wav_gen.closeWaveFile(audio_clip);
     }
 }
+
+void startRecording(Session &session) {
+    if (session.tracks.size() > 0) {
+        session.prepareAudio();
+        dac.openStream(&output_params, &input_params, RTAUDIO_FLOAT64,
+                       sample_rate, &buffer_size, &processAudioBlock, &session);
+        dac.startStream();
+    }
+}
+
 int main() {
     //Setup Audio Devices and Parameters
     if (dac.getDeviceCount() < 1) {
-        std::cout << "\nNo audio devices found!\n";
+        std::cout << "No audio devices found, exiting ...\n";
         exit(0);
     }
     initialiseAudioIO();
     wav_gen.initialise(sample_rate, 16, input_params.nChannels);
     Session session = {sample_rate, buffer_size};
-    std::cout << "\n"
-              << "\n"
-              << "Welcome to AsciiDAW"
-              << "\n";
+
+    // Set up Fracture and windows
+    Fracture frac = Fracture{};
+    Window main_window = Window(
+        ScreenSpaceRect(0, 0, -1, -1, frac.viewport),
+        "AsciiDAW",
+        Border(BorderStyle::Plain));
+    frac.addWindow(main_window);
+
+    // Main program loop
+    string state = "main";
+    bool error_state = false;
+    bool export_menu = false;
     while (true) {
-        if (dac.isStreamOpen()) {
-            std::cout << "Press <<space>> to stop audio" << endl;
-            char input = getch();
-            std::cout << input;
-            if (input == Key_space) {
+
+        main_window.screen.draw(Point(1, 0), "Welcome to AsciiDAW");
+        main_window.screen.draw(Point(1, 1), "-------------------");
+
+        KeyCombo key = frac.getKey();
+
+        if (state == "main") {
+            main_window.screen.draw(Point(1, 3), "Press T to create a track");
+            main_window.screen.draw(Point(1, 4), "Press D to delete a track");
+            if (session.tracks.size() > 0) {
+                main_window.screen.draw(Point(1, 5), "Press R to start recording audio");
+            }
+            if (export_menu) {
+                main_window.screen.draw(Point(1, 6), "Press E to export recordings to WAV files");
+            }
+            main_window.screen.draw(Point(1, 10), "Number of tracks: " + to_string(session.tracks.size()));
+            main_window.screen.draw(Point(1, 11), "Number of channels: " + to_string(input_params.nChannels));
+
+            // Create track
+            if (key.keycode == KeyCode::K_T) {
+                session.createTrack();
+            }
+            // Delete track
+            if (key.keycode == KeyCode::K_D) {
+                if (session.tracks.size() > 0) {
+                    session.deleteTrack(session.tracks.size() - 1);
+                }
+            }
+            // Start recording
+            if (key.keycode == KeyCode::K_R) {
+                try {
+                    startRecording(session);
+                } catch (RtAudioError &e) {
+                    main_window.screen.draw(Point(1, 14), e.what());
+                    error_state = true;
+                }
+                state = "recording";
+            }
+            // Export audio
+            if (key.keycode == KeyCode::K_E) {
+                exportAllTracks(session);
+                main_window.screen.draw(Point(1, 14), "WAV files exported successfully");
+                error_state = true;
+                export_menu = false;
+            }
+        } else if (state == "recording") {
+            int num_armed_tracks = session.record_armed_tracks.size();
+            string record_message = "Recording to " + to_string(num_armed_tracks) + " armed track";
+            if (num_armed_tracks != 1) record_message += "s";
+            main_window.screen.draw(Point(1, 5), record_message);
+            main_window.screen.draw(Point(1, 3), "Press R to stop recording audio");
+
+            // Stop recording
+            if (key.keycode == KeyCode::K_R) {
                 try {
                     dac.stopStream();
+                    dac.closeStream();
                 } catch (RtAudioError &e) {
-                    e.printMessage();
+                    main_window.screen.draw(Point(1, 14), e.what());
+                    error_state = true;
                 }
-                dac.closeStream();
-
-                bool exportMenu = true;
-                while (exportMenu) {
-                    std::cout << "Press E to export recordings as .wav files" << std::endl;
-                    input = getch();
-                    if (input == Key_e || input == Key_E) {
-                        for (int i = 0; i < session.record_armed_tracks.size(); i++) {
-                            Clip clip = session.record_armed_tracks[i]->clips[0];
-                            std::cout << ".wav files created :)" << std::endl;
-                            std::ofstream audio_clip("Exports/" + clip.getName() + ".wav", std::ios::binary);
-                            wav_gen.openWaveFile(audio_clip);
-                            for (int sample = 0; sample < clip.getNumSamples(); sample++) {
-                                wav_gen.writeInputToFile(audio_clip, clip.getSample(sample));
-                            }
-                            wav_gen.closeWaveFile(audio_clip);
-                        }
-
-                        exportMenu = false;
-                    } else
-                        std::cout << "Invalid Character..." << std::endl;
-                }
-            } else
-                std::cout << "Invalid Character..." << std::endl;
-        } else {
-            std::cout << "Press <<T>> to add or remove tracks"
-                      << "\n"
-                      << "Press <<Space>> to Play or Stop"
-                      << "\n";
-
-            bool trackMenu = true;
-            char input = getch();
-            std::cout << input;
-            switch (input) {
-            case Key_T:
-            case Key_t:
-                while (trackMenu) {
-                    runTrackMenu(session, input, trackMenu);
-                }
-                break;
-            case Key_space:
-                if (session.tracks.size() > 0) {
-                    session.prepareAudio();
-                    try {
-                        dac.openStream(&output_params, &input_params, RTAUDIO_FLOAT64,
-                                       sample_rate, &buffer_size, &processAudioBlock, &session);
-                        dac.startStream();
-                        std::cout << "Playing Audio, recording to " << session.record_armed_tracks.size() << " armed track/s" << std::endl;
-                    } catch (RtAudioError &e) {
-                        e.printMessage();
-                        exit(0);
-                    }
-                }
-                break;
-            default:
-                std::cout << (int)input;
+                state = "main";
+                export_menu = true;
             }
         }
+
+        frac.render();          // Draw everything to terminal
+        usleep(1'000'000 / 60); // ~60 fps, plus frame processing time
+        // Freeze UI to allow error messages to be read
+        while (error_state) {
+            // Continue if any key is pressed
+            if (!frac.getKey().isNull()) error_state = false;
+            usleep(1'000'000 / 60);
+        }
+        // Clear the main window to prevent lingering artifacts
+        main_window.screen.clear();
     }
+
     return 0;
 }
