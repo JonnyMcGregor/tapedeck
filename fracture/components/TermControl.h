@@ -145,7 +145,7 @@ private:
         termios term;
         tcgetattr(STDIN_FILENO, &term);
         if (state) {
-            term.c_lflag &= flag;
+            term.c_lflag |= flag;
 
         } else {
             term.c_lflag &= ~flag;
