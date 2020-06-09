@@ -26,6 +26,7 @@ struct Fracture {
         TermControl::setCursorVisible(true);
         TermControl::setEcho(true);
         TermControl::setCanonical(true);
+        TermControl::resetAll();
     }
 
     KeyCombo getKey(bool remove_from_buffer = true) {
