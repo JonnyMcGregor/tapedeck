@@ -1,6 +1,7 @@
 #pragma once
 #include "Colour.h"
 #include "Point.h"
+#include <cassert>
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -61,6 +62,18 @@ struct TermControl {
     };
     static int getHeight() {
         return getSize().y;
+    }
+
+    // Takes values between 0 and 5 inclusive
+    static void setForegroundColour(int red, int green, int blue) {
+        int colour_code = get256ColourCode(red, green, blue);
+        cout << "\e[38;5;" << to_string(colour_code) << "m";
+    }
+
+    // Takes values between 0 and 5 inclusive
+    static void setBackgroundColour(int red, int green, int blue) {
+        int colour_code = get256ColourCode(red, green, blue);
+        cout << "\e[48;5;" << to_string(colour_code) << "m";
     }
 
     static void setForegroundColour(Colour colour) {
@@ -149,5 +162,13 @@ private:
             term.c_lflag &= ~flag;
         }
         tcsetattr(STDIN_FILENO, TCSANOW, &term);
+    }
+
+    static int get256ColourCode(int red, int green, int blue) {
+        assert(0 <= red && red <= 5);
+        assert(0 <= green && green <= 5);
+        assert(0 <= blue && blue <= 5);
+        int colour_code = 16 + 36 * red + 6 * green + blue;
+        return colour_code;
     }
 };
