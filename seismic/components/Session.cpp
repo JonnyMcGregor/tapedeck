@@ -18,6 +18,7 @@ void Session::deleteTrack(int index) {
     advance(track_iterator, index);
     tracks.erase(track_iterator);
 }
+
 void Session::prepareAudio() {
     for (int i = 0; i < tracks.size(); i++) {
         if (tracks[i].is_record_enabled) {
@@ -33,7 +34,7 @@ void Session::processAudioBlock(double *input_buffer, double *output_buffer) {
         for (int channel = 0; channel < 2; channel++, *input_buffer++, *output_buffer++) {
             double output_sample = 0;
             if (play_state == Play_State::Recording) {
-                for (auto track : tracks) {
+                for (auto &track : tracks) {
                     //input
                     if (track.is_record_enabled)
                         track.clips.back().addSample(*input_buffer);

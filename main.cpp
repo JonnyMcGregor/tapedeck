@@ -27,7 +27,7 @@ int processAudioBlock(void *outputBuffer, void *inputBuffer, unsigned int nBuffe
         std::cout << "Stream underflow detected!" << std::endl;
 
     //if(RecordButtonIsPushed)
-    //  session->play_state = Session::Play_State::Recording;
+    session->play_state = Session::Play_State::Recording;
     //else if(PlayButtonIsPushed)
     //  session->play_state = Session::Play_State::Playing;
 
