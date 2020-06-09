@@ -5,25 +5,27 @@
 
 class Session {
 public:
-    Session(unsigned int sample_rate, unsigned int buffer_size);
+    Session(u_int sample_rate, u_int buffer_size);
     void createTrack();
     void deleteTrack(int index);
     void prepareAudio();
-    void processBlock(double *input_buffer, double *output_buffer);
+    void playAudio();
+    void processAudioBlock(double *input_buffer, double *output_buffer);
 
-    enum Play_State {
-        Play,
-        Stop,
-        Pause,
-        Record
+    enum struct Play_State {
+        ToPlay,
+        Playing,
+        Recording,
+        Stopping,
+        Stopped,
     };
 
-    Play_State play_state = Stop;
+    Play_State play_state = Play_State::Stopped;
     std::vector<Track> tracks;
     std::vector<Track *> record_armed_tracks = {};
 
 private:
-    double current_time = 0.0;
+    u_int current_time = 0;
     int sample_rate = 0, buffer_size = 0;
 };
 #endif

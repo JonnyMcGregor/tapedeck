@@ -26,7 +26,12 @@ int processAudioBlock(void *outputBuffer, void *inputBuffer, unsigned int nBuffe
     if (status)
         std::cout << "Stream underflow detected!" << std::endl;
 
-    session->processBlock(in_buffer, out_buffer);
+    //if(RecordButtonIsPushed)
+    //  session->play_state = Session::Play_State::Recording;
+    //else if(PlayButtonIsPushed)
+    //  session->play_state = Session::Play_State::Playing;
+
+    session->processAudioBlock(in_buffer, out_buffer);
 
     return 0;
 }
@@ -63,6 +68,7 @@ void exportAllTracks(Session &session) {
 
 void startRecording(Session &session) {
     if (session.tracks.size() > 0) {
+        session.play_state = Session::Play_State::ToPlay;
         session.prepareAudio();
         dac.openStream(&output_params, &input_params, RTAUDIO_FLOAT64,
                        sample_rate, &buffer_size, &processAudioBlock, &session);
@@ -148,8 +154,11 @@ int main() {
             // Stop recording
             if (key.keycode == KeyCode::K_R) {
                 try {
+                    session.play_state = Session::Play_State::Stopping;
                     dac.stopStream();
+                    session.play_state = Session::Play_State::Stopped;
                     dac.closeStream();
+
                 } catch (RtAudioError &e) {
                     main_window.screen.draw(Point(1, 14), e.what());
                     error_state = true;

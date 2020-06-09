@@ -13,7 +13,7 @@ public:
 
     void setName(std::string track_name) { this->track_name = track_name; }
 
-    void createClip(double start_time) {
+    void createClip(u_int start_time) {
         int clipNum = ((int)clips.size()) + 1;
         clips.push_back(Clip(track_name + "_clip" + std::to_string(clipNum), start_time));
     }
