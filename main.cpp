@@ -67,13 +67,13 @@ void exportAllTracks(Session &session) {
 }
 
 void startRecording(Session &session) {
-    if (session.tracks.size() > 0) {
-        session.play_state = Session::Play_State::ToPlay;
-        session.prepareAudio();
-        dac.openStream(&output_params, &input_params, RTAUDIO_FLOAT64,
-                       sample_rate, &buffer_size, &processAudioBlock, &session);
-        dac.startStream();
-    }
+    if (session.tracks.size() == 0)
+        return;
+    session.play_state = Session::Play_State::ToPlay;
+    session.prepareAudio();
+    dac.openStream(&output_params, &input_params, RTAUDIO_FLOAT64,
+                   sample_rate, &buffer_size, &processAudioBlock, &session);
+    dac.startStream();
 }
 
 int main() {

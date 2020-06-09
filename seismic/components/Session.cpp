@@ -31,18 +31,28 @@ void Session::processAudioBlock(double *input_buffer, double *output_buffer) {
     //Record Input
     for (int sample = 0; sample < buffer_size; sample++) {
         for (int channel = 0; channel < 2; channel++, *input_buffer++, *output_buffer++) {
-            //Input
+            double output_sample = 0;
             if (play_state == Play_State::Recording) {
-                for (auto record_track : record_armed_tracks)
-                    record_track->clips.back().addSample(*input_buffer);
+                for (auto track : tracks) {
+                    //input
+                    if (track.is_record_enabled)
+                        track.clips.back().addSample(*input_buffer);
+                    //output
+                    else {
+                        for (auto clip : track.clips) {
+                            if (clip.getStartTime() <= current_time && current_time <= clip.getEndTime())
+                                output_sample += clip.getSample(current_time - clip.getStartTime());
+                        }
+                    }
+                }
             }
             //Output
-            double output_sample = 0;
-
-            for (auto track : tracks) {
-                for (auto clip : track.clips) {
-                    if (clip.getStartTime() <= current_time && current_time <= clip.getEndTime())
-                        output_sample += clip.getSample(current_time - clip.getStartTime());
+            else {
+                for (auto track : tracks) {
+                    for (auto clip : track.clips) {
+                        if (clip.getStartTime() <= current_time && current_time <= clip.getEndTime())
+                            output_sample += clip.getSample(current_time - clip.getStartTime());
+                    }
                 }
             }
             *output_buffer = output_sample;
