@@ -21,8 +21,6 @@ enum struct Direction {
 
 struct TermControl {
 
-    // static KeyCode
-
     static int getch() {
         setEcho(false);
         setCanonical(false);
