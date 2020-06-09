@@ -1,6 +1,6 @@
-#include "AudioStructure/Session.h"
-#include "WavGen/WaveFileGenerator.h"
 #include "fracture/Fracture.h"
+#include "seismic/components/Session.h"
+#include "seismic/wave_file_generator/WaveFileGenerator.h"
 #include <experimental/filesystem>
 #include <rtaudio/RtAudio.h>
 #include <stdio.h>
