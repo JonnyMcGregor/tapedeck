@@ -64,13 +64,21 @@ struct TermControl {
         return getSize().y;
     }
 
+    static void setTForegroundColour(int red, int green, int blue) {
+        // int colour_code = getTrueColourCode(red, green, blue);
+        cout << "\e[38;2;" << to_string(red) << ";" << to_string(green) << ";" << to_string(blue) << "m";
+    }
+    static void setTBackgroundColour(int red, int green, int blue) {
+        // int colour_code = getTrueColourCode(red, green, blue);
+        cout << "\e[48;2;" << to_string(red) << ";" << to_string(green) << ";" << to_string(blue) << "m";
+    }
+    // 38;2;⟨r⟩;⟨g⟩;⟨b⟩
+
     // Takes values between 0 and 5 inclusive
     static void setForegroundColour(int red, int green, int blue) {
         int colour_code = get256ColourCode(red, green, blue);
         cout << "\e[38;5;" << to_string(colour_code) << "m";
     }
-
-    // Takes values between 0 and 5 inclusive
     static void setBackgroundColour(int red, int green, int blue) {
         int colour_code = get256ColourCode(red, green, blue);
         cout << "\e[48;5;" << to_string(colour_code) << "m";
