@@ -1,9 +1,13 @@
 #include "AudioStructure/Session.h"
 #include "WavGen/WaveFileGenerator.h"
 #include "fracture/Fracture.h"
+#include <experimental/filesystem>
 #include <rtaudio/RtAudio.h>
 #include <stdio.h>
 #include <unistd.h>
+
+using namespace std;
+using namespace experimental;
 
 unsigned int sample_rate = 44100, buffer_size = 256; // [1]
 
@@ -44,6 +48,9 @@ void initialiseAudioIO() {
 
 void exportAllTracks(Session &session) {
     for (int i = 0; i < session.record_armed_tracks.size(); i++) {
+        if (!filesystem::exists("exported_audio")) {
+            filesystem::create_directory("exported_audio");
+        }
         Clip clip = session.record_armed_tracks[i]->clips[0];
         std::ofstream audio_clip("exported_audio/" + clip.getName() + ".wav", std::ios::binary);
         wav_gen.openWaveFile(audio_clip);
