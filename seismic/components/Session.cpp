@@ -10,9 +10,11 @@ void Session::createTrack() {
 void Session::deleteTrack(int index) {
 
     std::vector<Track *>::iterator track_ptr_iterator = record_armed_tracks.begin();
-    for (int i = 0; i < record_armed_tracks.size(); i++, track_ptr_iterator++)
-        if (&tracks[index] == record_armed_tracks[i])
+    for (int i = 0; i < record_armed_tracks.size(); i++, track_ptr_iterator++) {
+        if (&tracks[index] == record_armed_tracks[i]) {
             record_armed_tracks.erase(track_ptr_iterator);
+        }
+    }
 
     std::vector<Track>::iterator track_iterator = tracks.begin();
     advance(track_iterator, index);
@@ -40,8 +42,9 @@ void Session::processAudioBlock(double *input_buffer, double *output_buffer) {
             }
 
             else {
-                for (auto &track : tracks)
+                for (auto &track : tracks) {
                     playbackProcessing(output_sample, track);
+                }
             }
             *output_buffer = output_sample;
         }
@@ -51,16 +54,20 @@ void Session::processAudioBlock(double *input_buffer, double *output_buffer) {
 
 void Session::recordProcessing(double *input_buffer, double &output_sample, Track &track) {
     //input
-    if (track.is_record_enabled)
+    if (track.is_record_enabled) {
         track.clips.back().addSample(*input_buffer);
+
+    }
     //output
-    else
+    else {
         playbackProcessing(output_sample, track);
+    }
 }
 
 void Session::playbackProcessing(double &output_sample, Track &track) {
     for (auto clip : track.clips) {
-        if (clip.getStartTime() <= current_time && current_time <= clip.getEndTime())
+        if (clip.getStartTime() <= current_time && current_time <= clip.getEndTime()) {
             output_sample += clip.getSample(current_time - clip.getStartTime());
+        }
     }
 }
