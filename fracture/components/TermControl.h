@@ -64,35 +64,47 @@ struct TermControl {
         return getSize().y;
     }
 
-    static void setTForegroundColour(int red, int green, int blue) {
-        // int colour_code = getTrueColourCode(red, green, blue);
-        cout << "\e[38;2;" << to_string(red) << ";" << to_string(green) << ";" << to_string(blue) << "m";
-    }
-    static void setTBackgroundColour(int red, int green, int blue) {
-        // int colour_code = getTrueColourCode(red, green, blue);
-        cout << "\e[48;2;" << to_string(red) << ";" << to_string(green) << ";" << to_string(blue) << "m";
-    }
-    // 38;2;⟨r⟩;⟨g⟩;⟨b⟩
-
-    // Takes values between 0 and 5 inclusive
-    static void setForegroundColour(int red, int green, int blue) {
-        int colour_code = get256ColourCode(red, green, blue);
-        cout << "\e[38;5;" << to_string(colour_code) << "m";
-    }
-    static void setBackgroundColour(int red, int green, int blue) {
-        int colour_code = get256ColourCode(red, green, blue);
-        cout << "\e[48;5;" << to_string(colour_code) << "m";
-    }
-
     static void setForegroundColour(Colour colour) {
-        cout << "\e[3" + to_string(getColourValue(colour)) + "m";
+        cout << "\e[3" << getTrueColourCode(colour);
     }
     static void setBackgroundColour(Colour colour) {
-        cout << "\e[4" + to_string(getColourValue(colour)) + "m";
+        cout << "\e[4" << getTrueColourCode(colour);
     }
+    static string getTrueColourCode(Colour colour) {
+        string true_colour_code = "8;2;";
+        true_colour_code += to_string((int)(colour.red * 255)) + ";";
+        true_colour_code += to_string((int)(colour.green * 255)) + ";";
+        true_colour_code += to_string((int)(colour.blue * 255)) + "m";
+        return true_colour_code;
+    }
+
+    static string get256ColourCode(Colour colour) {
+        // Convert float 0-1 to int 0-5
+        string _256_colour_code = "8;5;";
+        int red = colour.red * 256;
+        int green = colour.green * 256;
+        int blue = colour.blue * 256;
+        int colour_code = 16 + 36 * red + 6 * green + blue;
+        _256_colour_code += to_string(colour_code) + "m";
+        return _256_colour_code;
+    }
+
+    static string get8ColourCode(Colour colour) {
+        // Make function to calculate distance between two colours, using 3D hypotenuse.
+        // Calculate which of eight is closest to given colour, using bash defaults (255/127/0 values).
+        return "";
+    }
+
+    static void resetForegroundColour() {
+        cout << "\e[39m";
+    }
+    static void resetBackgroundColour() {
+        cout << "\e[49m";
+    }
+
     static void resetColours() {
-        setForegroundColour(Colour::Reset);
-        setBackgroundColour(Colour::Reset);
+        resetForegroundColour();
+        resetBackgroundColour();
     }
     static void resetAll() {
         cout << "\e[0m";
@@ -156,10 +168,6 @@ struct TermControl {
     }
 
 private:
-    static int getColourValue(Colour colour) {
-        return static_cast<int>(colour);
-    }
-
     static void setStdinFlag(int flag, bool state) {
         termios term;
         tcgetattr(STDIN_FILENO, &term);
@@ -170,13 +178,5 @@ private:
             term.c_lflag &= ~flag;
         }
         tcsetattr(STDIN_FILENO, TCSANOW, &term);
-    }
-
-    static int get256ColourCode(int red, int green, int blue) {
-        assert(0 <= red && red <= 5);
-        assert(0 <= green && green <= 5);
-        assert(0 <= blue && blue <= 5);
-        int colour_code = 16 + 36 * red + 6 * green + blue;
-        return colour_code;
     }
 };
