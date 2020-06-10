@@ -11,7 +11,6 @@ public:
     void prepareAudio();
     void processAudioBlock(double *input_buffer, double *output_buffer);
     void recordProcessing(double *input_buffer, double &output_sample, Track &track);
-    void playbackProcessing(double &output_sample, Track &track);
 
     enum struct Play_State {
         ToPlay,

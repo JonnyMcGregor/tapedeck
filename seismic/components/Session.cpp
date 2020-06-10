@@ -39,11 +39,9 @@ void Session::processAudioBlock(double *input_buffer, double *output_buffer) {
                 for (auto &track : tracks) {
                     recordProcessing(input_buffer, output_sample, track);
                 }
-            }
-
-            else {
+            } else {
                 for (auto &track : tracks) {
-                    playbackProcessing(output_sample, track);
+                    output_sample += track.getSample(current_time);
                 }
             }
             *output_buffer = output_sample;
@@ -56,18 +54,9 @@ void Session::recordProcessing(double *input_buffer, double &output_sample, Trac
     //input
     if (track.is_record_enabled) {
         track.clips.back().addSample(*input_buffer);
-
     }
     //output
     else {
-        playbackProcessing(output_sample, track);
-    }
-}
-
-void Session::playbackProcessing(double &output_sample, Track &track) {
-    for (auto clip : track.clips) {
-        if (clip.getStartTime() <= current_time && current_time <= clip.getEndTime()) {
-            output_sample += clip.getSample(current_time - clip.getStartTime());
-        }
+        output_sample += track.getSample(current_time);
     }
 }
