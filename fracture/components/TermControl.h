@@ -8,7 +8,7 @@
 #include <sys/select.h>
 #include <termios.h>
 #include <unistd.h> // for STDOUT_FILENO
-
+#include <vector>
 using namespace std;
 
 enum struct Direction {
@@ -19,9 +19,17 @@ enum struct Direction {
 
 };
 
+enum struct ColourDepth {
+    _4Bit,
+    _8Bit,
+    _24Bit,
+};
+
 struct TermControl {
 
-    // static KeyCode
+    static ColourDepth getMaximumColourDepth() {
+        return ColourDepth::_24Bit;
+    }
 
     static int getch() {
         setEcho(false);
@@ -66,14 +74,93 @@ struct TermControl {
     }
 
     static void setForegroundColour(Colour colour) {
-        cout << "\e[3" + to_string(getColourValue(colour)) + "m";
+        cout << "\e[3";
+        cout << getColourCode(colour);
+        cout << "m";
     }
     static void setBackgroundColour(Colour colour) {
-        cout << "\e[4" + to_string(getColourValue(colour)) + "m";
+        cout << "\e[4";
+        cout << getColourCode(colour);
+        cout << "m";
     }
+
+    static string getColourCode(Colour colour) {
+        ColourDepth colour_depth = getMaximumColourDepth();
+        if (colour_depth == ColourDepth::_24Bit) {
+            return get24BitColourCode(colour);
+        } else if (colour_depth == ColourDepth::_8Bit) {
+            return get8BitColourCode(colour);
+        } else {
+            return get4BitColourCode(colour);
+        }
+    }
+
+    static string get24BitColourCode(Colour colour) {
+        string true_colour_code = "8;2;";
+        true_colour_code += to_string((int)(colour.red * 255)) + ";";
+        true_colour_code += to_string((int)(colour.green * 255)) + ";";
+        true_colour_code += to_string((int)(colour.blue * 255));
+        return true_colour_code;
+    }
+
+    static string get8BitColourCode(Colour colour) {
+        string _256_colour_code = "8;5;";
+        int red = colour.red * 6;
+        int green = colour.green * 6;
+        int blue = colour.blue * 6;
+        if (red > 5) red = 5;
+        if (green > 5) green = 5;
+        if (blue > 5) blue = 5;
+        int colour_code = 16 + 36 * red + 6 * green + blue;
+        _256_colour_code += to_string(colour_code);
+        return _256_colour_code;
+    }
+
+    static string get4BitColourCode(Colour colour) {
+        vector<Colour> colours = {
+            Colour(0, 0, 0),
+            Colour(1, 0, 0),
+            Colour(0, 1, 0),
+            Colour(1, 1, 0),
+            Colour(0, 0, 1),
+            Colour(1, 0, 1),
+            Colour(0, 1, 1),
+            Colour(1, 1, 1),
+        };
+
+        Colour closest_colour = getClosestColour(colour, colours);
+        for (int i = 0; i < colours.size(); i++) {
+            if (colours[i] == closest_colour) {
+                return to_string(i);
+            }
+        }
+        return ""; // unreachable
+    }
+
+    static Colour getClosestColour(Colour colour, vector<Colour> candidates) {
+        Colour closest_colour;
+        float shortest_hypotenuse = 2.0f;
+
+        for (Colour candidate : candidates) {
+            float hypotenuse = candidate.getHypotenuse(colour);
+            if (hypotenuse < shortest_hypotenuse) {
+                shortest_hypotenuse = hypotenuse;
+                closest_colour = candidate;
+            }
+        }
+        return closest_colour;
+    }
+
+    static void resetForegroundColour() {
+        cout << "\e[39m";
+    }
+    static void resetBackgroundColour() {
+        cout << "\e[49m";
+    }
+
     static void resetColours() {
-        setForegroundColour(Colour::Reset);
-        setBackgroundColour(Colour::Reset);
+        resetForegroundColour();
+        resetBackgroundColour();
     }
     static void resetAll() {
         cout << "\e[0m";
@@ -137,15 +224,11 @@ struct TermControl {
     }
 
 private:
-    static int getColourValue(Colour colour) {
-        return static_cast<int>(colour);
-    }
-
     static void setStdinFlag(int flag, bool state) {
         termios term;
         tcgetattr(STDIN_FILENO, &term);
         if (state) {
-            term.c_lflag &= flag;
+            term.c_lflag |= flag;
 
         } else {
             term.c_lflag &= ~flag;

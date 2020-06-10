@@ -22,6 +22,13 @@ struct Fracture {
         TermControl::setEcho(false);
     }
 
+    void cleanup() {
+        TermControl::setCursorVisible(true);
+        TermControl::setEcho(true);
+        TermControl::setCanonical(true);
+        TermControl::resetAll();
+    }
+
     KeyCombo getKey(bool remove_from_buffer = true) {
         updateKeyBuffer();
         if (key_buffer.size() == 0) {
