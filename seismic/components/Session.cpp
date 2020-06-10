@@ -35,29 +35,32 @@ void Session::processAudioBlock(double *input_buffer, double *output_buffer) {
             double output_sample = 0;
             if (play_state == Play_State::Recording) {
                 for (auto &track : tracks) {
-                    //input
-                    if (track.is_record_enabled)
-                        track.clips.back().addSample(*input_buffer);
-                    //output
-                    else {
-                        for (auto clip : track.clips) {
-                            if (clip.getStartTime() <= current_time && current_time <= clip.getEndTime())
-                                output_sample += clip.getSample(current_time - clip.getStartTime());
-                        }
-                    }
+                    recordProcessing(input_buffer, output_sample, track);
                 }
             }
-            //Output
+
             else {
-                for (auto track : tracks) {
-                    for (auto clip : track.clips) {
-                        if (clip.getStartTime() <= current_time && current_time <= clip.getEndTime())
-                            output_sample += clip.getSample(current_time - clip.getStartTime());
-                    }
-                }
+                for (auto &track : tracks)
+                    playbackProcessing(output_sample, track);
             }
             *output_buffer = output_sample;
         }
         current_time++;
+    }
+}
+
+void Session::recordProcessing(double *input_buffer, double &output_sample, Track &track) {
+    //input
+    if (track.is_record_enabled)
+        track.clips.back().addSample(*input_buffer);
+    //output
+    else
+        playbackProcessing(output_sample, track);
+}
+
+void Session::playbackProcessing(double &output_sample, Track &track) {
+    for (auto clip : track.clips) {
+        if (clip.getStartTime() <= current_time && current_time <= clip.getEndTime())
+            output_sample += clip.getSample(current_time - clip.getStartTime());
     }
 }
