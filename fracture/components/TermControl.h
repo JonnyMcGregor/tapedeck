@@ -79,11 +79,13 @@ struct TermControl {
     }
 
     static string get256ColourCode(Colour colour) {
-        // Convert float 0-1 to int 0-5
         string _256_colour_code = "8;5;";
-        int red = colour.red * 256;
-        int green = colour.green * 256;
-        int blue = colour.blue * 256;
+        int red = colour.red * 6;
+        int green = colour.green * 6;
+        int blue = colour.blue * 6;
+        if (red > 5) red = 5;
+        if (green > 5) green = 5;
+        if (blue > 5) blue = 5;
         int colour_code = 16 + 36 * red + 6 * green + blue;
         _256_colour_code += to_string(colour_code) + "m";
         return _256_colour_code;
