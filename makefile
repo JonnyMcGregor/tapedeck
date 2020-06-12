@@ -1,2 +1,2 @@
-asciidaw: main.cpp fracture/**/*
+asciidaw: main.cpp fracture/**/* fracture/*
 	g++ main.cpp AudioStructure/Session.cpp -l rtaudio -o asciidaw -Wno-return-type
