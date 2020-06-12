@@ -66,7 +66,11 @@ struct Fracture {
 
         for (int y = 0; y < viewport.height; y++) {
             for (int x = 0; x < viewport.width; x++) {
-                cout << converter.to_bytes(viewport.content[y][x].character);
+                ScreenCell sc = viewport.content[y][x];
+                TermControl::setTextDecoration(sc.style.decoration);
+                TermControl::setTextUnderline(sc.style.underline);
+                TermControl::setTextWeight(sc.style.weight);
+                cout << converter.to_bytes(sc.character);
             }
         }
     }
