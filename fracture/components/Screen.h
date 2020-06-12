@@ -82,15 +82,6 @@ struct Screen {
         return true;
     }
 
-    // Returns a vector containing a string for each row
-    vector<u32string> render() {
-        vector<u32string> outvec(height);
-        for (int y = 0; y < height; y++) {
-            outvec[y] = getRowAsString(y);
-        }
-        return outvec;
-    }
-
     // private:
     bool isValidCoordinates(Point p) {
         if (p.x >= this->width || p.y >= this->height || p.x < 0 || p.y < 0) {
