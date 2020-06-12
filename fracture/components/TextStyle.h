@@ -22,8 +22,8 @@ enum struct TextWeight {
 };
 
 struct TextStyle {
-    Colour foreground_colour = Colour{};
-    Colour background_colour = Colour{};
+    Colour foreground_colour = Colour{0.8, 0.8, 0.8};
+    Colour background_colour = Colour{0, 0, 0};
     Colour underline_colour = Colour{};
     TextWeight weight = TextWeight::Normal;
     TextUnderline underline = TextUnderline::None;
