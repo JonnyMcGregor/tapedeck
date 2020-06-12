@@ -22,7 +22,7 @@ struct Fracture {
         TermControl::setEchoFlag(false);
     }
 
-    void cleanup() {
+    ~Fracture() {
         TermControl::setCursorVisible(true);
         TermControl::setEchoFlag(true);
         TermControl::setCanonicalFlag(true);
