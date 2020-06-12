@@ -60,25 +60,25 @@ struct Screen {
         return true;
     }
 
-    void draw(Point p, u32string s) {
+    void draw(Point p, u32string s, TextStyle style = TextStyle{}) {
         for (long unsigned int i = 0; i < s.size(); i++) {
-            draw(p, s.at(i));
+            draw(p, s.at(i), style);
             p.translate(Point(1, 0));
         }
     }
 
-    void draw(Point p, string s) {
+    void draw(Point p, string s, TextStyle style = TextStyle{}) {
         wstring_convert<codecvt_utf8<char32_t>, char32_t> converter;
         u32string us = converter.from_bytes(s);
-        draw(p, us);
+        draw(p, us, style);
     }
 
     // Returns true on success, false if drawing out of bounds
-    bool draw(Point p, char32_t c) {
+    bool draw(Point p, char32_t c, TextStyle style = TextStyle{}) {
         if (!isValidCoordinates(p)) {
             return false;
         }
-        content[p.y][p.x].character = c;
+        content[p.y][p.x] = ScreenCell(c, style);
         return true;
     }
 
