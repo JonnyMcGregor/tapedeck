@@ -1,6 +1,7 @@
 #pragma once
 #include "Colour.h"
 #include "Point.h"
+#include "TextStyle.h"
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,6 +27,46 @@ enum struct ColourDepth {
 };
 
 struct TermControl {
+
+    static void setTextWeight(TextWeight weight) {
+        if (weight == TextWeight::Bold) {
+            cout << "\e[1m";
+        } else if (weight == TextWeight::Dim) {
+            cout << "\e[2m";
+        } else {
+            cout << "\e[22m"; // TextWeight::Normal
+        }
+    }
+
+    static void setTextUnderline(TextUnderline underline) {
+        if (underline == TextUnderline::Single) { // also "\e[4"
+            cout << "\e[4:1m";
+        } else if (underline == TextUnderline::Double) {
+            cout << "\e[4:2m";
+        } else if (underline == TextUnderline::Curly) {
+            cout << "\e[4:3m";
+        } else {
+            cout << "\e[4:0m"; // TextUnderline::None, also "\e[24m"
+        }
+    }
+
+    static void setTextDecoration(int decoration) {
+        if (decoration & TextDecoration::Italic) {
+            cout << "\e[3m";
+        } else {
+            cout << "\e[23m";
+        };
+        if (decoration & TextDecoration::Reverse) {
+            cout << "\e[7m";
+        } else {
+            cout << "\e[27m";
+        };
+        if (decoration & TextDecoration::Strikethrough) {
+            cout << "\e[9m";
+        } else {
+            cout << "\e[29m";
+        };
+    }
 
     static ColourDepth getMaximumColourDepth() {
         return ColourDepth::_24Bit;
@@ -80,6 +121,11 @@ struct TermControl {
     }
     static void setBackgroundColour(Colour colour) {
         cout << "\e[4";
+        cout << getColourCode(colour);
+        cout << "m";
+    }
+    static void setUnderlineColour(Colour colour) {
+        cout << "\e[5";
         cout << getColourCode(colour);
         cout << "m";
     }
