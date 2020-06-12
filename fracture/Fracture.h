@@ -62,7 +62,6 @@ struct Fracture {
         TermControl::moveCursorToTopLeft();
 
         wstring_convert<codecvt_utf8<char32_t>, char32_t> converter;
-        vector<u32string> rendered_viewport = viewport.render();
 
         for (int y = 0; y < viewport.height; y++) {
             for (int x = 0; x < viewport.width; x++) {
@@ -70,6 +69,8 @@ struct Fracture {
                 TermControl::setTextDecoration(sc.style.decoration);
                 TermControl::setTextUnderline(sc.style.underline);
                 TermControl::setTextWeight(sc.style.weight);
+                TermControl::setForegroundColour(sc.style.foreground_colour);
+                TermControl::setBackgroundColour(sc.style.background_colour);
                 cout << converter.to_bytes(sc.character);
             }
         }
