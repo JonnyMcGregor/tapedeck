@@ -19,13 +19,13 @@ struct Fracture {
     Fracture() {
         viewport = Screen(TermControl::getSize());
         TermControl::setCursorVisible(false);
-        TermControl::setEcho(false);
+        TermControl::setEchoFlag(false);
     }
 
     void cleanup() {
         TermControl::setCursorVisible(true);
-        TermControl::setEcho(true);
-        TermControl::setCanonical(true);
+        TermControl::setEchoFlag(true);
+        TermControl::setCanonicalFlag(true);
         TermControl::resetAll();
     }
 

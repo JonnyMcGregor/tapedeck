@@ -32,8 +32,8 @@ struct TermControl {
     }
 
     static int getch() {
-        setEcho(false);
-        setCanonical(false);
+        setEchoFlag(false);
+        setCanonicalFlag(false);
         return getchar();
     };
 
@@ -43,7 +43,7 @@ struct TermControl {
 
         if (!initialized) {
             // Use termios to turn off line buffering
-            setCanonical(false);
+            setCanonicalFlag(false);
             setbuf(stdin, NULL);
             initialized = true;
         }
@@ -53,11 +53,11 @@ struct TermControl {
         return bytesWaiting;
     }
 
-    static void setCanonical(bool canonical) {
+    static void setCanonicalFlag(bool canonical) {
         setStdinFlag(ICANON, canonical);
     }
 
-    static void setEcho(bool echo) {
+    static void setEchoFlag(bool echo) {
         setStdinFlag(ECHO, echo);
     }
 
