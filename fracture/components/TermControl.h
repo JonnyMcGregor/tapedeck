@@ -173,6 +173,9 @@ struct TermControl {
         moveCursorUp(getHeight() - 1);
     }
 
+    static void scrollForward(int num_lines) {
+        cout << "\e[" + to_string(num_lines) + "S";
+    }
     static void scrollBack(int num_lines) {
         cout << "\e[" + to_string(num_lines) + "T";
     }
