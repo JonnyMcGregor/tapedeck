@@ -13,7 +13,7 @@ public:
 
     void setName(std::string track_name) { this->track_name = track_name; }
 
-    void createClip(double start_time) {
+    void createClip(u_int start_time) {
         int clipNum = ((int)clips.size()) + 1;
         clips.push_back(Clip(track_name + "_clip" + std::to_string(clipNum), start_time));
     }
@@ -24,8 +24,14 @@ public:
         clips.erase(it);
     }
 
-    int getSample(int time_in_samples) {
+    double getSample(int time_in_samples) {
+        for (auto clip : clips) {
+            if (clip.getStartTime() <= time_in_samples && time_in_samples <= clip.getEndTime()) {
+                return clip.getSample(time_in_samples - clip.getStartTime());
+            } else
+                return 0;
         }
+    }
 
     std::vector<Clip> clips = {};
     bool is_record_enabled = true;

@@ -1,9 +1,13 @@
-#include "AudioStructure/Session.h"
-#include "WavGen/WaveFileGenerator.h"
 #include "fracture/Fracture.h"
+#include "seismic/components/Session.h"
+#include "seismic/wave_file_generator/WaveFileGenerator.h"
+#include <experimental/filesystem>
 #include <rtaudio/RtAudio.h>
 #include <stdio.h>
 #include <unistd.h>
+
+using namespace std;
+using namespace experimental;
 
 unsigned int sample_rate = 44100, buffer_size = 256; // [1]
 
@@ -22,7 +26,12 @@ int processAudioBlock(void *outputBuffer, void *inputBuffer, unsigned int nBuffe
     if (status)
         std::cout << "Stream underflow detected!" << std::endl;
 
-    session->processBlock(in_buffer, out_buffer);
+    //if(RecordButtonIsPushed)
+    session->play_state = Session::Play_State::Recording;
+    //else if(PlayButtonIsPushed)
+    //  session->play_state = Session::Play_State::Playing;
+
+    session->processAudioBlock(in_buffer, out_buffer);
 
     return 0;
 }
@@ -44,6 +53,9 @@ void initialiseAudioIO() {
 
 void exportAllTracks(Session &session) {
     for (int i = 0; i < session.record_armed_tracks.size(); i++) {
+        if (!filesystem::exists("exported_audio")) {
+            filesystem::create_directory("exported_audio");
+        }
         Clip clip = session.record_armed_tracks[i]->clips[0];
         std::ofstream audio_clip("exported_audio/" + clip.getName() + ".wav", std::ios::binary);
         wav_gen.openWaveFile(audio_clip);
@@ -55,12 +67,13 @@ void exportAllTracks(Session &session) {
 }
 
 void startRecording(Session &session) {
-    if (session.tracks.size() > 0) {
-        session.prepareAudio();
-        dac.openStream(&output_params, &input_params, RTAUDIO_FLOAT64,
-                       sample_rate, &buffer_size, &processAudioBlock, &session);
-        dac.startStream();
-    }
+    if (session.tracks.size() == 0)
+        return;
+    session.play_state = Session::Play_State::ToPlay;
+    session.prepareAudio();
+    dac.openStream(&output_params, &input_params, RTAUDIO_FLOAT64,
+                   sample_rate, &buffer_size, &processAudioBlock, &session);
+    dac.startStream();
 }
 
 int main() {
@@ -141,8 +154,11 @@ int main() {
             // Stop recording
             if (key.keycode == KeyCode::K_R) {
                 try {
+                    session.play_state = Session::Play_State::Stopping;
                     dac.stopStream();
+                    session.play_state = Session::Play_State::Stopped;
                     dac.closeStream();
+
                 } catch (RtAudioError &e) {
                     main_window.screen.draw(Point(1, 14), e.what());
                     error_state = true;
