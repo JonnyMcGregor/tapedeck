@@ -15,17 +15,18 @@ struct Fracture {
     Screen viewport = {0, 0};
     vector<Window *> windows = {};
     vector<KeyCombo> key_buffer = {};
+    termios original_term_state;
 
     Fracture() {
+        original_term_state = TermControl::getTermState(); // must be first, before terminal state changes
         viewport = Screen(TermControl::getSize());
         TermControl::setCursorVisible(false);
         TermControl::setEchoFlag(false);
+        TermControl::setCanonicalFlag(false);
     }
 
     ~Fracture() {
-        TermControl::setCursorVisible(true);
-        TermControl::setEchoFlag(true);
-        TermControl::setCanonicalFlag(true);
+        TermControl::setTermState(original_term_state);
         TermControl::resetAll();
     }
 
