@@ -72,6 +72,16 @@ struct TermControl {
         return ColourDepth::_24Bit;
     }
 
+    static termios getTermState() {
+        termios term_state;
+        tcgetattr(STDOUT_FILENO, &term_state);
+        return term_state;
+    }
+
+    static void setTermState(termios &term_state) {
+        tcsetattr(STDOUT_FILENO, TCSAFLUSH, &term_state);
+    }
+
     static int getch() {
         setEchoFlag(false);
         setCanonicalFlag(false);
@@ -209,6 +219,7 @@ struct TermControl {
     }
     static void resetAll() {
         cout << "\e[0m";
+        setCursorVisible(true); // isn't handled by above line
     }
 
     static void moveCursorToLineStart() {
