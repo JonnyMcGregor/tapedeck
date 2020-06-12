@@ -56,13 +56,14 @@ void exportAllTracks(Session &session) {
         if (!filesystem::exists("exported_audio")) {
             filesystem::create_directory("exported_audio");
         }
-        Clip clip = session.record_armed_tracks[i]->clips[0];
-        std::ofstream audio_clip("exported_audio/" + clip.getName() + ".wav", std::ios::binary);
-        wav_gen.openWaveFile(audio_clip);
-        for (int sample = 0; sample < clip.getNumSamples(); sample++) {
-            wav_gen.writeInputToFile(audio_clip, clip.getSample(sample));
+        for (auto clip : session.record_armed_tracks[i]->clips) {
+            std::ofstream audio_clip("exported_audio/" + clip.getName() + ".wav", std::ios::binary);
+            wav_gen.openWaveFile(audio_clip);
+            for (int sample = 0; sample < clip.getNumSamples(); sample++) {
+                wav_gen.writeInputToFile(audio_clip, clip.getSample(sample));
+            }
+            wav_gen.closeWaveFile(audio_clip);
         }
-        wav_gen.closeWaveFile(audio_clip);
     }
 }
 

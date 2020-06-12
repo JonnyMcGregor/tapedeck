@@ -22,6 +22,7 @@ void Session::deleteTrack(int index) {
 }
 
 void Session::prepareAudio() {
+    record_armed_tracks.clear();
     for (int i = 0; i < tracks.size(); i++) {
         if (tracks[i].is_record_enabled) {
             tracks[i].createClip(current_time);
