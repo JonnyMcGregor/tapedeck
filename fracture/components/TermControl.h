@@ -134,7 +134,6 @@ struct TermControl {
                 return to_string(i);
             }
         }
-        return ""; // unreachable
     }
 
     static Colour getClosestColour(Colour colour, vector<Colour> candidates) {
