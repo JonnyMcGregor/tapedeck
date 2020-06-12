@@ -1,11 +1,15 @@
 #pragma once
+#include "Alignment.h"
 #include "Border.h"
 #include "Rect.h"
 #include <string>
 
 struct Window {
-    Rect rect = {};
     string title = "";
+    HorizontalAlignment title_alignment = HorizontalAlignment::Center;
+    bool draw_title = true;
+
+    Rect rect = {};
     Border border = {};
     int z = 0;
     Screen screen = {};
@@ -43,6 +47,18 @@ struct Window {
             output_screen.draw(Point(0, i), border.get(BorderElement::Vertical));
             output_screen.draw(Point(rect.width - 1, i), border.get(BorderElement::Vertical));
         };
+
+        if (draw_title) {
+            int title_x;
+            if (title_alignment == HorizontalAlignment::Right) {
+                title_x = rect.width - title.size();
+            } else if (title_alignment == HorizontalAlignment::Center) {
+                title_x = (rect.width / 2) - (title.size() / 2);
+            } else { // HorizontalAlignment::Left
+                title_x = 0;
+            }
+            output_screen.draw(Point(title_x, 0), " " + title + " ");
+        }
 
         output_screen.draw(Point(1, 1), screen);
         return output_screen;
