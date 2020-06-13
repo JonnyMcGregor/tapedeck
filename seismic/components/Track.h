@@ -25,7 +25,7 @@ public:
     }
 
     double getSample(int time_in_samples) {
-        for (auto clip : clips) {
+        for (auto &clip : clips) {
             if (clip.getStartTime() <= time_in_samples && time_in_samples <= clip.getEndTime()) {
                 return clip.getSample(time_in_samples - clip.getStartTime());
             } else

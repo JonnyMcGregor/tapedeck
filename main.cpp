@@ -1,7 +1,5 @@
 #include "fracture/Fracture.h"
 #include "seismic/components/Session.h"
-#include "seismic/wave_file_generator/WaveFileGenerator.h"
-#include <experimental/filesystem>
 #include <rtaudio/RtAudio.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -56,7 +54,7 @@ void exportAllTracks(Session &session) {
         if (!filesystem::exists("exported_audio")) {
             filesystem::create_directory("exported_audio");
         }
-        for (auto clip : session.record_armed_tracks[i]->clips) {
+        for (auto &clip : session.record_armed_tracks[i]->clips) {
             std::ofstream audio_clip("exported_audio/" + clip.getName() + ".wav", std::ios::binary);
             wav_gen.openWaveFile(audio_clip);
             for (int sample = 0; sample < clip.getNumSamples(); sample++) {
@@ -85,7 +83,7 @@ int main() {
     }
     initialiseAudioIO();
     wav_gen.initialise(sample_rate, 16, input_params.nChannels);
-    Session session = {sample_rate, buffer_size};
+    Session session = {sample_rate, buffer_size, input_params.nChannels, output_params.nChannels};
 
     // Set up Fracture and windows
     Fracture frac = Fracture{};
@@ -157,6 +155,7 @@ int main() {
                 try {
                     session.play_state = Session::Play_State::Stopping;
                     dac.stopStream();
+                    session.createFilesFromRecordedClips();
                     session.play_state = Session::Play_State::Stopped;
                     dac.closeStream();
 
@@ -180,6 +179,5 @@ int main() {
         // Clear the main window to prevent lingering artifacts
         main_window.screen.clear();
     }
-
     return 0;
 }
