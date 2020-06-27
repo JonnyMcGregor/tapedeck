@@ -47,7 +47,7 @@ void Session::processAudioBlock(double *input_buffer, double *output_buffer) {
                 }
             } else {
                 for (auto &track : tracks) {
-                    output_sample += track.getSample(current_time);
+                    output_sample += track.getSample(current_time, wav_gen.getMaxAmplitude());
                 }
             }
             *output_buffer = output_sample;
@@ -60,12 +60,10 @@ void Session::recordProcessing(double *input_buffer, double &output_sample, Trac
     //input
     if (track.is_record_enabled) {
         track.clips.back().addSample(*input_buffer);
-        //write data from input to .wav file
-
     }
     //output
     else {
-        output_sample += track.getSample(current_time);
+        output_sample += track.getSample(current_time, wav_gen.getMaxAmplitude());
     }
 }
 
@@ -77,7 +75,7 @@ void Session::createFilesFromRecordedClips() {
                 wav_file_streamer.open(clip.getReferenceFilePath(), ios::binary);
                 wav_gen.openWaveFile(wav_file_streamer);
                 for (int i = 0; i < clip.getNumSamples(); i++) {
-                    wav_gen.writeInputToFile(wav_file_streamer, clip.getSample(i));
+                    wav_gen.writeInputToFile(wav_file_streamer, clip.temp_audio_stream[i]);
                 }
                 wav_gen.closeWaveFile(wav_file_streamer);
                 wav_file_streamer.close();

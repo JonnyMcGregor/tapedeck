@@ -58,7 +58,7 @@ void exportAllTracks(Session &session) {
             std::ofstream audio_clip("exported_audio/" + clip.getName() + ".wav", std::ios::binary);
             wav_gen.openWaveFile(audio_clip);
             for (int sample = 0; sample < clip.getNumSamples(); sample++) {
-                wav_gen.writeInputToFile(audio_clip, clip.getSample(sample));
+                wav_gen.writeInputToFile(audio_clip, clip.getSample(sample, wav_gen.getMaxAmplitude()));
             }
             wav_gen.closeWaveFile(audio_clip);
         }

@@ -24,10 +24,10 @@ public:
         clips.erase(it);
     }
 
-    double getSample(int time_in_samples) {
+    double getSample(int time_in_samples, int max_amplitude) {
         for (auto &clip : clips) {
             if (clip.getStartTime() <= time_in_samples && time_in_samples <= clip.getEndTime()) {
-                return clip.getSample(time_in_samples - clip.getStartTime());
+                return clip.getSample(time_in_samples - clip.getStartTime(), max_amplitude);
             } else
                 return 0;
         }
