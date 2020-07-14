@@ -15,17 +15,18 @@ struct Fracture {
     Screen viewport = {0, 0};
     vector<Window *> windows = {};
     vector<KeyCombo> key_buffer = {};
+    termios original_term_state;
 
     Fracture() {
+        original_term_state = TermControl::getTermState(); // must be first, before terminal state changes
         viewport = Screen(TermControl::getSize());
         TermControl::setCursorVisible(false);
-        TermControl::setEcho(false);
+        TermControl::setEchoFlag(false);
+        TermControl::setCanonicalFlag(false);
     }
 
-    void cleanup() {
-        TermControl::setCursorVisible(true);
-        TermControl::setEcho(true);
-        TermControl::setCanonical(true);
+    ~Fracture() {
+        TermControl::setTermState(original_term_state);
         TermControl::resetAll();
     }
 
@@ -62,11 +63,16 @@ struct Fracture {
         TermControl::moveCursorToTopLeft();
 
         wstring_convert<codecvt_utf8<char32_t>, char32_t> converter;
-        vector<u32string> rendered_viewport = viewport.render();
 
         for (int y = 0; y < viewport.height; y++) {
             for (int x = 0; x < viewport.width; x++) {
-                cout << converter.to_bytes(viewport.content[y][x].character);
+                ScreenCell sc = viewport.content[y][x];
+                TermControl::setTextDecoration(sc.style.decoration);
+                TermControl::setTextUnderline(sc.style.underline);
+                TermControl::setTextWeight(sc.style.weight);
+                TermControl::setForegroundColour(sc.style.foreground_colour);
+                TermControl::setBackgroundColour(sc.style.background_colour);
+                cout << converter.to_bytes(sc.character);
             }
         }
     }

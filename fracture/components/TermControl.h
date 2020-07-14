@@ -1,6 +1,7 @@
 #pragma once
 #include "Colour.h"
 #include "Point.h"
+#include "TextStyle.h"
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,13 +28,63 @@ enum struct ColourDepth {
 
 struct TermControl {
 
+    static void setTextWeight(TextWeight weight) {
+        if (weight == TextWeight::Bold) {
+            cout << "\e[1m";
+        } else if (weight == TextWeight::Dim) {
+            cout << "\e[2m";
+        } else {
+            cout << "\e[22m"; // TextWeight::Normal
+        }
+    }
+
+    static void setTextUnderline(TextUnderline underline) {
+        if (underline == TextUnderline::Single) { // also "\e[4"
+            cout << "\e[4:1m";
+        } else if (underline == TextUnderline::Double) {
+            cout << "\e[4:2m";
+        } else if (underline == TextUnderline::Curly) {
+            cout << "\e[4:3m";
+        } else {
+            cout << "\e[4:0m"; // TextUnderline::None, also "\e[24m"
+        }
+    }
+
+    static void setTextDecoration(int decoration) {
+        if (decoration & TextDecoration::Italic) {
+            cout << "\e[3m";
+        } else {
+            cout << "\e[23m";
+        };
+        if (decoration & TextDecoration::Reverse) {
+            cout << "\e[7m";
+        } else {
+            cout << "\e[27m";
+        };
+        if (decoration & TextDecoration::Strikethrough) {
+            cout << "\e[9m";
+        } else {
+            cout << "\e[29m";
+        };
+    }
+
     static ColourDepth getMaximumColourDepth() {
         return ColourDepth::_24Bit;
     }
 
+    static termios getTermState() {
+        termios term_state;
+        tcgetattr(STDOUT_FILENO, &term_state);
+        return term_state;
+    }
+
+    static void setTermState(termios &term_state) {
+        tcsetattr(STDOUT_FILENO, TCSAFLUSH, &term_state);
+    }
+
     static int getch() {
-        setEcho(false);
-        setCanonical(false);
+        setEchoFlag(false);
+        setCanonicalFlag(false);
         return getchar();
     };
 
@@ -43,7 +94,7 @@ struct TermControl {
 
         if (!initialized) {
             // Use termios to turn off line buffering
-            setCanonical(false);
+            setCanonicalFlag(false);
             setbuf(stdin, NULL);
             initialized = true;
         }
@@ -53,11 +104,11 @@ struct TermControl {
         return bytesWaiting;
     }
 
-    static void setCanonical(bool canonical) {
+    static void setCanonicalFlag(bool canonical) {
         setStdinFlag(ICANON, canonical);
     }
 
-    static void setEcho(bool echo) {
+    static void setEchoFlag(bool echo) {
         setStdinFlag(ECHO, echo);
     }
 
@@ -80,6 +131,11 @@ struct TermControl {
     }
     static void setBackgroundColour(Colour colour) {
         cout << "\e[4";
+        cout << getColourCode(colour);
+        cout << "m";
+    }
+    static void setUnderlineColour(Colour colour) {
+        cout << "\e[5";
         cout << getColourCode(colour);
         cout << "m";
     }
@@ -134,7 +190,6 @@ struct TermControl {
                 return to_string(i);
             }
         }
-        return ""; // unreachable
     }
 
     static Colour getClosestColour(Colour colour, vector<Colour> candidates) {
@@ -164,6 +219,7 @@ struct TermControl {
     }
     static void resetAll() {
         cout << "\e[0m";
+        setCursorVisible(true); // isn't handled by above line
     }
 
     static void moveCursorToLineStart() {
@@ -174,6 +230,9 @@ struct TermControl {
         moveCursorUp(getHeight() - 1);
     }
 
+    static void scrollForward(int num_lines) {
+        cout << "\e[" + to_string(num_lines) + "S";
+    }
     static void scrollBack(int num_lines) {
         cout << "\e[" + to_string(num_lines) + "T";
     }
