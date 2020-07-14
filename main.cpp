@@ -24,10 +24,13 @@ int processAudioBlock(void *outputBuffer, void *inputBuffer, unsigned int nBuffe
     if (status)
         std::cout << "Stream underflow detected!" << std::endl;
 
-    //if(RecordButtonIsPushed)
-    session->play_state = Session::Play_State::Recording;
-    //else if(PlayButtonIsPushed)
-    //  session->play_state = Session::Play_State::Playing;
+    //Temporary for testing purposes...
+    //If tracks are armed, record audio
+    if (session->tracks[0].is_record_enabled)
+        session->play_state = Session::Play_State::Recording;
+    //Else playback audio
+    else
+        session->play_state = Session::Play_State::Playing;
 
     session->processAudioBlock(in_buffer, out_buffer);
 
@@ -113,9 +116,15 @@ int main() {
             if (export_menu) {
                 main_window.screen.draw(Point(1, 6), "Press E to export recordings to WAV files");
             }
+            main_window.screen.draw(Point(1, 7), "Press A to arm/disarm tracks");
             main_window.screen.draw(Point(1, 10), "Number of tracks: " + to_string(session.tracks.size()));
             main_window.screen.draw(Point(1, 11), "Number of channels: " + to_string(input_params.nChannels));
 
+            if (key.keycode == KeyCode::K_A) {
+                for (auto &track : session.tracks) {
+                    track.is_record_enabled = !track.is_record_enabled;
+                }
+            }
             // Create track
             if (key.keycode == KeyCode::K_T) {
                 session.createTrack();

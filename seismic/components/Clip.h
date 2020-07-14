@@ -6,7 +6,6 @@
 #include <fstream>
 #include <memory>
 #include <vector>
-
 using namespace std;
 
 class Clip {
@@ -18,7 +17,7 @@ public:
     }
 
     void addSample(double sample) {
-        temp_audio_stream.push_back(sample);
+        write_audio_stream.push_back(sample);
         length++;
     }
 
@@ -32,29 +31,45 @@ public:
         length = start_time_in_session + end_time;
     }
 
-    void clearAudioStream() { temp_audio_stream.clear(); }
+    void clearAudioStream() { write_audio_stream.clear(); }
 
     std::string getName() { return clip_name; }
     std::string getReferenceFilePath() { return reference_file_path; }
 
-    double getSample(int index, int max_amplitude_of_source) {
-        int first_sample_index = 44;
-        char sample = 0;
-        reference_file_stream.open(reference_file_path);
-        reference_file_stream.seekg(first_sample_index + (index * 2));
-        reference_file_stream.get(&sample, 2);
-        reference_file_stream.close();
-        return ((int)sample / max_amplitude_of_source);
+    static double bytesToDouble(unsigned char first_byte, unsigned char second_byte, double max_amplitude) {
+        // convert two bytes to one 16-bit int (little endian)
+        int16_t output = (second_byte << 8) | first_byte;
+        // convert to range from -1 to (just below) 1
+        return output / max_amplitude;
+    }
+
+    double getSample(int index, double max_amplitude_of_source) {
+        if (index < length) {
+            //audio data in .wav file begins at the 44th byte
+            int first_sample_index = 44;
+            //each audio sample is 2 bytes therefore index is multiplied by 2 to get byte index of sample
+            int sample_pos = first_sample_index + (index * 2);
+            //as samples are stored as little endian, both bytes within sample must be retrieved individually
+            char first_byte, second_byte;
+            reference_file_stream.open(reference_file_path, ios::binary);
+            reference_file_stream.seekg(sample_pos, ios::beg);
+            reference_file_stream.read(&first_byte, 1);
+            reference_file_stream.read(&second_byte, 1);
+            reference_file_stream.close();
+            //sample data is then converted to its original double between 1.0 and -1.0
+            double sample = bytesToDouble(first_byte, second_byte, max_amplitude_of_source);
+            return (sample);
+        }
     }
 
     u_int getNumSamples() { return length; }
     int getStartTime() { return start_time_in_session; }
     int getEndTime() { return (start_time_in_session + length); }
 
-    vector<double> temp_audio_stream;
+    vector<double> write_audio_stream;
 
 private:
-    u_int start_time_in_session, start_time_in_reference, length = 0;
+    u_int start_time_in_session, start_time_in_reference = 0, length = 0;
     string clip_name, reference_file_path;
     ifstream reference_file_stream = {};
 };

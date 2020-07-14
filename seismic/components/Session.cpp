@@ -28,6 +28,7 @@ void Session::deleteTrack(int index) {
 
 void Session::prepareAudio() {
     record_armed_tracks.clear();
+    current_time = 0;
     for (auto &track : tracks) {
         if (track.is_record_enabled) {
             track.createClip(current_time);
@@ -38,32 +39,30 @@ void Session::prepareAudio() {
 
 void Session::processAudioBlock(double *input_buffer, double *output_buffer) {
     //Record Input
-    for (int sample = 0; sample < buffer_size; sample++) {
+    for (int sample = 0; sample < buffer_size; sample++, current_time++) {
         for (int channel = 0; channel < 2; channel++, *input_buffer++, *output_buffer++) {
             double output_sample = 0;
             if (play_state == Play_State::Recording) {
                 for (auto &track : tracks) {
-                    recordProcessing(input_buffer, output_sample, track);
+                    recordProcessing(channel, input_buffer, output_sample, track);
                 }
             } else {
                 for (auto &track : tracks) {
-                    output_sample += track.getSample(current_time, wav_gen.getMaxAmplitude());
+                    output_sample += track.getSample(channel, current_time, wav_gen.getMaxAmplitude());
                 }
+                *output_buffer = output_sample;
             }
-            *output_buffer = output_sample;
         }
-        current_time++;
     }
 }
-
-void Session::recordProcessing(double *input_buffer, double &output_sample, Track &track) {
+void Session::recordProcessing(int channel, double *input_buffer, double &output_sample, Track &track) {
     //input
     if (track.is_record_enabled) {
         track.clips.back().addSample(*input_buffer);
     }
     //output
     else {
-        output_sample += track.getSample(current_time, wav_gen.getMaxAmplitude());
+        output_sample += track.getSample(channel, current_time, wav_gen.getMaxAmplitude());
     }
 }
 
@@ -75,7 +74,7 @@ void Session::createFilesFromRecordedClips() {
                 wav_file_streamer.open(clip.getReferenceFilePath(), ios::binary);
                 wav_gen.openWaveFile(wav_file_streamer);
                 for (int i = 0; i < clip.getNumSamples(); i++) {
-                    wav_gen.writeInputToFile(wav_file_streamer, clip.temp_audio_stream[i]);
+                    wav_gen.writeInputToFile(wav_file_streamer, clip.write_audio_stream[i]);
                 }
                 wav_gen.closeWaveFile(wav_file_streamer);
                 wav_file_streamer.close();

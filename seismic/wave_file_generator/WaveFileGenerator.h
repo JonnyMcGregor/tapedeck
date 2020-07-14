@@ -49,6 +49,7 @@ struct WaveFileGenerator {
         wav_file.seekp(0 + 4);
         write_word(wav_file, file_length - 8, 4);
     }
+
     int getMaxAmplitude() {
         return max_amplitude;
     }
