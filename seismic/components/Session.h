@@ -4,7 +4,6 @@
 #include "../wave_file_generator/WaveFileGenerator.h"
 #include "Track.h"
 #include <experimental/filesystem>
-
 using namespace experimental;
 
 class Session {
@@ -18,7 +17,6 @@ public:
     void processAudioBlock(double *input_buffer, double *output_buffer);
     void recordProcessing(int channel, double *input_buffer, double &output_sample, Track &track);
     void createFilesFromRecordedClips();
-
     enum struct Play_State {
         ToPlay,
         Playing,

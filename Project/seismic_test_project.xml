@@ -1,0 +1,10 @@
+<Session>
+    <track name="track1">
+        <clip name="track1_clip1" reference_file_path="recorded_audio/track1_clip1.wav" start_time_in_session="0" start_time_in_reference="0" length_in_samples="229376"/>
+        <clip name="track1_clip1" reference_file_path="recorded_audio/track1_clip1.wav" start_time_in_session="0" start_time_in_reference="0" length_in_samples="229376"/>
+        <clip name="track1_clip2" reference_file_path="recorded_audio/track1_clip2.wav" start_time_in_session="0" start_time_in_reference="0" length_in_samples="199168"/>
+    </track>
+    <track name="track2">
+        <clip name="track2_clip1" reference_file_path="recorded_audio/track2_clip1.wav" start_time_in_session="0" start_time_in_reference="0" length_in_samples="199168"/>
+    </track>
+</Session>

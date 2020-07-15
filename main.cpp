@@ -1,5 +1,5 @@
 #include "fracture/Fracture.h"
-#include "seismic/components/Session.h"
+#include "seismic/Seismic.h"
 #include <rtaudio/RtAudio.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -86,8 +86,10 @@ int main() {
     }
     initialiseAudioIO();
     wav_gen.initialise(sample_rate, 16, input_params.nChannels);
-    Session session = {sample_rate, buffer_size, input_params.nChannels, output_params.nChannels};
-
+    // Set up Seismic and session
+    SeismicParams seismic_params = {sample_rate, buffer_size, input_params.nChannels, output_params.nChannels};
+    Seismic seismic = {seismic_params, "seismic_test_project"};
+    seismic.createXMLDocument();
     // Set up Fracture and windows
     Fracture frac = Fracture{};
     Window main_window = Window(
@@ -110,35 +112,36 @@ int main() {
         if (state == "main") {
             main_window.screen.draw(Point(1, 3), "Press T to create a track");
             main_window.screen.draw(Point(1, 4), "Press D to delete a track");
-            if (session.tracks.size() > 0) {
+            if (seismic.session->tracks.size() > 0) {
                 main_window.screen.draw(Point(1, 5), "Press R to start recording audio");
             }
             if (export_menu) {
                 main_window.screen.draw(Point(1, 6), "Press E to export recordings to WAV files");
             }
             main_window.screen.draw(Point(1, 7), "Press A to arm/disarm tracks");
-            main_window.screen.draw(Point(1, 10), "Number of tracks: " + to_string(session.tracks.size()));
+            main_window.screen.draw(Point(1, 10), "Number of tracks: " + to_string(seismic.session->tracks.size()));
             main_window.screen.draw(Point(1, 11), "Number of channels: " + to_string(input_params.nChannels));
 
             if (key.keycode == KeyCode::K_A) {
-                for (auto &track : session.tracks) {
+                for (auto &track : seismic.session->tracks) {
                     track.is_record_enabled = !track.is_record_enabled;
                 }
             }
             // Create track
             if (key.keycode == KeyCode::K_T) {
-                session.createTrack();
+                seismic.session->createTrack();
+                seismic.addTrackToXML(seismic.session->tracks.back());
             }
             // Delete track
             if (key.keycode == KeyCode::K_D) {
-                if (session.tracks.size() > 0) {
-                    session.deleteTrack(session.tracks.size() - 1);
+                if (seismic.session->tracks.size() > 0) {
+                    seismic.session->deleteTrack(seismic.session->tracks.size() - 1);
                 }
             }
             // Start recording
             if (key.keycode == KeyCode::K_R) {
                 try {
-                    startRecording(session);
+                    startRecording(*seismic.session.get());
                 } catch (RtAudioError &e) {
                     main_window.screen.draw(Point(1, 14), e.what());
                     error_state = true;
@@ -147,13 +150,13 @@ int main() {
             }
             // Export audio
             if (key.keycode == KeyCode::K_E) {
-                exportAllTracks(session);
+                exportAllTracks(*seismic.session.get());
                 main_window.screen.draw(Point(1, 14), "WAV files exported successfully");
                 error_state = true;
                 export_menu = false;
             }
         } else if (state == "recording") {
-            int num_armed_tracks = session.record_armed_tracks.size();
+            int num_armed_tracks = seismic.session->record_armed_tracks.size();
             string record_message = "Recording to " + to_string(num_armed_tracks) + " armed track";
             if (num_armed_tracks != 1) record_message += "s";
             main_window.screen.draw(Point(1, 5), record_message);
@@ -162,12 +165,17 @@ int main() {
             // Stop recording
             if (key.keycode == KeyCode::K_R) {
                 try {
-                    session.play_state = Session::Play_State::Stopping;
+                    seismic.session->play_state = Session::Play_State::Stopping;
                     dac.stopStream();
-                    session.createFilesFromRecordedClips();
-                    session.play_state = Session::Play_State::Stopped;
-                    dac.closeStream();
+                    seismic.session->createFilesFromRecordedClips();
+                    for (auto track : seismic.session->record_armed_tracks) {
+                        for (auto &clip : track->clips) {
+                            seismic.addClipToXML(clip);
+                        }
+                    }
 
+                    seismic.session->play_state = Session::Play_State::Stopped;
+                    dac.closeStream();
                 } catch (RtAudioError &e) {
                     main_window.screen.draw(Point(1, 14), e.what());
                     error_state = true;

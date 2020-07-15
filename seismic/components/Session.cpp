@@ -49,7 +49,12 @@ void Session::processAudioBlock(double *input_buffer, double *output_buffer) {
             } else {
                 for (auto &track : tracks) {
                     output_sample += track.getSample(channel, current_time, wav_gen.getMaxAmplitude());
+                    if (output_sample >= 1)
+                        output_sample = 0.99;
+                    else if (output_sample <= -1)
+                        output_sample = -0.99;
                 }
+
                 *output_buffer = output_sample;
             }
         }
