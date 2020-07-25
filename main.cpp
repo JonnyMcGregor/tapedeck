@@ -9,7 +9,6 @@ using namespace experimental;
 
 unsigned int sample_rate = 44100, buffer_size = 256; // [1]
 
-WaveFileGenerator wav_gen;
 RtAudio dac;
 RtAudio::StreamParameters output_params, input_params;
 RtAudio::DeviceInfo output_info, input_info;
@@ -52,22 +51,6 @@ void initialiseAudioIO() {
     sample_rate = input_info.preferredSampleRate;
 }
 
-void exportAllTracks(Session &session) {
-    for (int i = 0; i < session.record_armed_tracks.size(); i++) {
-        if (!filesystem::exists("exported_audio")) {
-            filesystem::create_directory("exported_audio");
-        }
-        for (auto &clip : session.record_armed_tracks[i]->clips) {
-            std::ofstream audio_clip("exported_audio/" + clip.getName() + ".wav", std::ios::binary);
-            wav_gen.openWaveFile(audio_clip);
-            for (int sample = 0; sample < clip.getNumSamples(); sample++) {
-                wav_gen.writeInputToFile(audio_clip, clip.getSample(sample, wav_gen.getMaxAmplitude()));
-            }
-            wav_gen.closeWaveFile(audio_clip);
-        }
-    }
-}
-
 void startRecording(Session &session) {
     if (session.tracks.size() == 0)
         return;
@@ -85,11 +68,10 @@ int main() {
         exit(0);
     }
     initialiseAudioIO();
-    wav_gen.initialise(sample_rate, 16, input_params.nChannels);
     // Set up Seismic and session
     SeismicParams seismic_params = {sample_rate, buffer_size, input_params.nChannels, output_params.nChannels};
     Seismic seismic = {seismic_params, "seismic_test_project"};
-    seismic.createXMLDocument();
+    seismic.seismic_xml->createXMLDocument();
     // Set up Fracture and windows
     Fracture frac = Fracture{};
     Window main_window = Window(
@@ -130,7 +112,7 @@ int main() {
             // Create track
             if (key.keycode == KeyCode::K_T) {
                 seismic.session->createTrack();
-                seismic.addTrackToXML(seismic.session->tracks.back());
+                seismic.seismic_xml->addTrackToXML(seismic.session->tracks.back());
             }
             // Delete track
             if (key.keycode == KeyCode::K_D) {
@@ -150,7 +132,7 @@ int main() {
             }
             // Export audio
             if (key.keycode == KeyCode::K_E) {
-                exportAllTracks(*seismic.session.get());
+                seismic.exportAllTracks();
                 main_window.screen.draw(Point(1, 14), "WAV files exported successfully");
                 error_state = true;
                 export_menu = false;
@@ -170,7 +152,7 @@ int main() {
                     seismic.session->createFilesFromRecordedClips();
                     for (auto track : seismic.session->record_armed_tracks) {
                         for (auto &clip : track->clips) {
-                            seismic.addClipToXML(clip);
+                            seismic.seismic_xml->addClipToXML(clip);
                         }
                     }
 

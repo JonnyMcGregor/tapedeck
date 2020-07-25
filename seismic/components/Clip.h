@@ -10,10 +10,11 @@ using namespace std;
 
 class Clip {
 public:
-    Clip(std::string clip_name, u_int start_time) {
+    Clip(std::string project_name, std::string clip_name, u_int start_time) {
+        this->project_name = project_name;
         this->clip_name = clip_name;
         this->start_time_in_session = start_time;
-        reference_file_path = "recorded_audio/" + clip_name + ".wav";
+        reference_file_path = project_name + "/recorded_audio/" + clip_name + ".wav";
     }
 
     void addSample(double sample) {
@@ -71,7 +72,7 @@ public:
 
 private:
     u_int start_time_in_session, start_time_in_reference = 0, length = 0;
-    string clip_name, reference_file_path;
+    string project_name, clip_name, reference_file_path;
     ifstream reference_file_stream = {};
 };
 

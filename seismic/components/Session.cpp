@@ -1,18 +1,15 @@
 #include "Session.h"
 
-Session::Session(u_int sample_rate, u_int buffer_size, u_int num_input_channels, u_int num_output_channels) {
+Session::Session(std::string project_name, u_int sample_rate, u_int buffer_size, u_int num_input_channels, u_int num_output_channels) {
+    this->project_name = project_name;
     this->sample_rate = sample_rate;
     this->buffer_size = buffer_size;
     this->num_input_channels = num_input_channels;
     this->num_output_channels = num_output_channels;
     wav_gen.initialise(sample_rate, bit_depth, num_output_channels);
-
-    if (!filesystem::exists("recorded_audio")) {
-        filesystem::create_directory("recorded_audio");
-    }
 }
 void Session::createTrack() {
-    tracks.push_back(Track("track" + std::to_string(tracks.size() + 1)));
+    tracks.push_back(Track(project_name, "track" + std::to_string(tracks.size() + 1)));
 }
 void Session::deleteTrack(int index) {
     std::vector<Track *>::iterator track_ptr_iterator = record_armed_tracks.begin();
@@ -25,7 +22,6 @@ void Session::deleteTrack(int index) {
     advance(track_iterator, index);
     tracks.erase(track_iterator);
 }
-
 void Session::prepareAudio() {
     record_armed_tracks.clear();
     current_time = 0;
@@ -36,7 +32,6 @@ void Session::prepareAudio() {
         }
     }
 }
-
 void Session::processAudioBlock(double *input_buffer, double *output_buffer) {
     //Record Input
     for (int sample = 0; sample < buffer_size; sample++, current_time++) {
@@ -54,7 +49,6 @@ void Session::processAudioBlock(double *input_buffer, double *output_buffer) {
                     else if (output_sample <= -1)
                         output_sample = -0.99;
                 }
-
                 *output_buffer = output_sample;
             }
         }
@@ -70,9 +64,9 @@ void Session::recordProcessing(int channel, double *input_buffer, double &output
         output_sample += track.getSample(channel, current_time, wav_gen.getMaxAmplitude());
     }
 }
-
 void Session::createFilesFromRecordedClips() {
     assert(play_state == Play_State::Stopping);
+
     for (auto track : record_armed_tracks) {
         for (auto &clip : track->clips) {
             if (clip.getNumSamples() > 0) {

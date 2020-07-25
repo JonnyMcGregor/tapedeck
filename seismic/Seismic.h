@@ -1,6 +1,5 @@
 #include "components/Session.h"
-#include "tiny_xml_2/tinyxml2.h"
-#include <experimental/filesystem>
+#include "components/XmlWrapper.h"
 
 struct SeismicParams {
     SeismicParams(uint sample_rate, uint buffer_size, uint num_input_channels, uint num_output_channels) {
@@ -12,69 +11,45 @@ struct SeismicParams {
     uint sample_rate, buffer_size, num_input_channels, num_output_channels;
 };
 
-using namespace tinyxml2;
 //Seismic is the back-end interface which manages the DSP and project structure of the asciidaw
 class Seismic {
 public:
-    Seismic(SeismicParams params, std::string file_name) {
-        session = std::make_unique<Session>(params.sample_rate, params.buffer_size, params.num_input_channels, params.num_output_channels);
-        this->file_name = "Project/" + file_name + ".xml";
+    Seismic(SeismicParams params, std::string project_name) {
+        this->project_name = project_name;
+        std::string xml_file_name = project_name + ".xml";
+        session = std::make_unique<Session>(this->project_name, params.sample_rate, params.buffer_size, params.num_input_channels, params.num_output_channels);
+        seismic_xml = std::make_unique<XmlWrapper>(this->project_name, xml_file_name, *session.get());
+        createProjectFileStructure();
     }
     ~Seismic() {
     }
-
-    void createXMLDocument() {
-        if (!std::experimental::filesystem::exists("Project")) {
-            std::experimental::filesystem::create_directory("Project");
-        }
-        project_xml.InsertFirstChild(session_node);
-        project_xml.SaveFile(file_name.c_str());
+    void createProjectFileStructure() {
+        if (!filesystem::exists(project_name))
+            filesystem::create_directory(project_name);
+        if (!filesystem::exists(project_name + "/recorded_audio"))
+            filesystem::create_directory(project_name + "/recorded_audio");
+        if (!filesystem::exists(project_name + "/exported_audio"))
+            filesystem::create_directory(project_name + "/exported_audio");
     }
 
-    void addTrackToXML(Track &track) {
-        track_element = project_xml.NewElement("track");
-        track_element->SetAttribute("name", track.getName().c_str());
-        session_node->InsertEndChild(track_element);
-        project_xml.SaveFile(file_name.c_str());
-    }
-
-    void addClipToXML(Clip &clip) {
-        clip_element = project_xml.NewElement("clip");
-        addAttributesToClipElement(clip);
-        const XMLAttribute *clip_name = clip_element->FindAttribute("name");
-        std::string track_name = clip_name->Value();
-        addClipToTrackElement(track_name);
-        project_xml.SaveFile(file_name.c_str());
-    }
-
-    void addAttributesToClipElement(Clip &clip) {
-        clip_element->SetAttribute("name", clip.getName().c_str());
-        clip_element->SetAttribute("reference_file_path", clip.getReferenceFilePath().c_str());
-        clip_element->SetAttribute("start_time_in_session", clip.getStartTime());
-        clip_element->SetAttribute("start_time_in_reference", clip.getStartTimeInReference());
-        clip_element->SetAttribute("length_in_samples", clip.getNumSamples());
-    }
-    void addClipToTrackElement(std::string track_name) {
-        track_element = session_node->LastChildElement();
-        for (int i = session->tracks.size() - 1; i >= 0; i--) {
-            int name_length = session->tracks[i].getName().length();
-            track_name = track_name.substr(0, name_length);
-            if (session->tracks[i].getName() == track_name) {
-                if (track_element->FindAttribute("name")->Value() == track_name) {
-                    track_element->InsertEndChild(clip_element);
+    void exportAllTracks() {
+        for (int i = 0; i < session->record_armed_tracks.size(); i++) {
+            assert(filesystem::exists(project_name + "/exported_audio"));
+            for (auto &clip : session->record_armed_tracks[i]->clips) {
+                std::ofstream audio_clip(project_name + "/exported_audio/" + clip.getName() + ".wav", std::ios::binary);
+                session->wav_gen.openWaveFile(audio_clip);
+                for (int sample = 0; sample < clip.getNumSamples(); sample++) {
+                    session->wav_gen.writeInputToFile(audio_clip, clip.getSample(sample, session->wav_gen.getMaxAmplitude()));
                 }
-            } else {
-                track_element = track_element->PreviousSiblingElement();
+                session->wav_gen.closeWaveFile(audio_clip);
             }
         }
     }
 
     std::unique_ptr<Session> session;
+    std::unique_ptr<XmlWrapper> seismic_xml;
 
 private:
-    std::string file_name;
-    XMLDocument project_xml;
-    XMLNode *session_node = project_xml.NewElement("Session");
-    XMLElement *track_element, *clip_element;
+    std::string project_name;
     /* data */
 };

@@ -3,21 +3,21 @@
 #define _TRACK_H_
 
 #include "Clip.h"
-#include <iostream>
-#include <stdlib.h>
-#include <string>
 
 class Track {
 public:
-    Track(std::string track_name) { this->track_name = track_name; }
+    Track(std::string project_name, std::string track_name) {
+        this->project_name = project_name;
+        this->track_name = track_name;
+    }
 
     void setName(std::string track_name) { this->track_name = track_name; }
 
     string getName() { return track_name; }
 
     void createClip(u_int start_time) {
-        int clipNum = ((int)clips.size()) + 1;
-        clips.push_back(Clip(track_name + "_clip" + std::to_string(clipNum), start_time));
+        int clipNum = (int)clips.size() + 1;
+        clips.push_back(Clip(project_name, track_name + "_clip" + std::to_string(clipNum), start_time));
     }
 
     void eraseClip(int clip_index) {
@@ -47,7 +47,7 @@ public:
     bool is_record_enabled = true;
 
 private:
-    std::string track_name;
+    std::string track_name, project_name;
 };
 
 #endif
