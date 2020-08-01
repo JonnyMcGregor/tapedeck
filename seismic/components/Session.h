@@ -1,6 +1,7 @@
 #ifndef _SESSION_H_
 #define _SESSION_H_
 
+#include "SeismicParams.h"
 #include "Track.h"
 #include "wave_file_generator/WaveFileGenerator.h"
 #include <experimental/filesystem>
@@ -8,6 +9,7 @@ using namespace experimental;
 
 class Session {
 public:
+    Session(std::string project_name, SeismicParams params);
     Session(std::string project_name, u_int sample_rate, u_int buffer_size, u_int num_input_channels, u_int num_output_channels);
 
     void createTrack();

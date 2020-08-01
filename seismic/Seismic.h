@@ -1,28 +1,29 @@
 #include "components/Session.h"
 #include "components/XmlWrapper.h"
 
-struct SeismicParams {
-    SeismicParams(uint sample_rate, uint buffer_size, uint num_input_channels, uint num_output_channels) {
-        this->sample_rate = sample_rate;
-        this->buffer_size = buffer_size;
-        this->num_input_channels = num_input_channels;
-        this->num_output_channels = num_output_channels;
-    }
-    uint sample_rate, buffer_size, num_input_channels, num_output_channels;
-};
+#include <rtaudio/RtAudio.h>
 
 //Seismic is the back-end interface which manages the DSP and project structure of the asciidaw
 class Seismic {
 public:
-    Seismic(SeismicParams params, std::string project_name) {
+    Seismic(std::string project_name) {
+        //Setup Audio Devices and Parameters
+        if (dac.getDeviceCount() < 1) {
+            std::cout << "No audio devices found, exiting ...\n";
+            exit(0);
+        }
+        initialiseAudioIO();
+        params = std::make_unique<SeismicParams>(sample_rate, buffer_size, input_params.nChannels, output_params.nChannels);
+
         this->project_name = project_name;
         std::string xml_file_name = project_name + ".xml";
-        session = std::make_unique<Session>(this->project_name, params.sample_rate, params.buffer_size, params.num_input_channels, params.num_output_channels);
+        session = std::make_unique<Session>(this->project_name, *params.get());
         seismic_xml = std::make_unique<XmlWrapper>(this->project_name, xml_file_name, *session.get());
         createProjectFileStructure();
     }
     ~Seismic() {
     }
+
     void createProjectFileStructure() {
         if (!filesystem::exists(project_name))
             filesystem::create_directory(project_name);
@@ -30,6 +31,61 @@ public:
             filesystem::create_directory(project_name + "/recorded_audio");
         if (!filesystem::exists(project_name + "/exported_audio"))
             filesystem::create_directory(project_name + "/exported_audio");
+    }
+
+    void initialiseAudioIO() {
+        output_params.deviceId = dac.getDefaultOutputDevice();
+        input_params.deviceId = dac.getDefaultInputDevice();
+
+        output_info = dac.getDeviceInfo(output_params.deviceId);
+        output_params.nChannels = output_info.outputChannels;
+        output_params.firstChannel = 0;
+
+        input_info = dac.getDeviceInfo(input_params.deviceId);
+        input_params.nChannels = input_info.inputChannels;
+        input_params.firstChannel = 0;
+
+        sample_rate = input_info.preferredSampleRate;
+    }
+
+    void startAudioStream() {
+        if (session->tracks.size() == 0)
+            return;
+        session->play_state = Session::Play_State::ToPlay;
+        session->prepareAudio();
+        dac.openStream(&output_params, &input_params, RTAUDIO_FLOAT64,
+                       sample_rate, &buffer_size, &processAudioBlock, session.get());
+        dac.startStream();
+    }
+
+    void stopAudioStream() {
+        session->play_state = Session::Play_State::Stopping;
+        dac.stopStream();
+        session->createFilesFromRecordedClips();
+        seismic_xml->refreshXMLDocument();
+        session->play_state = Session::Play_State::Stopped;
+        dac.closeStream();
+    }
+
+    static int processAudioBlock(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
+                                 double streamTime, RtAudioStreamStatus status, void *userData) {
+        unsigned int sample_index, channel_index;
+        double *out_buffer = (double *)outputBuffer;
+        double *in_buffer = (double *)inputBuffer;
+        Session *session = (Session *)userData;
+
+        if (status)
+            std::cout << "Stream underflow detected!" << std::endl;
+        //Temporary for testing purposes...
+        //If tracks are armed, record audio
+        if (session->tracks[0].is_record_enabled)
+            session->play_state = Session::Play_State::Recording;
+        //Else playback audio
+        else
+            session->play_state = Session::Play_State::Playing;
+
+        session->processAudioBlock(in_buffer, out_buffer);
+        return 0;
     }
 
     void exportAllTracks() {
@@ -48,8 +104,13 @@ public:
 
     std::unique_ptr<Session> session;
     std::unique_ptr<XmlWrapper> seismic_xml;
+    std::unique_ptr<SeismicParams> params;
 
 private:
     std::string project_name;
-    /* data */
+
+    RtAudio dac;
+    RtAudio::StreamParameters output_params, input_params;
+    RtAudio::DeviceInfo output_info, input_info;
+    unsigned int sample_rate = 44100, buffer_size = 256;
 };

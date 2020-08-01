@@ -1,5 +1,12 @@
 #include "Session.h"
-
+Session::Session(std::string project_name, SeismicParams params) {
+    this->project_name = project_name;
+    this->sample_rate = params.sample_rate;
+    this->buffer_size = params.buffer_size;
+    this->num_input_channels = params.num_input_channels;
+    this->num_output_channels = params.num_output_channels;
+    wav_gen.initialise(sample_rate, bit_depth, num_output_channels);
+}
 Session::Session(std::string project_name, u_int sample_rate, u_int buffer_size, u_int num_input_channels, u_int num_output_channels) {
     this->project_name = project_name;
     this->sample_rate = sample_rate;

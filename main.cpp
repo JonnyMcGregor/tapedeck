@@ -1,76 +1,13 @@
 #include "fracture/Fracture.h"
 #include "seismic/Seismic.h"
-#include <rtaudio/RtAudio.h>
 #include <stdio.h>
 #include <unistd.h>
 
 using namespace std;
-using namespace experimental;
-
-unsigned int sample_rate = 44100, buffer_size = 256; // [1]
-
-RtAudio dac;
-RtAudio::StreamParameters output_params, input_params;
-RtAudio::DeviceInfo output_info, input_info;
-
-int processAudioBlock(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
-                      double streamTime, RtAudioStreamStatus status, void *userData) {
-    unsigned int sample_index, channel_index;
-    double *out_buffer = (double *)outputBuffer;
-    double *in_buffer = (double *)inputBuffer;
-    Session *session = (Session *)userData;
-
-    if (status)
-        std::cout << "Stream underflow detected!" << std::endl;
-
-    //Temporary for testing purposes...
-    //If tracks are armed, record audio
-    if (session->tracks[0].is_record_enabled)
-        session->play_state = Session::Play_State::Recording;
-    //Else playback audio
-    else
-        session->play_state = Session::Play_State::Playing;
-
-    session->processAudioBlock(in_buffer, out_buffer);
-
-    return 0;
-}
-
-void initialiseAudioIO() {
-    output_params.deviceId = dac.getDefaultOutputDevice();
-    input_params.deviceId = dac.getDefaultInputDevice();
-
-    output_info = dac.getDeviceInfo(output_params.deviceId);
-    output_params.nChannels = output_info.outputChannels;
-    output_params.firstChannel = 0;
-
-    input_info = dac.getDeviceInfo(input_params.deviceId);
-    input_params.nChannels = input_info.inputChannels;
-    input_params.firstChannel = 0;
-
-    sample_rate = input_info.preferredSampleRate;
-}
-
-void startRecording(Session &session) {
-    if (session.tracks.size() == 0)
-        return;
-    session.play_state = Session::Play_State::ToPlay;
-    session.prepareAudio();
-    dac.openStream(&output_params, &input_params, RTAUDIO_FLOAT64,
-                   sample_rate, &buffer_size, &processAudioBlock, &session);
-    dac.startStream();
-}
 
 int main() {
-    //Setup Audio Devices and Parameters
-    if (dac.getDeviceCount() < 1) {
-        std::cout << "No audio devices found, exiting ...\n";
-        exit(0);
-    }
-    initialiseAudioIO();
-    // Set up Seismic and session
-    SeismicParams seismic_params = {sample_rate, buffer_size, input_params.nChannels, output_params.nChannels};
-    Seismic seismic = {seismic_params, "seismic_test_project"};
+
+    Seismic seismic = {"seismic_test_project"};
     seismic.seismic_xml->createXMLDocument();
     // Set up Fracture and windows
     Fracture frac = Fracture{};
@@ -102,7 +39,7 @@ int main() {
             }
             main_window.screen.draw(Point(1, 7), "Press A to arm/disarm tracks");
             main_window.screen.draw(Point(1, 10), "Number of tracks: " + to_string(seismic.session->tracks.size()));
-            main_window.screen.draw(Point(1, 11), "Number of channels: " + to_string(input_params.nChannels));
+            main_window.screen.draw(Point(1, 11), "Number of channels: " + to_string(seismic.params->num_input_channels));
 
             if (key.keycode == KeyCode::K_A) {
                 for (auto &track : seismic.session->tracks) {
@@ -124,7 +61,7 @@ int main() {
             // Start recording
             if (key.keycode == KeyCode::K_R) {
                 try {
-                    startRecording(*seismic.session.get());
+                    seismic.startAudioStream();
                 } catch (RtAudioError &e) {
                     main_window.screen.draw(Point(1, 14), e.what());
                     error_state = true;
@@ -148,12 +85,7 @@ int main() {
             // Stop recording
             if (key.keycode == KeyCode::K_R) {
                 try {
-                    seismic.session->play_state = Session::Play_State::Stopping;
-                    dac.stopStream();
-                    seismic.session->createFilesFromRecordedClips();
-                    seismic.seismic_xml->refreshXMLDocument();
-                    seismic.session->play_state = Session::Play_State::Stopped;
-                    dac.closeStream();
+                    seismic.stopAudioStream();
                 } catch (RtAudioError &e) {
                     main_window.screen.draw(Point(1, 14), e.what());
                     error_state = true;
