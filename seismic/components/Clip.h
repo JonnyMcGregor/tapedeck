@@ -66,7 +66,7 @@ public:
     u_int getNumSamples() { return length; }
     int getStartTime() { return start_time_in_session; }
     int getStartTimeInReference() { return start_time_in_reference; }
-    int getEndTime() { return (start_time_in_session + length); }
+    int getEndTime() { return (start_time_in_session + (length * 0.5)); }
 
     vector<double> write_audio_stream;
 

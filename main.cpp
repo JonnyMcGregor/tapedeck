@@ -40,7 +40,14 @@ int main() {
             main_window.screen.draw(Point(1, 7), "Press A to arm/disarm tracks");
             main_window.screen.draw(Point(1, 10), "Number of tracks: " + to_string(seismic.session->tracks.size()));
             main_window.screen.draw(Point(1, 11), "Number of channels: " + to_string(seismic.params->num_input_channels));
+            main_window.screen.draw(Point(1, 15), "Current Time (s): " + to_string(seismic.session->getCurrentTimeInSeconds()));
 
+            if (key.keycode == KeyCode::K_K) {
+                seismic.session->movePlayhead(-0.1 * seismic.params->sample_rate);
+            }
+            if (key.keycode == KeyCode::K_L) {
+                seismic.session->movePlayhead(0.1 * seismic.params->sample_rate);
+            }
             if (key.keycode == KeyCode::K_A) {
                 for (auto &track : seismic.session->tracks) {
                     track.is_record_enabled = !track.is_record_enabled;
@@ -81,7 +88,7 @@ int main() {
             if (num_armed_tracks != 1) record_message += "s";
             main_window.screen.draw(Point(1, 5), record_message);
             main_window.screen.draw(Point(1, 3), "Press R to stop recording audio");
-
+            main_window.screen.draw(Point(1, 7), "Current Time (s): " + to_string(seismic.session->getCurrentTimeInSeconds()));
             // Stop recording
             if (key.keycode == KeyCode::K_R) {
                 try {

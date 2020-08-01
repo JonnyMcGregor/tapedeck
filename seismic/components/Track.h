@@ -37,10 +37,9 @@ public:
                 } else if (channel == 1) {
                     return clip.getSample(sample_start + 1, max_amplitude);
                 }
-
-            } else
-                return 0;
+            }
         }
+        return 0;
     }
 
     std::vector<Clip> clips = {};

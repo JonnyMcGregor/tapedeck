@@ -19,6 +19,9 @@ public:
     void processAudioBlock(double *input_buffer, double *output_buffer);
     void recordProcessing(int channel, double *input_buffer, double &output_sample, Track &track);
     void createFilesFromRecordedClips();
+    float getCurrentTimeInSeconds();
+    u_int getCurrentTimeInSamples();
+    void movePlayhead(int time_in_samples);
 
     enum struct Play_State {
         ToPlay,
@@ -34,9 +37,10 @@ public:
     WaveFileGenerator wav_gen;
 
 private:
-    u_int current_time = 0, sample_rate = 0, buffer_size = 0,
+    u_int sample_rate = 0, buffer_size = 0,
           num_input_channels = 0, num_output_channels = 0, bit_depth = 16;
     ofstream wav_file_streamer;
     std::string project_name;
+    int current_time = 0;
 };
 #endif

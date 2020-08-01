@@ -31,7 +31,6 @@ void Session::deleteTrack(int index) {
 }
 void Session::prepareAudio() {
     record_armed_tracks.clear();
-    current_time = 0;
     for (auto &track : tracks) {
         if (track.is_record_enabled) {
             track.createClip(current_time);
@@ -88,5 +87,19 @@ void Session::createFilesFromRecordedClips() {
                 clip.clearAudioStream();
             }
         }
+    }
+}
+
+u_int Session::getCurrentTimeInSamples() {
+    return current_time;
+}
+float Session::getCurrentTimeInSeconds() {
+    return 1.0f * current_time / sample_rate;
+}
+void Session::movePlayhead(int time_in_samples) {
+    if ((current_time + time_in_samples) < 0) {
+        current_time = 0;
+    } else {
+        current_time += time_in_samples;
     }
 }
