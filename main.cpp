@@ -112,12 +112,13 @@ int main() {
             // Create track
             if (key.keycode == KeyCode::K_T) {
                 seismic.session->createTrack();
-                seismic.seismic_xml->addTrackToXML(seismic.session->tracks.back());
+                seismic.seismic_xml->refreshXMLDocument();
             }
             // Delete track
             if (key.keycode == KeyCode::K_D) {
                 if (seismic.session->tracks.size() > 0) {
                     seismic.session->deleteTrack(seismic.session->tracks.size() - 1);
+                    seismic.seismic_xml->refreshXMLDocument();
                 }
             }
             // Start recording
@@ -150,12 +151,7 @@ int main() {
                     seismic.session->play_state = Session::Play_State::Stopping;
                     dac.stopStream();
                     seismic.session->createFilesFromRecordedClips();
-                    for (auto track : seismic.session->record_armed_tracks) {
-                        for (auto &clip : track->clips) {
-                            seismic.seismic_xml->addClipToXML(clip);
-                        }
-                    }
-
+                    seismic.seismic_xml->refreshXMLDocument();
                     seismic.session->play_state = Session::Play_State::Stopped;
                     dac.closeStream();
                 } catch (RtAudioError &e) {

@@ -54,6 +54,7 @@ void Session::processAudioBlock(double *input_buffer, double *output_buffer) {
         }
     }
 }
+
 void Session::recordProcessing(int channel, double *input_buffer, double &output_sample, Track &track) {
     //input
     if (track.is_record_enabled) {

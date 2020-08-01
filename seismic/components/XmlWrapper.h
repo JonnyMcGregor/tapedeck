@@ -18,19 +18,27 @@ public:
         xml_doc.SaveFile(file_name.c_str());
     }
 
-    void addTrackToXML(Track &track) {
-        track_element = xml_doc.NewElement("track");
-        track_element->SetAttribute("name", track.getName().c_str());
-        session_node->InsertEndChild(track_element);
+    void refreshXMLDocument() {
+        xml_doc.FirstChild()->DeleteChildren();
+        for (auto &track : session->tracks) {
+            addTrackDataToXML(track);
+        }
         xml_doc.SaveFile(file_name.c_str());
     }
 
-    void addClipToXML(Clip &clip) {
+    void addTrackDataToXML(Track &track) {
+        track_element = xml_doc.NewElement("track");
+        track_element->SetAttribute("name", track.getName().c_str());
+        session_node->InsertEndChild(track_element);
+        for (auto &clip : track.clips) {
+            addClipToTrackElement(clip);
+        }
+    }
+
+    void addClipToTrackElement(Clip &clip) {
         clip_element = xml_doc.NewElement("clip");
         addAttributesToClipElement(clip);
-        std::string clip_name = clip_element->FindAttribute("name")->Value();
-        addClipToTrackElement(clip_name);
-        xml_doc.SaveFile(file_name.c_str());
+        track_element->InsertEndChild(clip_element);
     }
 
     void addAttributesToClipElement(Clip &clip) {
@@ -39,29 +47,6 @@ public:
         clip_element->SetAttribute("start_time_in_session", clip.getStartTime());
         clip_element->SetAttribute("start_time_in_reference", clip.getStartTimeInReference());
         clip_element->SetAttribute("length_in_samples", clip.getNumSamples());
-    }
-    void addClipToTrackElement(std::string clip_name) {
-        track_element = session_node->FirstChildElement();
-
-        int return_type;
-        //Use name attribute to identify which track the clip belongs to..
-        for (int i = 0; i < session->tracks.size(); i++) {
-            int name_length = session->tracks[i].getName().length();
-            //if name of track element matches the clip name, add clip element to track element
-            if (track_element->FindAttribute("name")->Value() == clip_name.substr(0, name_length)) {
-                if (track_element->QueryAttribute(clip_element->FindAttribute("name")->Value(), &return_type) != tinyxml2::XMLError::XML_NO_ATTRIBUTE) {
-                    track_element->DeleteChild(track_element->FirstChildElement());
-                    track_element->InsertEndChild(clip_element);
-                } else {
-                    track_element->InsertEndChild(clip_element);
-                }
-
-            }
-            //else move on to next track element
-            else {
-                track_element = track_element->NextSiblingElement();
-            }
-        }
     }
 
 private:
