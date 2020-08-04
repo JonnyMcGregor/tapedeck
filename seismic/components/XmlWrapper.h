@@ -20,15 +20,26 @@ public:
 
     void refreshXMLDocument() {
         xml_doc.FirstChild()->DeleteChildren();
+        addPlayheadElement();
         for (auto &track : session->tracks) {
             addTrackDataToXML(track);
         }
         xml_doc.SaveFile(file_name.c_str());
     }
 
+    void addPlayheadElement() {
+        playhead_element = xml_doc.NewElement("playhead");
+        playhead_element->SetAttribute("tempo", to_string(120).c_str());
+        playhead_element->SetAttribute("timeSigNumerator", to_string(4).c_str());
+        playhead_element->SetAttribute("timeSigDenominator", to_string(4).c_str());
+        playhead_element->SetAttribute("currentTimeSamples", to_string(session->getCurrentTimeInSamples()).c_str());
+        playhead_element->SetAttribute("currentTimeSeconds", to_string(session->getCurrentTimeInSeconds()).c_str());
+        session_node->InsertEndChild(playhead_element);
+    }
     void addTrackDataToXML(Track &track) {
         track_element = xml_doc.NewElement("track");
         track_element->SetAttribute("name", track.getName().c_str());
+        track_element->SetAttribute("isRecordEnabled", to_string(track.is_record_enabled).c_str());
         session_node->InsertEndChild(track_element);
         for (auto &clip : track.clips) {
             addClipToTrackElement(clip);
@@ -52,7 +63,7 @@ public:
 private:
     XMLDocument xml_doc;
     XMLNode *session_node = xml_doc.NewElement("Session");
-    XMLElement *track_element, *clip_element;
+    XMLElement *track_element, *clip_element, *playhead_element;
     std::string project_name, file_name;
     Session *session;
 };

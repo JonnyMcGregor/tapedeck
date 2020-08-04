@@ -5,6 +5,21 @@
 
 using namespace std;
 
+int selected_track = 0;
+
+void setSelectedTrack(KeyCombo key, Seismic &seismic) {
+    if (key.keycode == KeyCode::K_O) {
+        if (selected_track > 0) {
+            selected_track--;
+        }
+    }
+    if (key.keycode == KeyCode::K_P) {
+        if (selected_track + 1 <= seismic.session->tracks.size()) {
+            selected_track++;
+        }
+    }
+}
+
 int main() {
 
     Seismic seismic = {"seismic_test_project"};
@@ -16,7 +31,6 @@ int main() {
         "AsciiDAW",
         Border(BorderStyle::Plain));
     frac.addWindow(main_window);
-
     // Main program loop
     string state = "main";
     bool error_state = false;
@@ -29,6 +43,7 @@ int main() {
         KeyCombo key = frac.getKey();
 
         if (state == "main") {
+            seismic.seismic_xml->refreshXMLDocument();
             main_window.screen.draw(Point(1, 3), "Press T to create a track");
             main_window.screen.draw(Point(1, 4), "Press D to delete a track");
             if (seismic.session->tracks.size() > 0) {
@@ -40,18 +55,26 @@ int main() {
             main_window.screen.draw(Point(1, 7), "Press A to arm/disarm tracks");
             main_window.screen.draw(Point(1, 10), "Number of tracks: " + to_string(seismic.session->tracks.size()));
             main_window.screen.draw(Point(1, 11), "Number of channels: " + to_string(seismic.params->num_input_channels));
+            if (selected_track == 0) {
+                main_window.screen.draw(Point(1, 13), "Selected Track: Null");
+
+            } else if (seismic.session->tracks[selected_track - 1].is_record_enabled) {
+                main_window.screen.draw(Point(1, 13), "Selected Track: " + seismic.session->tracks[selected_track - 1].getName() + " (R)");
+            } else {
+                main_window.screen.draw(Point(1, 13), "Selected Track: " + seismic.session->tracks[selected_track - 1].getName());
+            }
             main_window.screen.draw(Point(1, 15), "Current Time (s): " + to_string(seismic.session->getCurrentTimeInSeconds()));
 
+            setSelectedTrack(key, seismic);
+
             if (key.keycode == KeyCode::K_K) {
-                seismic.session->movePlayhead(-0.1 * seismic.params->sample_rate);
+                seismic.session->movePlayhead(-0.5 * seismic.params->sample_rate);
             }
             if (key.keycode == KeyCode::K_L) {
-                seismic.session->movePlayhead(0.1 * seismic.params->sample_rate);
+                seismic.session->movePlayhead(0.5 * seismic.params->sample_rate);
             }
             if (key.keycode == KeyCode::K_A) {
-                for (auto &track : seismic.session->tracks) {
-                    track.is_record_enabled = !track.is_record_enabled;
-                }
+                seismic.session->tracks[selected_track - 1].is_record_enabled = !seismic.session->tracks[selected_track - 1].is_record_enabled;
             }
             // Create track
             if (key.keycode == KeyCode::K_T) {

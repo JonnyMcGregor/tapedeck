@@ -78,7 +78,7 @@ public:
             std::cout << "Stream underflow detected!" << std::endl;
         //Temporary for testing purposes...
         //If tracks are armed, record audio
-        if (session->tracks[0].is_record_enabled)
+        if (session->record_armed_tracks.size() > 0)
             session->play_state = Session::Play_State::Recording;
         //Else playback audio
         else
@@ -95,7 +95,7 @@ public:
                 std::ofstream audio_clip(project_name + "/exported_audio/" + clip.getName() + ".wav", std::ios::binary);
                 session->wav_gen.openWaveFile(audio_clip);
                 for (int sample = 0; sample < clip.getNumSamples(); sample++) {
-                    session->wav_gen.writeInputToFile(audio_clip, clip.getSample(sample, session->wav_gen.getMaxAmplitude()));
+                    session->wav_gen.writeInputToFile(audio_clip, clip.getSample(sample));
                 }
                 session->wav_gen.closeWaveFile(audio_clip);
             }

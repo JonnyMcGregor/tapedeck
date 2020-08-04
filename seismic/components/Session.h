@@ -11,7 +11,7 @@ class Session {
 public:
     Session(std::string project_name, SeismicParams params);
     Session(std::string project_name, u_int sample_rate, u_int buffer_size, u_int num_input_channels, u_int num_output_channels);
-
+    ~Session();
     void createTrack();
     void deleteTrack(int index);
 
