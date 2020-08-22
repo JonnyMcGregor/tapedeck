@@ -54,7 +54,7 @@ public:
         }
     }
     std::vector<Clip> clips = {};
-    bool is_record_enabled = true;
+    bool is_record_enabled = false;
 
 private:
     std::string track_name, project_name;
