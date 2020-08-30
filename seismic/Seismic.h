@@ -6,7 +6,7 @@
 //Seismic is the back-end interface which manages the DSP and project structure of the asciidaw
 class Seismic {
 public:
-    Seismic(std::string project_name) {
+    Seismic(bool is_loading_from_xml, std::string project_name = "", filesystem::path xml_path = "") {
         //Setup Audio Devices and Parameters
         if (dac.getDeviceCount() < 1) {
             std::cout << "No audio devices found, exiting ...\n";
@@ -14,13 +14,17 @@ public:
         }
         initialiseAudioIO();
         params = std::make_unique<SeismicParams>(sample_rate, buffer_size, input_params.nChannels, output_params.nChannels);
-
-        this->project_name = project_name;
-        std::string xml_file_name = project_name + ".xml";
+        if (is_loading_from_xml) {
+            this->project_name = xml_path.stem();
+        } else {
+            this->project_name = project_name;
+        }
+        std::string xml_file_name = this->project_name + ".xml";
+        createProjectFileStructure();
         session = std::make_unique<Session>(this->project_name, *params.get());
         seismic_xml = std::make_unique<XmlWrapper>(this->project_name, xml_file_name, *session.get());
-        createProjectFileStructure();
     }
+
     ~Seismic() {
     }
 

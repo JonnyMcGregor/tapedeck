@@ -9,9 +9,6 @@ Session::Session(std::string project_name, SeismicParams params) {
 
     //loads audio clips with data from .wav files - this allows for faster reading of audio data
     //as the data is being read from stack as opposed to disk
-    for (auto &track : tracks) {
-        track.loadAudioClips(wav_gen.getMaxAmplitude());
-    }
 }
 
 Session::Session(std::string project_name, u_int sample_rate, u_int buffer_size, u_int num_input_channels, u_int num_output_channels) {
@@ -24,6 +21,15 @@ Session::Session(std::string project_name, u_int sample_rate, u_int buffer_size,
 }
 Session::~Session() {
     //Clears the Audio clips from temp memory
+    clearAllAudioClips();
+}
+void Session::loadAllAudioClips() {
+    for (auto &track : tracks) {
+        track.loadAudioClips(wav_gen.getMaxAmplitude());
+    }
+}
+
+void Session::clearAllAudioClips() {
     for (auto &track : tracks) {
         track.clearAudioClips();
     }

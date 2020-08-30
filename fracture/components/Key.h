@@ -170,6 +170,9 @@ struct KeyCombo {
         output += getKeyName(keycode);
         return output;
     }
+    char getChar() {
+        return getKeyName(keycode).front();
+    }
 };
 
 /* This enum is deliberately separate from the main key enum above. It is

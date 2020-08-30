@@ -28,8 +28,8 @@ public:
         start_time_in_session = start_time;
     }
 
-    void setEndTime(u_int end_time) {
-        length = start_time_in_session + end_time;
+    void setLength(u_int length) {
+        this->length = length;
     }
 
     std::string getName() { return clip_name; }

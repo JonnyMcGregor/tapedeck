@@ -14,6 +14,7 @@ public:
         if (!std::experimental::filesystem::exists(project_name)) {
             std::experimental::filesystem::create_directory(project_name);
         }
+        session_node = xml_doc.NewElement("Session");
         xml_doc.InsertFirstChild(session_node);
         xml_doc.SaveFile(file_name.c_str());
     }
@@ -34,12 +35,14 @@ public:
         playhead_element->SetAttribute("timeSigDenominator", to_string(4).c_str());
         playhead_element->SetAttribute("currentTimeSamples", to_string(session->getCurrentTimeInSamples()).c_str());
         playhead_element->SetAttribute("currentTimeSeconds", to_string(session->getCurrentTimeInSeconds()).c_str());
+        playhead_element->SetAttribute("numberOfTracks", session->tracks.size());
         session_node->InsertEndChild(playhead_element);
     }
     void addTrackDataToXML(Track &track) {
         track_element = xml_doc.NewElement("track");
         track_element->SetAttribute("name", track.getName().c_str());
         track_element->SetAttribute("isRecordEnabled", to_string(track.is_record_enabled).c_str());
+        track_element->SetAttribute("numberOfClips", track.clips.size());
         session_node->InsertEndChild(track_element);
         for (auto &clip : track.clips) {
             addClipToTrackElement(clip);
@@ -60,9 +63,38 @@ public:
         clip_element->SetAttribute("length_in_samples", clip.getNumSamples());
     }
 
+    void loadSessionFromXML() {
+        xml_doc.LoadFile(file_name.c_str());
+        session_node = xml_doc.RootElement();
+        playhead_element = session_node->FirstChildElement();
+        loadPlayhead();
+        loadTracks(playhead_element->FindAttribute("numberOfTracks")->IntValue());
+        xml_doc.SaveFile(file_name.c_str());
+    }
+    void loadPlayhead() {
+        session->movePlayhead(playhead_element->FindAttribute("currentTimeSamples")->IntValue());
+    }
+    void loadTracks(int number_of_tracks) {
+        track_element = playhead_element->NextSiblingElement();
+        for (int i = 0; i < number_of_tracks; i++) {
+            session->createTrack();
+            loadClips(track_element->FindAttribute("numberOfClips")->IntValue());
+            track_element = track_element->NextSiblingElement();
+        }
+    }
+    void loadClips(int number_of_clips) {
+        clip_element = track_element->FirstChildElement();
+
+        for (int j = 0; j < number_of_clips; j++) {
+            session->tracks.back().createClip(clip_element->FindAttribute("start_time_in_session")->IntValue());
+            session->tracks.back().clips[j].setLength(clip_element->FindAttribute("length_in_samples")->IntValue());
+            clip_element = clip_element->NextSiblingElement();
+        }
+    }
+
 private:
     XMLDocument xml_doc;
-    XMLNode *session_node = xml_doc.NewElement("Session");
+    XMLNode *session_node;
     XMLElement *track_element, *clip_element, *playhead_element;
     std::string project_name, file_name;
     Session *session;
