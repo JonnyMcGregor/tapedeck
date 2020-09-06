@@ -67,7 +67,7 @@ int main() {
             if (key.keycode == KeyCode::K_L) {
                 state = "load";
             } else if (key.keycode == KeyCode::K_C) {
-                state = "new";
+                state = "input_name";
             }
         }
 
@@ -78,11 +78,20 @@ int main() {
             seismic->session->loadAllAudioClips();
             state = "main";
         }
-        if (state == "new") {
-            if (filesystem::exists("seismic_test_project")) {
-                filesystem::remove_all("seismic_test_project");
+        if (state == "input_name") {
+            main_window.screen.draw(Point(1, 3), "Please Enter Name of Project: " + project_name);
+            KeyCombo input = frac.getKey();
+            if (input.keycode == KeyCode::K_E && input.modifier_keys == ModifierKey::Shift) {
+                state = "new";
+            } else if (!input.isNull()) {
+                project_name += input.getChar();
             }
-            seismic = make_unique<Seismic>(false, "seismic_test_project", "");
+        }
+        if (state == "new") {
+            if (filesystem::exists(project_name)) {
+                filesystem::remove_all(project_name);
+            }
+            seismic = make_unique<Seismic>(false, project_name, "");
             seismic->seismic_xml->createXMLDocument();
             state = "main";
         }
