@@ -6,8 +6,8 @@
 
 class Track {
 public:
-    Track(std::string project_name, std::string track_name) {
-        this->project_name = project_name;
+    Track(std::string session_name, std::string track_name) {
+        this->session_name = session_name;
         this->track_name = track_name;
     }
 
@@ -17,7 +17,7 @@ public:
 
     void createClip(u_int start_time) {
         int clipNum = (int)clips.size() + 1;
-        clips.push_back(Clip(project_name, track_name + "_clip" + std::to_string(clipNum), start_time));
+        clips.push_back(Clip(session_name, track_name + "_clip" + std::to_string(clipNum), start_time));
     }
 
     void eraseClip(int clip_index) {
@@ -43,21 +43,11 @@ public:
         return 0;
     }
 
-    void loadAudioClips(double max_amplitude_of_source) {
-        for (auto &clip : clips) {
-            clip.loadAudioStream(max_amplitude_of_source);
-        }
-    }
-    void clearAudioClips() {
-        for (auto &clip : clips) {
-            clip.audio_stream.clear();
-        }
-    }
     std::vector<Clip> clips = {};
     bool is_record_enabled = false;
 
 private:
-    std::string track_name, project_name;
+    std::string track_name, session_name;
 };
 
 #endif

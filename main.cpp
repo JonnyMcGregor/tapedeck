@@ -47,7 +47,7 @@ int main() {
         Border(BorderStyle::Plain));
     frac.addWindow(main_window);
     std::unique_ptr<Seismic> seismic;
-
+    std::shared_ptr<Session> session;
     // Main program loop
     string state = "start";
     bool error_state = false;
@@ -74,8 +74,9 @@ int main() {
         if (state == "load") {
             filesystem::path xml_to_load = getStdOutFromCommand("zenity --file-selection");
             seismic = make_unique<Seismic>(true, "", xml_to_load);
-            seismic->seismic_xml->loadSessionFromXML();
-            seismic->session->loadAllAudioClips();
+            session = seismic->session;
+            session->loadSessionFromXML(xml_to_load);
+            session->loadAllAudioClips();
             state = "main";
         }
         if (state == "input_name") {
@@ -92,13 +93,14 @@ int main() {
                 filesystem::remove_all(project_name);
             }
             seismic = make_unique<Seismic>(false, project_name, "");
-            seismic->seismic_xml->createXMLDocument();
+            session = seismic->session;
+            session->session_xml->createXMLDocument();
             state = "main";
         }
         KeyCombo key = frac.getKey();
 
         if (state == "main") {
-            seismic->seismic_xml->refreshXMLDocument();
+            seismic->session->session_xml->refreshXMLDocument(session->playhead, session->tracks);
             main_window.screen.draw(Point(1, 3), "Press T to create a track");
             main_window.screen.draw(Point(1, 4), "Press D to delete a track");
             if (seismic->session->tracks.size() > 0) {
@@ -107,40 +109,42 @@ int main() {
             if (export_menu) {
                 main_window.screen.draw(Point(1, 6), "Press E to export recordings to WAV files");
             }
-            main_window.screen.draw(Point(1, 7), "Press A to arm/disarm tracks");
-            main_window.screen.draw(Point(1, 10), "Number of tracks: " + to_string(seismic->session->tracks.size()));
-            main_window.screen.draw(Point(1, 11), "Number of channels: " + to_string(seismic->params->num_input_channels));
+            main_window.screen.draw(Point(1, 7), "Number of tracks: " + to_string(session->tracks.size()));
+            main_window.screen.draw(Point(1, 8), "Number of channels: " + to_string(seismic->params->num_input_channels));
             if (selected_track == 0) {
-                main_window.screen.draw(Point(1, 13), "Selected Track: Null");
+                main_window.screen.draw(Point(1, 10), "Selected Track: Null");
 
             } else if (seismic->session->tracks[selected_track - 1].is_record_enabled) {
-                main_window.screen.draw(Point(1, 13), "Selected Track: " + seismic->session->tracks[selected_track - 1].getName() + " (R)");
+                main_window.screen.draw(Point(1, 10), "Selected Track: " + session->tracks[selected_track - 1].getName() + " (R)");
             } else {
-                main_window.screen.draw(Point(1, 13), "Selected Track: " + seismic->session->tracks[selected_track - 1].getName());
+                main_window.screen.draw(Point(1, 10), "Selected Track: " + session->tracks[selected_track - 1].getName());
             }
-            main_window.screen.draw(Point(1, 15), "Current Time (s): " + to_string(seismic->session->getCurrentTimeInSeconds()));
+            main_window.screen.draw(Point(1, 12), "Current Time (s): " + to_string(session->getCurrentTimeInSeconds()));
+            main_window.screen.draw(Point(1, 14), "Press A to arm/disarm tracks");
+            main_window.screen.draw(Point(1, 15), "Press K or L to move playhead");
+            main_window.screen.draw(Point(1, 16), "Press O or P to change selected track");
 
             setSelectedTrack(key, *seismic.get());
 
             if (key.keycode == KeyCode::K_K) {
-                seismic->session->movePlayhead(-0.5 * seismic->params->sample_rate);
+                session->playhead.movePlayhead(-0.5 * seismic->params->sample_rate);
             }
             if (key.keycode == KeyCode::K_L) {
-                seismic->session->movePlayhead(0.5 * seismic->params->sample_rate);
+                session->playhead.movePlayhead(0.5 * seismic->params->sample_rate);
             }
             if (key.keycode == KeyCode::K_A) {
-                seismic->session->tracks[selected_track - 1].is_record_enabled = !seismic->session->tracks[selected_track - 1].is_record_enabled;
+                session->tracks[selected_track - 1].is_record_enabled = !session->tracks[selected_track - 1].is_record_enabled;
             }
             // Create track
             if (key.keycode == KeyCode::K_T) {
-                seismic->session->createTrack();
-                seismic->seismic_xml->refreshXMLDocument();
+                session->createTrack();
+                session->session_xml->refreshXMLDocument(session->playhead, session->tracks);
             }
             // Delete track
             if (key.keycode == KeyCode::K_D) {
-                if (seismic->session->tracks.size() > 0) {
-                    seismic->session->deleteTrack(seismic->session->tracks.size() - 1);
-                    seismic->seismic_xml->refreshXMLDocument();
+                if (session->tracks.size() > 0) {
+                    session->deleteTrack(seismic->session->tracks.size() - 1);
+                    session->session_xml->refreshXMLDocument(session->playhead, session->tracks);
                 }
             }
             // Start recording
@@ -161,12 +165,12 @@ int main() {
                 export_menu = false;
             }
         } else if (state == "recording") {
-            int num_armed_tracks = seismic->session->record_armed_tracks.size();
+            int num_armed_tracks = session->record_armed_tracks.size();
             string record_message = "Recording to " + to_string(num_armed_tracks) + " armed track";
             if (num_armed_tracks != 1) record_message += "s";
             main_window.screen.draw(Point(1, 5), record_message);
             main_window.screen.draw(Point(1, 3), "Press R to stop recording audio");
-            main_window.screen.draw(Point(1, 7), "Current Time (s): " + to_string(seismic->session->getCurrentTimeInSeconds()));
+            main_window.screen.draw(Point(1, 7), "Current Time (s): " + to_string(session->getCurrentTimeInSeconds()));
             // Stop recording
             if (key.keycode == KeyCode::K_R) {
                 try {

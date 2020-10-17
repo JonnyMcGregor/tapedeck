@@ -1,5 +1,4 @@
 #include "components/Session.h"
-#include "components/XmlWrapper.h"
 
 #include <rtaudio/RtAudio.h>
 
@@ -19,10 +18,8 @@ public:
         } else {
             this->project_name = project_name;
         }
-        std::string xml_file_name = this->project_name + ".xml";
         createProjectFileStructure();
-        session = std::make_unique<Session>(this->project_name, *params.get());
-        seismic_xml = std::make_unique<XmlWrapper>(this->project_name, xml_file_name, *session.get());
+        session = std::make_shared<Session>(this->project_name, *params.get());
     }
 
     ~Seismic() {
@@ -66,7 +63,8 @@ public:
         session->play_state = Session::Play_State::Stopping;
         dac.stopStream();
         session->createFilesFromRecordedClips();
-        seismic_xml->refreshXMLDocument();
+        assert(session->tracks.size() > 0);
+        session->session_xml->refreshXMLDocument(session->playhead, session->tracks);
         session->play_state = Session::Play_State::Stopped;
         dac.closeStream();
     }
@@ -106,8 +104,7 @@ public:
         }
     }
 
-    std::unique_ptr<Session> session;
-    std::unique_ptr<XmlWrapper> seismic_xml;
+    std::shared_ptr<Session> session;
     std::unique_ptr<SeismicParams> params;
 
 private:
