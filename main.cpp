@@ -73,11 +73,15 @@ int main() {
 
         if (state == "load") {
             filesystem::path xml_to_load = getStdOutFromCommand("zenity --file-selection");
-            seismic = make_unique<Seismic>(true, "", xml_to_load);
-            session = seismic->session;
-            session->loadSessionFromXML(xml_to_load);
-            session->loadAllAudioClips();
-            state = "main";
+            if (xml_to_load != "") {
+                seismic = make_unique<Seismic>(true, "", xml_to_load);
+                session = seismic->session;
+                session->loadSessionFromXML(xml_to_load);
+                session->loadAllAudioClips();
+                state = "main";
+            } else {
+                state = "start";
+            }
         }
         if (state == "input_name") {
             main_window.screen.draw(Point(1, 3), "Please Enter Name of Project: " + project_name);
