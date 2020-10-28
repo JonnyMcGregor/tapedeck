@@ -23,16 +23,22 @@ public:
 
     void prepareAudio();
     void processAudioBlock(double *input_buffer, double *output_buffer);
-    void recordProcessing(int channel, double *input_buffer, double &output_sample, Track &track);
+    //void recordProcessing(int channel, double *input_buffer, double &output_sample, Track &track);
+    void limitOutputSample(double &output_sample);
+
     void createFilesFromRecordedClips();
+
     float getCurrentTimeInSeconds();
     u_int getCurrentTimeInSamples();
+
     void loadAudioClip(Clip &clip);
     static double bytesToDouble(unsigned char first_byte, unsigned char second_byte, double max_amplitude);
+
     void loadSessionFromXML(string xml_file_name);
     void loadPlayhead();
     void loadTracks(int number_of_tracks);
     void loadClips(int number_of_clips);
+
     enum struct Play_State {
         ToPlay,
         Playing,

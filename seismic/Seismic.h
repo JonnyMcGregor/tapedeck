@@ -43,7 +43,7 @@ public:
         output_params.firstChannel = 0;
 
         input_info = dac.getDeviceInfo(input_params.deviceId);
-        input_params.nChannels = input_info.inputChannels;
+        input_params.nChannels = 1;
         input_params.firstChannel = 0;
 
         sample_rate = input_info.preferredSampleRate;

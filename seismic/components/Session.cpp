@@ -5,7 +5,7 @@ Session::Session(std::string session_name, SeismicParams params) {
     this->buffer_size = params.buffer_size;
     this->num_input_channels = params.num_input_channels;
     this->num_output_channels = params.num_output_channels;
-    wav_gen.initialise(sample_rate, bit_depth, num_output_channels);
+    wav_gen.initialise(sample_rate, bit_depth, num_input_channels);
     std::string xml_file_name = this->session_name + ".xml";
     session_xml = std::make_unique<XmlWrapper>(this->session_name, xml_file_name);
     //loads audio clips with data from .wav files - this allows for faster reading of audio data
@@ -126,26 +126,20 @@ void Session::prepareAudio() {
         }
     }
 }
-
 void Session::processAudioBlock(double *input_buffer, double *output_buffer) {
     //Record Input
-    for (int sample = 0; sample < buffer_size; sample++, playhead.current_time_in_samples++) {
-        for (int channel = 0; channel < 2; channel++, *input_buffer++, *output_buffer++) {
+    for (int sample = 0; sample < buffer_size; sample++, playhead.current_time_in_samples++, *input_buffer++) {
+        for (int channel = 0; channel < 2; channel++, *output_buffer++) {
             double output_sample = 0;
-            if (play_state == Play_State::Recording) {
-                for (auto &track : tracks) {
-                    recordProcessing(channel, input_buffer, output_sample, track);
+            for (auto &track : tracks) {
+                //input
+                if (play_state == Play_State::Recording && track.is_record_enabled && channel == 0) {
+                    track.clips.back().addSample(*input_buffer);
                 }
-            } else {
-                int counter = 0;
-                for (auto &track : tracks) {
-                    output_sample += track.getSample(channel, getCurrentTimeInSamples(), counter, wav_gen.getMaxAmplitude());
-                }
-                output_sample = output_sample * 0.5;
-                if (output_sample >= 1) {
-                    output_sample = 0.999;
-                } else if (output_sample <= -1) {
-                    output_sample = -0.999;
+                //output
+                else {
+                    output_sample += track.getSample(channel, getCurrentTimeInSamples(), wav_gen.getMaxAmplitude());
+                    limitOutputSample(output_sample);
                 }
             }
             *output_buffer = output_sample;
@@ -153,24 +147,46 @@ void Session::processAudioBlock(double *input_buffer, double *output_buffer) {
     }
 }
 
-void Session::recordProcessing(int channel, double *input_buffer, double &output_sample, Track &track) {
-    //input
-    if (track.is_record_enabled) {
-        track.clips.back().addSample(*input_buffer);
-    }
-    //output
-    else {
-        int counter = 0;
-        output_sample += track.getSample(channel, getCurrentTimeInSamples(), counter, wav_gen.getMaxAmplitude());
-        output_sample = output_sample * 0.5;
-        if (output_sample >= 1) {
-            output_sample = 0.999;
-        } else if (output_sample <= -1) {
-            output_sample = -0.999;
-        }
+// void Session::processAudioBlock(double *input_buffer, double *output_buffer) {
+//     //Record Input
+//     for (int sample = 0; sample < buffer_size; sample++, playhead.current_time_in_samples++, *input_buffer++) {
+//         for (int channel = 0; channel < 2; channel++, *output_buffer++) {
+//             double output_sample = 0;
+//             if (play_state == Play_State::Recording) {
+//                 for (auto &track : tracks) {
+//                     recordProcessing(channel, input_buffer, output_sample, track);
+//                 }
+//             } else {
+//                 for (auto &track : tracks) {
+//                     output_sample += track.getSample(channel, getCurrentTimeInSamples(), wav_gen.getMaxAmplitude());
+//                 }
+//                 limitOutputSample(output_sample);
+//             }
+//             *output_buffer = output_sample;
+//         }
+//     }
+// }
+
+// void Session::recordProcessing(int channel, double *input_buffer, double &output_sample, Track &track) {
+//     //input
+//     if (track.is_record_enabled && channel == 0) {
+//         track.clips.back().addSample(*input_buffer);
+//     }
+//     //output
+//     else {
+//         output_sample += track.getSample(channel, getCurrentTimeInSamples(), wav_gen.getMaxAmplitude());
+//         limitOutputSample(output_sample);
+//     }
+// }
+
+void Session::limitOutputSample(double &output_sample) {
+    output_sample = output_sample * 0.5;
+    if (output_sample >= 1) {
+        output_sample = 0.999;
+    } else if (output_sample <= -1) {
+        output_sample = -0.999;
     }
 }
-
 void Session::createFilesFromRecordedClips() {
     assert(play_state == Play_State::Stopping);
     for (auto track : record_armed_tracks) {
