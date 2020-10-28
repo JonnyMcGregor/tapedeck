@@ -94,10 +94,10 @@ public:
         for (int i = 0; i < session->record_armed_tracks.size(); i++) {
             assert(filesystem::exists(project_name + "/exported_audio"));
             for (auto &clip : session->record_armed_tracks[i]->clips) {
-                std::ofstream audio_clip(project_name + "/exported_audio/" + clip.getName() + ".wav", std::ios::binary);
+                std::ofstream audio_clip(project_name + "/exported_audio/" + clip.clip_name + ".wav", std::ios::binary);
                 session->wav_gen.openWaveFile(audio_clip);
-                for (int sample = 0; sample < clip.getNumSamples(); sample++) {
-                    session->wav_gen.writeInputToFile(audio_clip, clip.getSample(sample));
+                for (int sample = 0; sample < clip.length; sample++) {
+                    session->wav_gen.writeInputToFile(audio_clip, clip.audio_stream[sample]);
                 }
                 session->wav_gen.closeWaveFile(audio_clip);
             }

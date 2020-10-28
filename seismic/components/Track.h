@@ -26,12 +26,11 @@ public:
         clips.erase(it);
     }
 
-    double getSample(int channel, int time_in_samples, int max_amplitude) {
+    double getSample(int time_in_samples, int max_amplitude) {
         for (auto &clip : clips) {
-            if (clip.getStartTime() <= time_in_samples && time_in_samples <= clip.getEndTime()) {
-                //As audio is interleaved in wav, we must select sample from appropriate channel
-                int sample_start = time_in_samples - clip.getStartTime();
-                return clip.getSample(sample_start);
+            if (clip.start_time_in_session <= time_in_samples && time_in_samples <= (clip.start_time_in_session + clip.length)) {
+                int sample_start = time_in_samples - clip.start_time_in_session;
+                return clip.audio_stream[sample_start];
             }
         }
         return 0;

@@ -23,7 +23,6 @@ public:
 
     void prepareAudio();
     void processAudioBlock(double *input_buffer, double *output_buffer);
-    //void recordProcessing(int channel, double *input_buffer, double &output_sample, Track &track);
     void limitOutputSample(double &output_sample);
 
     void createFilesFromRecordedClips();

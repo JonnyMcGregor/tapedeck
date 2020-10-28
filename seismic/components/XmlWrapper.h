@@ -54,11 +54,11 @@ struct XmlWrapper {
     }
 
     void addAttributesToClipElement(Clip &clip) {
-        clip_element->SetAttribute("name", clip.getName().c_str());
-        clip_element->SetAttribute("reference_file_path", clip.getReferenceFilePath().c_str());
-        clip_element->SetAttribute("start_time_in_session", clip.getStartTime());
-        clip_element->SetAttribute("start_time_in_reference", clip.getStartTimeInReference());
-        clip_element->SetAttribute("length_in_samples", clip.getNumSamples());
+        clip_element->SetAttribute("name", clip.clip_name.c_str());
+        clip_element->SetAttribute("reference_file_path", clip.reference_file_path.c_str());
+        clip_element->SetAttribute("start_time_in_session", clip.start_time_in_session);
+        clip_element->SetAttribute("start_time_in_reference", clip.start_time_in_reference);
+        clip_element->SetAttribute("length_in_samples", clip.length);
     }
     XMLDocument xml_doc;
     XMLNode *session_node;
