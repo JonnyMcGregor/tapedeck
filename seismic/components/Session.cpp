@@ -1,4 +1,4 @@
-#include "Session.h"
+#include "Session.hpp"
 Session::Session(std::string session_name, SeismicParams params) {
     this->session_name = session_name;
     this->sample_rate = params.sample_rate;
@@ -26,29 +26,30 @@ Session::~Session() {
 }
 void Session::loadAllAudioClips() {
     for (auto &track : tracks) {
-        for (auto &clip : track.clips) {
-            loadAudioClip(clip);
+        for (int i = 0; i < track.clips.size(); i++) {
+            loadAudioClip(track.clips[i], track.start_times[i]);
         }
     }
 }
 
-void Session::loadAudioClip(Clip &clip) {
-    if (!clip.audio_stream.empty()) {
-        clip.audio_stream.clear();
+void Session::loadAudioClip(Clip &clip, int start_time_in_reference) {
+    if (!clip.audio_data.empty()) {
+        clip.clear();
     }
-    for (int i = 0; i < clip.length; i++) {
+    for (int i = 0; i < clip.size(); i++) {
         int first_sample_index = 44;
         //each audio sample is 2 bytes therefore index is multiplied by 2 to get byte index of sample
-        int sample_pos = first_sample_index + clip.start_time_in_reference + (i * 2);
+        int sample_pos = first_sample_index + start_time_in_reference + (i * 2);
         //as samples are stored as little endian, both bytes within sample must be retrieved individually
         char first_byte, second_byte;
-        clip.reference_file_stream.open(clip.reference_file_path, ios::binary);
-        clip.reference_file_stream.seekg(sample_pos, ios::beg);
-        clip.reference_file_stream.read(&first_byte, 1);
-        clip.reference_file_stream.read(&second_byte, 1);
-        clip.reference_file_stream.close();
+        ifstream reference_file;
+        reference_file.open(clip.reference_file_path, ios::binary);
+        reference_file.seekg(sample_pos, ios::beg);
+        reference_file.read(&first_byte, 1);
+        reference_file.read(&second_byte, 1);
+        reference_file.close();
         //sample data is then converted to its original double between 1.0 and -1.0
-        clip.audio_stream.push_back(bytesToDouble(first_byte, second_byte, wav_gen.getMaxAmplitude()));
+        clip.audio_data.push_back(bytesToDouble(first_byte, second_byte, wav_gen.getMaxAmplitude()));
     }
 }
 
@@ -85,10 +86,9 @@ void Session::loadTracks(int number_of_tracks) {
 void Session::loadClips(int number_of_clips) {
     session_xml->clip_element = session_xml->track_element->FirstChildElement();
 
-    for (int j = 0; j < number_of_clips; j++) {
+    for (int i = 0; i < number_of_clips; i++) {
         tracks.back().createClip(session_xml->clip_element->FindAttribute("start_time_in_session")->IntValue());
-        tracks.back().clips[j].length = session_xml->clip_element->FindAttribute("length_in_samples")->IntValue();
-        tracks.back().clips[j].reference_file_path = session_xml->clip_element->FindAttribute("reference_file_path")->Value();
+        tracks.back().clips[i].reference_file_path = session_xml->clip_element->FindAttribute("reference_file_path")->Value();
         session_xml->clip_element = session_xml->clip_element->NextSiblingElement();
     }
 }
@@ -96,13 +96,14 @@ void Session::loadClips(int number_of_clips) {
 void Session::clearAllAudioClips() {
     for (auto &track : tracks) {
         for (auto &clip : track.clips) {
-            clip.audio_stream.clear();
+            clip.audio_data.clear();
         }
     }
 }
 
 void Session::createTrack() {
-    tracks.push_back(Track(session_name, "track" + std::to_string(tracks.size() + 1)));
+    tracks.push_back(Track());
+    tracks.back().name = ("Track" + std::to_string(tracks.size()));
 }
 
 void Session::deleteTrack(int index) {
@@ -120,7 +121,7 @@ void Session::deleteTrack(int index) {
 void Session::prepareAudio() {
     record_armed_tracks.clear();
     for (auto &track : tracks) {
-        if (track.is_record_enabled) {
+        if (track.record_armed) {
             track.createClip(playhead.current_time_in_samples);
             record_armed_tracks.push_back(&track);
         }
@@ -131,16 +132,17 @@ void Session::processAudioBlock(double *input_buffer, double *output_buffer) {
         for (int channel = 0; channel < 2; channel++, *output_buffer++) {
             double output_sample = 0;
             //when solo enabled is true all non-solo'd tracks are ignored
+            is_solo_enabled_tracks = false;
             checkForSoloTracks();
             for (auto &track : tracks) {
                 //input
-                if (play_state == Play_State::Recording && track.is_record_enabled && channel == 0) {
-                    track.clips.back().addSample(*input_buffer);
+                if (play_state == Play_State::Recording && track.record_armed && channel == 0) {
+                    track.clips.back().appendSample(*input_buffer);
                 }
                 //output
                 else {
-                    if (track.is_solo || (is_solo_enabled_tracks == false && track.is_mute == false)) {
-                        output_sample += track.getSample(getCurrentTimeInSamples(), wav_gen.getMaxAmplitude());
+                    if (track.solo || (is_solo_enabled_tracks == false && track.mute == false)) {
+                        output_sample += track.getSample(getCurrentTimeInSamples()).value;
                     }
                     limitOutputSample(output_sample);
                 }
@@ -151,7 +153,7 @@ void Session::processAudioBlock(double *input_buffer, double *output_buffer) {
 }
 void Session::checkForSoloTracks() {
     for (auto &track : tracks) {
-        if (track.is_solo) {
+        if (track.solo) {
             is_solo_enabled_tracks = true;
         }
     }
@@ -168,11 +170,11 @@ void Session::createFilesFromRecordedClips() {
     assert(play_state == Play_State::Stopping);
     for (auto track : record_armed_tracks) {
         for (auto &clip : track->clips) {
-            if (clip.length > 0) {
+            if (clip.size() > 0) {
                 wav_file_streamer.open(clip.reference_file_path, ios::binary);
                 wav_gen.openWaveFile(wav_file_streamer);
-                for (int i = 0; i < clip.length; i++) {
-                    wav_gen.writeInputToFile(wav_file_streamer, clip.audio_stream[i]);
+                for (int i = 0; i < clip.size(); i++) {
+                    wav_gen.writeInputToFile(wav_file_streamer, clip.get_sample(i).value);
                 }
                 wav_gen.closeWaveFile(wav_file_streamer);
                 wav_file_streamer.close();

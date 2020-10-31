@@ -1,4 +1,4 @@
-#include "endian.h"
+#include "endian.hpp"
 #include <fstream>
 #include <math.h>
 

@@ -1,11 +1,12 @@
 #ifndef _SESSION_H_
 #define _SESSION_H_
 
-#include "Playhead.h"
-#include "SeismicParams.h"
-#include "Track.h"
-#include "XmlWrapper.h"
-#include "wave_file_generator/WaveFileGenerator.h"
+#include "Playhead.hpp"
+#include "SeismicParams.hpp"
+#include "Track.hpp"
+#include "XmlWrapper.hpp"
+#include "wave_file_generator/WaveFileGenerator.hpp"
+#include <assert.h>
 #include <experimental/filesystem>
 using namespace experimental;
 
@@ -31,7 +32,7 @@ public:
     float getCurrentTimeInSeconds();
     u_int getCurrentTimeInSamples();
 
-    void loadAudioClip(Clip &clip);
+    void loadAudioClip(Clip &clip, int start_time_in_reference);
     static double bytesToDouble(unsigned char first_byte, unsigned char second_byte, double max_amplitude);
 
     void loadSessionFromXML(string xml_file_name);

@@ -1,4 +1,4 @@
-#include "tiny_xml_2/tinyxml2.h"
+#include "tiny_xml_2/tinyxml2.hpp"
 #include <experimental/filesystem>
 
 using namespace tinyxml2;
@@ -17,7 +17,7 @@ struct XmlWrapper {
         xml_doc.SaveFile(file_name.c_str());
     }
 
-    void refreshXMLDocument(Playhead &playhead, vector<Track> &tracks) {
+    void refreshXMLDocument(Playhead &playhead, std::vector<Track> &tracks) {
         xml_doc.FirstChild()->DeleteChildren();
         addPlayheadElement(playhead, tracks.size());
         for (auto &track : tracks) {
@@ -28,37 +28,37 @@ struct XmlWrapper {
 
     void addPlayheadElement(Playhead playhead, int number_of_tracks) {
         playhead_element = xml_doc.NewElement("playhead");
-        playhead_element->SetAttribute("tempo", to_string(playhead.tempo).c_str());
-        playhead_element->SetAttribute("time_sig_numerator", to_string(playhead.time_sig_num).c_str());
-        playhead_element->SetAttribute("time_sig_denominator", to_string(playhead.time_sig_denom).c_str());
-        playhead_element->SetAttribute("current_time_samples", to_string(playhead.current_time_in_samples).c_str());
-        playhead_element->SetAttribute("current_time_seconds", to_string(playhead.current_time_in_samples).c_str());
+        playhead_element->SetAttribute("tempo", std::to_string(playhead.tempo).c_str());
+        playhead_element->SetAttribute("time_sig_numerator", std::to_string(playhead.time_sig_num).c_str());
+        playhead_element->SetAttribute("time_sig_denominator", std::to_string(playhead.time_sig_denom).c_str());
+        playhead_element->SetAttribute("current_time_samples", std::to_string(playhead.current_time_in_samples).c_str());
+        playhead_element->SetAttribute("current_time_seconds", std::to_string(playhead.current_time_in_samples).c_str());
         playhead_element->SetAttribute("number_of_tracks", number_of_tracks);
         session_node->InsertEndChild(playhead_element);
     }
     void addTrackDataToXML(Track &track) {
         track_element = xml_doc.NewElement("track");
-        track_element->SetAttribute("name", track.getName().c_str());
-        track_element->SetAttribute("is_record_enabled", to_string(track.is_record_enabled).c_str());
+        track_element->SetAttribute("name", track.name.c_str());
+        track_element->SetAttribute("is_record_enabled", std::to_string(track.record_armed).c_str());
         track_element->SetAttribute("number_of_clips", track.clips.size());
         session_node->InsertEndChild(track_element);
-        for (auto &clip : track.clips) {
-            addClipToTrackElement(clip);
+        for (int i = 0; i < track.clips.size(); i++) {
+            addClipToTrackElement(track.clips[i], track.start_times[i]);
         }
     }
 
-    void addClipToTrackElement(Clip &clip) {
+    void addClipToTrackElement(Clip &clip, int start_time_in_session) {
         clip_element = xml_doc.NewElement("clip");
-        addAttributesToClipElement(clip);
+        addAttributesToClipElement(clip, start_time_in_session);
         track_element->InsertEndChild(clip_element);
     }
 
-    void addAttributesToClipElement(Clip &clip) {
-        clip_element->SetAttribute("name", clip.clip_name.c_str());
+    void addAttributesToClipElement(Clip &clip, int start_time_in_session) {
+        clip_element->SetAttribute("name", clip.name.c_str());
         clip_element->SetAttribute("reference_file_path", clip.reference_file_path.c_str());
-        clip_element->SetAttribute("start_time_in_session", clip.start_time_in_session);
+        clip_element->SetAttribute("start_time_in_session", start_time_in_session);
         clip_element->SetAttribute("start_time_in_reference", clip.start_time_in_reference);
-        clip_element->SetAttribute("length_in_samples", clip.length);
+        clip_element->SetAttribute("length_in_samples", clip.size());
     }
     XMLDocument xml_doc;
     XMLNode *session_node;

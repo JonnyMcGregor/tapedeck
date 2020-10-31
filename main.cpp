@@ -1,5 +1,5 @@
 #include "fracture/Fracture.h"
-#include "seismic/Seismic.h"
+#include "seismic/Seismic.hpp"
 #include <stdio.h>
 #include <unistd.h>
 
@@ -118,14 +118,14 @@ int main() {
             if (selected_track == 0) {
                 main_window.screen.draw(Point(1, 10), "Selected Track: Null");
             } else {
-                main_window.screen.draw(Point(1, 10), "Selected Track: " + session->tracks[selected_track - 1].getName());
-                if (seismic->session->tracks[selected_track - 1].is_record_enabled) {
+                main_window.screen.draw(Point(1, 10), "Selected Track: " + session->tracks[selected_track - 1].name);
+                if (seismic->session->tracks[selected_track - 1].record_armed) {
                     main_window.screen.draw(Point(25, 10), "(R)");
                 }
-                if (seismic->session->tracks[selected_track - 1].is_solo) {
+                if (seismic->session->tracks[selected_track - 1].solo) {
                     main_window.screen.draw(Point(29, 10), "(S)");
                 }
-                if (seismic->session->tracks[selected_track - 1].is_mute) {
+                if (seismic->session->tracks[selected_track - 1].mute) {
                     main_window.screen.draw(Point(33, 10), " (M)");
                 }
             }
@@ -144,13 +144,13 @@ int main() {
                 session->playhead.movePlayhead(0.5 * seismic->params->sample_rate);
             }
             if (key.keycode == KeyCode::K_A) {
-                session->tracks[selected_track - 1].is_record_enabled = !session->tracks[selected_track - 1].is_record_enabled;
+                session->tracks[selected_track - 1].record_armed = !session->tracks[selected_track - 1].record_armed;
             }
             if (key.keycode == KeyCode::K_S) {
-                session->tracks[selected_track - 1].is_solo = !session->tracks[selected_track - 1].is_solo;
+                session->tracks[selected_track - 1].solo = !session->tracks[selected_track - 1].solo;
             }
             if (key.keycode == KeyCode::K_M) {
-                session->tracks[selected_track - 1].is_mute = !session->tracks[selected_track - 1].is_mute;
+                session->tracks[selected_track - 1].mute = !session->tracks[selected_track - 1].mute;
             }
             // Create track
             if (key.keycode == KeyCode::K_T) {

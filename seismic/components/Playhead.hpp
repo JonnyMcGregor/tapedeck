@@ -1,4 +1,3 @@
-
 struct Playhead {
     int current_time_in_samples = 0,
         tempo = 120,
