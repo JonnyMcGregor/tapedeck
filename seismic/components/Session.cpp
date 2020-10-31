@@ -127,10 +127,11 @@ void Session::prepareAudio() {
     }
 }
 void Session::processAudioBlock(double *input_buffer, double *output_buffer) {
-    //Record Input
     for (int sample = 0; sample < buffer_size; sample++, playhead.current_time_in_samples++, *input_buffer++) {
         for (int channel = 0; channel < 2; channel++, *output_buffer++) {
             double output_sample = 0;
+            //when solo enabled is true all non-solo'd tracks are ignored
+            checkForSoloTracks();
             for (auto &track : tracks) {
                 //input
                 if (play_state == Play_State::Recording && track.is_record_enabled && channel == 0) {
@@ -138,7 +139,9 @@ void Session::processAudioBlock(double *input_buffer, double *output_buffer) {
                 }
                 //output
                 else {
-                    output_sample += track.getSample(getCurrentTimeInSamples(), wav_gen.getMaxAmplitude());
+                    if (track.is_solo || (is_solo_enabled_tracks == false && track.is_mute == false)) {
+                        output_sample += track.getSample(getCurrentTimeInSamples(), wav_gen.getMaxAmplitude());
+                    }
                     limitOutputSample(output_sample);
                 }
             }
@@ -146,7 +149,13 @@ void Session::processAudioBlock(double *input_buffer, double *output_buffer) {
         }
     }
 }
-
+void Session::checkForSoloTracks() {
+    for (auto &track : tracks) {
+        if (track.is_solo) {
+            is_solo_enabled_tracks = true;
+        }
+    }
+}
 void Session::limitOutputSample(double &output_sample) {
     output_sample = output_sample * 0.5;
     if (output_sample >= 1) {

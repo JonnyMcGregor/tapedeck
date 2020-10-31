@@ -9,6 +9,12 @@
 using namespace std;
 
 struct Clip {
+
+    vector<double> audio_stream;
+    ifstream reference_file_stream = {};
+    u_int start_time_in_session, start_time_in_reference = 0, length = 0;
+    std::string clip_name, reference_file_path;
+
     Clip(std::string session_name, std::string clip_name, u_int start_time) {
         this->clip_name = clip_name;
         this->start_time_in_session = start_time;
@@ -19,11 +25,6 @@ struct Clip {
         audio_stream.push_back(sample);
         length++;
     }
-
-    vector<double> audio_stream;
-    ifstream reference_file_stream = {};
-    u_int start_time_in_session, start_time_in_reference = 0, length = 0;
-    std::string clip_name, reference_file_path;
 };
 
 #endif

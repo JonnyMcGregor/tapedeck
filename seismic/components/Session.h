@@ -23,6 +23,7 @@ public:
 
     void prepareAudio();
     void processAudioBlock(double *input_buffer, double *output_buffer);
+    void checkForSoloTracks();
     void limitOutputSample(double &output_sample);
 
     void createFilesFromRecordedClips();
@@ -58,5 +59,6 @@ private:
           num_input_channels = 0, num_output_channels = 0, bit_depth = 16;
     ofstream wav_file_streamer;
     std::string session_name;
+    bool is_solo_enabled_tracks = false;
 };
 #endif

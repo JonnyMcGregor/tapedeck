@@ -117,14 +117,21 @@ int main() {
             main_window.screen.draw(Point(1, 8), "Number of channels: " + to_string(seismic->params->num_input_channels));
             if (selected_track == 0) {
                 main_window.screen.draw(Point(1, 10), "Selected Track: Null");
-
-            } else if (seismic->session->tracks[selected_track - 1].is_record_enabled) {
-                main_window.screen.draw(Point(1, 10), "Selected Track: " + session->tracks[selected_track - 1].getName() + " (R)");
             } else {
                 main_window.screen.draw(Point(1, 10), "Selected Track: " + session->tracks[selected_track - 1].getName());
+                if (seismic->session->tracks[selected_track - 1].is_record_enabled) {
+                    main_window.screen.draw(Point(25, 10), "(R)");
+                }
+                if (seismic->session->tracks[selected_track - 1].is_solo) {
+                    main_window.screen.draw(Point(29, 10), "(S)");
+                }
+                if (seismic->session->tracks[selected_track - 1].is_mute) {
+                    main_window.screen.draw(Point(33, 10), " (M)");
+                }
             }
+
             main_window.screen.draw(Point(1, 12), "Current Time (s): " + to_string(session->getCurrentTimeInSeconds()));
-            main_window.screen.draw(Point(1, 14), "Press A to arm/disarm tracks");
+            main_window.screen.draw(Point(1, 14), "Press A to arm/disarm tracks, S to solo, M to Mute");
             main_window.screen.draw(Point(1, 15), "Press K or L to move playhead");
             main_window.screen.draw(Point(1, 16), "Press O or P to change selected track");
 
@@ -138,6 +145,12 @@ int main() {
             }
             if (key.keycode == KeyCode::K_A) {
                 session->tracks[selected_track - 1].is_record_enabled = !session->tracks[selected_track - 1].is_record_enabled;
+            }
+            if (key.keycode == KeyCode::K_S) {
+                session->tracks[selected_track - 1].is_solo = !session->tracks[selected_track - 1].is_solo;
+            }
+            if (key.keycode == KeyCode::K_M) {
+                session->tracks[selected_track - 1].is_mute = !session->tracks[selected_track - 1].is_mute;
             }
             // Create track
             if (key.keycode == KeyCode::K_T) {

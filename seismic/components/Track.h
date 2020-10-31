@@ -37,7 +37,7 @@ public:
     }
 
     std::vector<Clip> clips = {};
-    bool is_record_enabled = false;
+    bool is_record_enabled = false, is_solo = false, is_mute = false;
 
 private:
     std::string track_name, session_name;
