@@ -11,9 +11,11 @@ class Clip {
 public:
     std::vector<Sample> audio_data;
     std::string name, reference_file_path;
-    int start_time_in_reference;
+    int start_time_in_reference = 0;
 
-    Clip() {
+    Clip(std::string name, std::string reference_file_path) {
+        this->name = name;
+        this->reference_file_path = reference_file_path;
     }
 
     void appendSample(Sample sample) {

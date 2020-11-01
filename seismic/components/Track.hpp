@@ -14,8 +14,10 @@ public:
     Track() {
     }
 
-    void createClip(u_int start_time) {
-        this->clips.push_back(Clip());
+    void createClip(u_int start_time, std::string reference_file_path) {
+        std::string clip_name = name + "Clip" + std::to_string(clips.size() + 1);
+        reference_file_path = reference_file_path + clip_name + ".wav";
+        this->clips.push_back(Clip(name, reference_file_path));
         this->start_times.push_back(start_time);
     }
 

@@ -85,9 +85,9 @@ void Session::loadTracks(int number_of_tracks) {
 }
 void Session::loadClips(int number_of_clips) {
     session_xml->clip_element = session_xml->track_element->FirstChildElement();
-
     for (int i = 0; i < number_of_clips; i++) {
-        tracks.back().createClip(session_xml->clip_element->FindAttribute("start_time_in_session")->IntValue());
+        tracks.back().createClip(session_xml->clip_element->FindAttribute("start_time_in_session")->IntValue(), (session_name + "/recorded_audio/"));
+        tracks.back().clips[i].start_time_in_reference = session_xml->clip_element->FindAttribute("start_time_in_reference")->IntValue();
         tracks.back().clips[i].reference_file_path = session_xml->clip_element->FindAttribute("reference_file_path")->Value();
         session_xml->clip_element = session_xml->clip_element->NextSiblingElement();
     }
@@ -122,7 +122,7 @@ void Session::prepareAudio() {
     record_armed_tracks.clear();
     for (auto &track : tracks) {
         if (track.record_armed) {
-            track.createClip(playhead.current_time_in_samples);
+            track.createClip(playhead.current_time_in_samples, (session_name + "/recorded_audio/"));
             record_armed_tracks.push_back(&track);
         }
     }
