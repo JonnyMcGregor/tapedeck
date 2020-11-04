@@ -7,14 +7,12 @@
 #include <string>
 #include <vector>
 
-class Clip {
-public:
+struct Clip {
     std::vector<Sample> audio_data;
-    std::string name, reference_file_path;
+    std::string reference_file_path;
     int start_time_in_reference = 0;
 
-    Clip(std::string name, std::string reference_file_path) {
-        this->name = name;
+    Clip(std::string reference_file_path) {
         this->reference_file_path = reference_file_path;
     }
 

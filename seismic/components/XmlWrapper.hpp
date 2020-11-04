@@ -54,7 +54,6 @@ struct XmlWrapper {
     }
 
     void addAttributesToClipElement(Clip &clip, int start_time_in_session) {
-        clip_element->SetAttribute("name", clip.name.c_str());
         clip_element->SetAttribute("reference_file_path", (clip.reference_file_path).c_str());
         clip_element->SetAttribute("start_time_in_session", start_time_in_session);
         clip_element->SetAttribute("start_time_in_reference", clip.start_time_in_reference);

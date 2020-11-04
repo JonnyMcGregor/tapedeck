@@ -51,7 +51,6 @@ int main() {
     // Main program loop
     string state = "start";
     bool error_state = false;
-    bool export_menu = false;
     string project_name = "";
 
     while (true) {
@@ -77,7 +76,6 @@ int main() {
                 seismic = make_unique<Seismic>(true, "", xml_to_load);
                 session = seismic->session;
                 session->loadSessionFromXML(xml_to_load);
-                session->loadAllAudioClips();
                 state = "main";
             } else {
                 state = "start";
@@ -110,9 +108,7 @@ int main() {
             if (seismic->session->tracks.size() > 0) {
                 main_window.screen.draw(Point(1, 5), "Press R to start recording audio");
             }
-            if (export_menu) {
-                main_window.screen.draw(Point(1, 6), "Press E to export recordings to WAV files");
-            }
+
             main_window.screen.draw(Point(1, 7), "Number of tracks: " + to_string(session->tracks.size()));
             main_window.screen.draw(Point(1, 8), "Number of channels: " + to_string(seismic->params->num_input_channels));
             if (selected_track == 0) {
@@ -174,17 +170,9 @@ int main() {
                 }
                 state = "recording";
             }
-            // Export audio
-            if (key.keycode == KeyCode::K_E) {
-                seismic->exportAllTracks();
-                main_window.screen.draw(Point(1, 14), "WAV files exported successfully");
-                error_state = true;
-                export_menu = false;
-            }
         } else if (state == "recording") {
-            int num_armed_tracks = session->record_armed_tracks.size();
-            string record_message = "Recording to " + to_string(num_armed_tracks) + " armed track";
-            if (num_armed_tracks != 1) record_message += "s";
+            string record_message = "Recording to " + to_string(session->numRecordArmedTracks()) + " armed track";
+            if (session->numRecordArmedTracks() != 1) record_message += "s";
             main_window.screen.draw(Point(1, 5), record_message);
             main_window.screen.draw(Point(1, 3), "Press R to stop recording audio");
             main_window.screen.draw(Point(1, 7), "Current Time (s): " + to_string(session->getCurrentTimeInSeconds()));
@@ -197,7 +185,6 @@ int main() {
                     error_state = true;
                 }
                 state = "main";
-                export_menu = true;
             }
         }
 

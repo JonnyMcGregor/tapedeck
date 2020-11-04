@@ -2,7 +2,7 @@
 
 #include <rtaudio/RtAudio.h>
 
-//Seismic is the back-end interface which manages the DSP and project structure of the asciidaw
+//Seismic is the back-end interface which manages the DSP and session structure of TapeDeck
 class Seismic {
 public:
     Seismic(bool is_loading_from_xml, std::string project_name = "", filesystem::path xml_path = "") {
@@ -80,7 +80,7 @@ public:
             std::cout << "Stream underflow detected!" << std::endl;
         //Temporary for testing purposes...
         //If tracks are armed, record audio
-        if (session->record_armed_tracks.size() > 0)
+        if (session->numRecordArmedTracks() > 0)
             session->play_state = Session::Play_State::Recording;
         //Else playback audio
         else
@@ -88,20 +88,6 @@ public:
 
         session->processAudioBlock(in_buffer, out_buffer);
         return 0;
-    }
-
-    void exportAllTracks() {
-        for (int i = 0; i < session->record_armed_tracks.size(); i++) {
-            assert(filesystem::exists(project_name + "/exported_audio"));
-            for (auto &clip : session->record_armed_tracks[i]->clips) {
-                std::ofstream audio_clip(project_name + "/exported_audio/" + clip.name + ".wav", std::ios::binary);
-                session->wav_gen.openWaveFile(audio_clip);
-                for (int sample = 0; sample < clip.size(); sample++) {
-                    session->wav_gen.writeInputToFile(audio_clip, clip.audio_data[sample].value);
-                }
-                session->wav_gen.closeWaveFile(audio_clip);
-            }
-        }
     }
 
     std::shared_ptr<Session> session;
@@ -115,3 +101,17 @@ private:
     RtAudio::DeviceInfo output_info, input_info;
     unsigned int sample_rate = 44100, buffer_size = 256;
 };
+
+// void exportAllTracks() {
+//     for (int i = 0; i < session->record_armed_tracks.size(); i++) {
+//         assert(filesystem::exists(project_name + "/exported_audio"));
+//         for (auto &clip : session->record_armed_tracks[i]->clips) {
+//             std::ofstream audio_clip(project_name + "/exported_audio/" + clip.name + ".wav", std::ios::binary);
+//             session->wav_gen.openWaveFile(audio_clip);
+//             for (int sample = 0; sample < clip.size(); sample++) {
+//                 session->wav_gen.writeInputToFile(audio_clip, clip.audio_data[sample].value);
+//             }
+//             session->wav_gen.closeWaveFile(audio_clip);
+//         }
+//     }
+// }

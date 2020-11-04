@@ -4,8 +4,7 @@
 
 #include "Clip.hpp"
 
-class Track {
-public:
+struct Track {
     std::vector<Clip> clips;
     std::vector<u_int> start_times;
     std::string name; // a user-provided name for display purposes
@@ -17,14 +16,18 @@ public:
     void createClip(u_int start_time, std::string reference_file_path) {
         std::string clip_name = name + "Clip" + std::to_string(clips.size() + 1);
         reference_file_path = reference_file_path + clip_name + ".wav";
-        this->clips.push_back(Clip(name, reference_file_path));
+        this->clips.push_back(Clip(reference_file_path));
         this->start_times.push_back(start_time);
     }
 
-    void eraseClip(int clip_index) {
+    void delete_clip(int clip_index) {
         std::vector<Clip>::iterator it = clips.begin();
         advance(it, clip_index);
         clips.erase(it);
+    }
+
+    void move_clip(u_int index, u_int new_start_time) {
+        this->start_times.at(index) = new_start_time;
     }
 
     Sample getSample(int sample_index) {

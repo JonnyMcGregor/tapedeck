@@ -24,19 +24,47 @@ Session::~Session() {
     //Clears the Audio clips from temp memory
     clearAllAudioClips();
 }
-void Session::loadAllAudioClips() {
-    for (auto &track : tracks) {
-        for (int i = 0; i < track.clips.size(); i++) {
-            loadAudioClip(track.clips[i], track.start_times[i]);
-        }
+
+//Do I put the load functions in the XMLWrapper?
+
+void Session::loadSessionFromXML(string xml_file_name) {
+    session_xml->xml_doc.LoadFile(session_xml->file_name.c_str());
+    session_xml->session_node = session_xml->xml_doc.RootElement();
+    session_xml->playhead_element = session_xml->session_node->FirstChildElement();
+    loadPlayhead();
+    loadTracks(session_xml->playhead_element->FindAttribute("number_of_tracks")->IntValue());
+    session_xml->xml_doc.SaveFile(session_xml->file_name.c_str());
+}
+void Session::loadPlayhead() {
+    playhead.movePlayhead(session_xml->playhead_element->FindAttribute("current_time_samples")->IntValue());
+    playhead.tempo = session_xml->playhead_element->FindAttribute("tempo")->IntValue();
+    playhead.time_sig_num = session_xml->playhead_element->FindAttribute("time_sig_numerator")->IntValue();
+    playhead.time_sig_denom = session_xml->playhead_element->FindAttribute("time_sig_denominator")->IntValue();
+}
+void Session::loadTracks(int number_of_tracks) {
+    session_xml->track_element = session_xml->playhead_element->NextSiblingElement();
+    for (int i = 0; i < number_of_tracks; i++) {
+        createTrack();
+        loadClips(session_xml->track_element->FindAttribute("number_of_clips")->IntValue());
+        session_xml->track_element = session_xml->track_element->NextSiblingElement();
+    }
+}
+void Session::loadClips(int number_of_clips) {
+    session_xml->clip_element = session_xml->track_element->FirstChildElement();
+    for (int i = 0; i < number_of_clips; i++) {
+        tracks.back().createClip(session_xml->clip_element->FindAttribute("start_time_in_session")->IntValue(), (session_name + "/recorded_audio/"));
+        tracks.back().clips[i].start_time_in_reference = session_xml->clip_element->FindAttribute("start_time_in_reference")->IntValue();
+        tracks.back().clips[i].reference_file_path = session_xml->clip_element->FindAttribute("reference_file_path")->Value();
+        loadAudioClip(tracks.back().clips[i], tracks.back().clips[i].start_time_in_reference, session_xml->clip_element->FindAttribute("length_in_samples")->IntValue());
+        session_xml->clip_element = session_xml->clip_element->NextSiblingElement();
     }
 }
 
-void Session::loadAudioClip(Clip &clip, int start_time_in_reference) {
+void Session::loadAudioClip(Clip &clip, int start_time_in_reference, int clip_length) {
     if (!clip.audio_data.empty()) {
         clip.clear();
     }
-    for (int i = 0; i < clip.size(); i++) {
+    for (int i = 0; i < clip_length; i++) {
         int first_sample_index = 44;
         //each audio sample is 2 bytes therefore index is multiplied by 2 to get byte index of sample
         int sample_pos = first_sample_index + start_time_in_reference + (i * 2);
@@ -60,39 +88,6 @@ double Session::bytesToDouble(unsigned char first_byte, unsigned char second_byt
     return output / max_amplitude;
 }
 
-void Session::loadSessionFromXML(string xml_file_name) {
-    session_xml->xml_doc.LoadFile(session_xml->file_name.c_str());
-    session_xml->session_node = session_xml->xml_doc.RootElement();
-    session_xml->playhead_element = session_xml->session_node->FirstChildElement();
-    loadPlayhead();
-    loadTracks(session_xml->playhead_element->FindAttribute("number_of_tracks")->IntValue());
-    session_xml->xml_doc.SaveFile(session_xml->file_name.c_str());
-}
-
-void Session::loadPlayhead() {
-    playhead.movePlayhead(session_xml->playhead_element->FindAttribute("current_time_samples")->IntValue());
-    playhead.tempo = session_xml->playhead_element->FindAttribute("tempo")->IntValue();
-    playhead.time_sig_num = session_xml->playhead_element->FindAttribute("time_sig_numerator")->IntValue();
-    playhead.time_sig_denom = session_xml->playhead_element->FindAttribute("time_sig_denominator")->IntValue();
-}
-void Session::loadTracks(int number_of_tracks) {
-    session_xml->track_element = session_xml->playhead_element->NextSiblingElement();
-    for (int i = 0; i < number_of_tracks; i++) {
-        createTrack();
-        loadClips(session_xml->track_element->FindAttribute("number_of_clips")->IntValue());
-        session_xml->track_element = session_xml->track_element->NextSiblingElement();
-    }
-}
-void Session::loadClips(int number_of_clips) {
-    session_xml->clip_element = session_xml->track_element->FirstChildElement();
-    for (int i = 0; i < number_of_clips; i++) {
-        tracks.back().createClip(session_xml->clip_element->FindAttribute("start_time_in_session")->IntValue(), (session_name + "/recorded_audio/"));
-        tracks.back().clips[i].start_time_in_reference = session_xml->clip_element->FindAttribute("start_time_in_reference")->IntValue();
-        tracks.back().clips[i].reference_file_path = session_xml->clip_element->FindAttribute("reference_file_path")->Value();
-        session_xml->clip_element = session_xml->clip_element->NextSiblingElement();
-    }
-}
-
 void Session::clearAllAudioClips() {
     for (auto &track : tracks) {
         for (auto &clip : track.clips) {
@@ -107,82 +102,76 @@ void Session::createTrack() {
 }
 
 void Session::deleteTrack(int index) {
-    std::vector<Track *>::iterator track_ptr_iterator = record_armed_tracks.begin();
-    for (int i = 0; i < record_armed_tracks.size(); i++, track_ptr_iterator++) {
-        if (&tracks[index] == record_armed_tracks[i]) {
-            record_armed_tracks.erase(track_ptr_iterator);
-        }
-    }
     std::vector<Track>::iterator track_iterator = tracks.begin();
     advance(track_iterator, index);
     tracks.erase(track_iterator);
 }
 
 void Session::prepareAudio() {
-    record_armed_tracks.clear();
     for (auto &track : tracks) {
         if (track.record_armed) {
             track.createClip(playhead.current_time_in_samples, (session_name + "/recorded_audio/"));
-            record_armed_tracks.push_back(&track);
         }
     }
 }
 void Session::processAudioBlock(double *input_buffer, double *output_buffer) {
-    for (int sample = 0; sample < buffer_size; sample++, playhead.current_time_in_samples++, *input_buffer++) {
-        for (int channel = 0; channel < 2; channel++, *output_buffer++) {
-            double output_sample = 0;
+    for (int sample = 0; sample < buffer_size; sample++, playhead.current_time_in_samples++, input_buffer++) {
+        for (int channel = 0; channel < 2; channel++, output_buffer++) {
+            Sample output_sample;
             //when solo enabled is true all non-solo'd tracks are ignored
-            is_solo_enabled_tracks = false;
-            checkForSoloTracks();
-            for (auto &track : tracks) {
+            for (Track &track : tracks) {
                 //input
                 if (play_state == Play_State::Recording && track.record_armed && channel == 0) {
                     track.clips.back().appendSample(*input_buffer);
                 }
                 //output
                 else {
-                    if (track.solo || (is_solo_enabled_tracks == false && track.mute == false)) {
-                        output_sample += track.getSample(getCurrentTimeInSamples()).value;
+                    if (track.solo || (!is_solo_enabled() && !track.mute)) {
+                        output_sample += track.getSample(getCurrentTimeInSamples());
                     }
-                    limitOutputSample(output_sample);
                 }
             }
-            *output_buffer = output_sample;
+            *output_buffer = output_sample.value * 0.5;
         }
     }
 }
-void Session::checkForSoloTracks() {
+
+bool Session::is_solo_enabled() {
     for (auto &track : tracks) {
         if (track.solo) {
-            is_solo_enabled_tracks = true;
+            return true;
         }
     }
 }
-void Session::limitOutputSample(double &output_sample) {
-    output_sample = output_sample * 0.5;
-    if (output_sample >= 1) {
-        output_sample = 0.999;
-    } else if (output_sample <= -1) {
-        output_sample = -0.999;
-    }
-}
+
 void Session::createFilesFromRecordedClips() {
     assert(play_state == Play_State::Stopping);
-    for (auto track : record_armed_tracks) {
-        for (auto &clip : track->clips) {
-            if (clip.size() > 0) {
-                wav_file_streamer.open(clip.reference_file_path, ios::binary);
-                wav_gen.openWaveFile(wav_file_streamer);
-                for (int i = 0; i < clip.size(); i++) {
-                    wav_gen.writeInputToFile(wav_file_streamer, clip.get_sample(i).value);
+    for (auto &track : tracks) {
+        if (track.record_armed) {
+            for (auto &clip : track.clips) {
+                if (clip.size() > 0) {
+                    wav_file_streamer.open(clip.reference_file_path, ios::binary);
+                    wav_gen.openWaveFile(wav_file_streamer);
+                    for (int i = 0; i < clip.size(); i++) {
+                        wav_gen.writeInputToFile(wav_file_streamer, clip.get_sample(i).value);
+                    }
+                    wav_gen.closeWaveFile(wav_file_streamer);
+                    wav_file_streamer.close();
                 }
-                wav_gen.closeWaveFile(wav_file_streamer);
-                wav_file_streamer.close();
             }
         }
     }
 }
 
+int Session::numRecordArmedTracks() {
+    int num_record_armed_tracks = 0;
+    for (int i = 0; i < tracks.size(); i++) {
+        if (tracks[i].record_armed) {
+            num_record_armed_tracks++;
+        }
+    }
+    return num_record_armed_tracks;
+}
 u_int Session::getCurrentTimeInSamples() {
     return playhead.current_time_in_samples;
 }

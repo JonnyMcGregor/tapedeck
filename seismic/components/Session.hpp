@@ -24,7 +24,7 @@ public:
 
     void prepareAudio();
     void processAudioBlock(double *input_buffer, double *output_buffer);
-    void checkForSoloTracks();
+    bool is_solo_enabled();
     void limitOutputSample(double &output_sample);
 
     void createFilesFromRecordedClips();
@@ -32,13 +32,14 @@ public:
     float getCurrentTimeInSeconds();
     u_int getCurrentTimeInSamples();
 
-    void loadAudioClip(Clip &clip, int start_time_in_reference);
+    void loadAudioClip(Clip &clip, int start_time_in_reference, int clip_length);
     static double bytesToDouble(unsigned char first_byte, unsigned char second_byte, double max_amplitude);
 
     void loadSessionFromXML(string xml_file_name);
     void loadPlayhead();
     void loadTracks(int number_of_tracks);
     void loadClips(int number_of_clips);
+    int numRecordArmedTracks();
 
     enum struct Play_State {
         ToPlay,
@@ -50,7 +51,6 @@ public:
 
     Play_State play_state = Play_State::Stopped;
     std::vector<Track> tracks;
-    std::vector<Track *> record_armed_tracks = {};
     WaveFileGenerator wav_gen;
     std::unique_ptr<XmlWrapper> session_xml;
     Playhead playhead;
