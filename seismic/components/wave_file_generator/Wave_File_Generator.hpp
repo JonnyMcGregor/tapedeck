@@ -5,8 +5,8 @@
 using namespace std;
 using namespace little_endian_io;
 
-struct WaveFileGenerator {
-    WaveFileGenerator() {}
+struct Wave_File_Generator {
+    Wave_File_Generator() {}
 
     void initialise(int sample_rate, int bit_depth, int num_channels) {
         current_sample_rate = sample_rate;

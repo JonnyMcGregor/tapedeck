@@ -13,7 +13,7 @@ struct Track {
     Track() {
     }
 
-    void createClip(u_int start_time, std::string reference_file_path) {
+    void create_clip(u_int start_time, std::string reference_file_path) {
         std::string clip_name = name + "Clip" + std::to_string(clips.size() + 1);
         reference_file_path = reference_file_path + clip_name + ".wav";
         this->clips.push_back(Clip(reference_file_path));
@@ -30,7 +30,7 @@ struct Track {
         this->start_times.at(index) = new_start_time;
     }
 
-    Sample getSample(int sample_index) {
+    Sample get_sample(int sample_index) {
         for (int i = 0; i < this->clips.size(); i++) {
             u_int clip_start_time = this->start_times.at(i);
             u_int clip_end_time = clip_start_time + this->clips.at(i).size();

@@ -1,5 +1,5 @@
-struct SeismicParams {
-    SeismicParams(unsigned int sample_rate, unsigned int buffer_size, unsigned int num_input_channels, unsigned int num_output_channels) {
+struct Audio_Params {
+    Audio_Params(unsigned int sample_rate, unsigned int buffer_size, unsigned int num_input_channels, unsigned int num_output_channels) {
         this->sample_rate = sample_rate;
         this->buffer_size = buffer_size;
         this->num_input_channels = num_input_channels;

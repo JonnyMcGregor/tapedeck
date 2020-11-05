@@ -1,45 +1,44 @@
 #ifndef _SESSION_H_
 #define _SESSION_H_
 
+#include "Audio_Params.hpp"
 #include "Playhead.hpp"
-#include "SeismicParams.hpp"
 #include "Track.hpp"
-#include "XmlWrapper.hpp"
-#include "wave_file_generator/WaveFileGenerator.hpp"
+#include "Xml_Wrapper.hpp"
+#include "wave_file_generator/Wave_File_Generator.hpp"
 #include <assert.h>
 #include <experimental/filesystem>
 using namespace experimental;
 
 class Session {
 public:
-    Session(std::string session_name, SeismicParams params);
+    Session(std::string session_name, Audio_Params params);
     Session(std::string session_name, u_int sample_rate, u_int buffer_size, u_int num_input_channels, u_int num_output_channels);
     ~Session();
 
-    void loadAllAudioClips();
-    void clearAllAudioClips();
+    void load_all_audio_clips();
+    void clear_all_audio_clips();
 
-    void createTrack();
-    void deleteTrack(int index);
+    void create_track();
+    void delete_track(int index);
 
-    void prepareAudio();
-    void processAudioBlock(double *input_buffer, double *output_buffer);
+    void prepare_audio();
+    void process_audio_block(double *input_buffer, double *output_buffer);
     bool is_solo_enabled();
-    void limitOutputSample(double &output_sample);
 
-    void createFilesFromRecordedClips();
+    void create_files_from_recorded_clips();
 
-    float getCurrentTimeInSeconds();
-    u_int getCurrentTimeInSamples();
+    float get_current_time_in_seconds();
+    u_int get_current_time_in_samples();
 
-    void loadAudioClip(Clip &clip, int start_time_in_reference, int clip_length);
-    static double bytesToDouble(unsigned char first_byte, unsigned char second_byte, double max_amplitude);
+    void load_audio_clip(Clip &clip, int start_time_in_reference, int clip_length);
+    static double bytes_to_double(unsigned char first_byte, unsigned char second_byte, double max_amplitude);
 
-    void loadSessionFromXML(string xml_file_name);
-    void loadPlayhead();
-    void loadTracks(int number_of_tracks);
-    void loadClips(int number_of_clips);
-    int numRecordArmedTracks();
+    void load_session_from_xml(string xml_file_name);
+    void load_playhead();
+    void load_tracks(int number_of_tracks);
+    void load_clips(int number_of_clips);
+    int num_record_armed_tracks();
 
     enum struct Play_State {
         ToPlay,
@@ -51,8 +50,8 @@ public:
 
     Play_State play_state = Play_State::Stopped;
     std::vector<Track> tracks;
-    WaveFileGenerator wav_gen;
-    std::unique_ptr<XmlWrapper> session_xml;
+    Wave_File_Generator wav_gen;
+    std::unique_ptr<Xml_Wrapper> session_xml;
     Playhead playhead;
 
 private:

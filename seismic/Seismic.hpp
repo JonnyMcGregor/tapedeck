@@ -7,34 +7,29 @@ class Seismic {
 public:
     Seismic(bool is_loading_from_xml, std::string project_name = "", filesystem::path xml_path = "") {
         //Setup Audio Devices and Parameters
-        if (dac.getDeviceCount() < 1) {
-            std::cout << "No audio devices found, exiting ...\n";
-            exit(0);
-        }
-        initialiseAudioIO();
-        params = std::make_unique<SeismicParams>(sample_rate, buffer_size, input_params.nChannels, output_params.nChannels);
+        check_for_available_devices();
+        initialise_audio_io();
+        params = std::make_unique<Audio_Params>(sample_rate, buffer_size, input_params.nChannels, output_params.nChannels);
         if (is_loading_from_xml) {
             this->project_name = xml_path.stem();
         } else {
             this->project_name = project_name;
         }
-        createProjectFileStructure();
+        create_project_file_structure();
         session = std::make_shared<Session>(this->project_name, *params.get());
     }
 
     ~Seismic() {
     }
 
-    void createProjectFileStructure() {
-        if (!filesystem::exists(project_name))
-            filesystem::create_directory(project_name);
-        if (!filesystem::exists(project_name + "/recorded_audio"))
-            filesystem::create_directory(project_name + "/recorded_audio");
-        if (!filesystem::exists(project_name + "/exported_audio"))
-            filesystem::create_directory(project_name + "/exported_audio");
+    void check_for_available_devices() {
+        if (dac.getDeviceCount() < 1) {
+            std::cout << "No audio devices found, exiting ...\n";
+            exit(0);
+        }
     }
 
-    void initialiseAudioIO() {
+    void initialise_audio_io() {
         output_params.deviceId = dac.getDefaultOutputDevice();
         input_params.deviceId = dac.getDefaultInputDevice();
 
@@ -49,28 +44,37 @@ public:
         sample_rate = input_info.preferredSampleRate;
     }
 
-    void startAudioStream() {
+    void create_project_file_structure() {
+        if (!filesystem::exists(project_name))
+            filesystem::create_directory(project_name);
+        if (!filesystem::exists(project_name + "/recorded_audio"))
+            filesystem::create_directory(project_name + "/recorded_audio");
+        if (!filesystem::exists(project_name + "/exported_audio"))
+            filesystem::create_directory(project_name + "/exported_audio");
+    }
+
+    void start_audio_stream() {
         if (session->tracks.size() == 0)
             return;
         session->play_state = Session::Play_State::ToPlay;
-        session->prepareAudio();
+        session->prepare_audio();
         dac.openStream(&output_params, &input_params, RTAUDIO_FLOAT64,
-                       sample_rate, &buffer_size, &processAudioBlock, session.get());
+                       sample_rate, &buffer_size, &process_audio_block, session.get());
         dac.startStream();
     }
 
-    void stopAudioStream() {
+    void stop_audio_stream() {
         session->play_state = Session::Play_State::Stopping;
         dac.stopStream();
-        session->createFilesFromRecordedClips();
+        session->create_files_from_recorded_clips();
         assert(session->tracks.size() > 0);
-        session->session_xml->refreshXMLDocument(session->playhead, session->tracks);
+        session->session_xml->refresh_xml_document(session->playhead, session->tracks);
         session->play_state = Session::Play_State::Stopped;
         dac.closeStream();
     }
 
-    static int processAudioBlock(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
-                                 double streamTime, RtAudioStreamStatus status, void *userData) {
+    static int process_audio_block(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
+                                   double streamTime, RtAudioStreamStatus status, void *userData) {
         unsigned int sample_index, channel_index;
         double *out_buffer = (double *)outputBuffer;
         double *in_buffer = (double *)inputBuffer;
@@ -80,18 +84,18 @@ public:
             std::cout << "Stream underflow detected!" << std::endl;
         //Temporary for testing purposes...
         //If tracks are armed, record audio
-        if (session->numRecordArmedTracks() > 0)
+        if (session->num_record_armed_tracks() > 0)
             session->play_state = Session::Play_State::Recording;
         //Else playback audio
         else
             session->play_state = Session::Play_State::Playing;
 
-        session->processAudioBlock(in_buffer, out_buffer);
+        session->process_audio_block(in_buffer, out_buffer);
         return 0;
     }
 
     std::shared_ptr<Session> session;
-    std::unique_ptr<SeismicParams> params;
+    std::unique_ptr<Audio_Params> params;
 
 private:
     std::string project_name;

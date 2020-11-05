@@ -5,12 +5,11 @@
 
 struct TapeDeck : Widget {
     DecoratedWindow sub_widget;
-    Session session;
+    Seismic seismic;
 
     TapeDeck() {
         DecoratedWindow dw = DecoratedWindow("TAPEDECK");
         this->sub_widget = dw;
-        this->session = Session();
     }
 
     void process(std::vector<KeyPress> &keyboard_input) {

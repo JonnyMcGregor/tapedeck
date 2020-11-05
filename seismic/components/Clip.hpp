@@ -16,11 +16,11 @@ struct Clip {
         this->reference_file_path = reference_file_path;
     }
 
-    void appendSample(Sample sample) {
+    void append_sample(Sample sample) {
         audio_data.push_back(sample);
     }
 
-    void removeSample() {
+    void remove_sample() {
         audio_data.pop_back();
     }
 
