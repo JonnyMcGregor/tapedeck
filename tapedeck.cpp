@@ -1,33 +1,27 @@
 #include "fracture/components/widget.hpp"
-#include "fracture/widgets/track_widget.hpp"
+#include "fracture/widgets/track_stack.hpp"
 #include "fracture/fracture.hpp"
-#include "fracture/widgets/vbox_layout.hpp"
 #include "seismic/AudioManager.hpp"
 #include <rtaudio/RtAudio.h>
 
 struct TapeDeck : Widget {
-    DecoratedWindow sub_widget;
-    VBoxLayout track_stack;
+    DecoratedWindow tapedeck_window;
+    TrackStack track_stack;
     std::string session_name;
     std::unique_ptr<AudioManager> audio_manager;
-    Track track1, track2, track3;
+    std::shared_ptr<Session> session;
     Clip clip1, clip2, clip3;
-    std::unique_ptr<TrackWidget> track_widget_1;
-    std::unique_ptr<TrackWidget> track_widget_2;
-    std::unique_ptr<TrackWidget> track_widget_3;
-
     TapeDeck() {
+        session_name = "Test Session";
+         if (filesystem::exists(session_name)) {
+             filesystem::remove_all(session_name);
+        }
         DecoratedWindow dw = DecoratedWindow("TAPEDECK");
-        
-        this->sub_widget = dw;
+        this->tapedeck_window = dw;
         initialiseClip();
-        track1.name = "Track01";
-        track2.name = "Track02";
-        track3.name = "Track03";
-
-        track1.clips.push_back(clip1);
-        track2.clips.push_back(clip2);
-        track3.clips.push_back(clip3);
+        audio_manager = make_unique<AudioManager>(false, session_name, "");
+        session = audio_manager->session;
+        session->session_xml->create_xml_document();
     }
     void initialiseClip()
     {
@@ -72,11 +66,28 @@ struct TapeDeck : Widget {
             if (last == KeyPress(Key::K_RightArrow)) {
                 // scrub_forward
             }
-            if (last == KeyPress(Key::K_Equal, ModifierKey::Shift)) {
+            if (last == KeyPress(Key::K_Equal)) {
                 // create_track
+                session->create_track();
+                if(session->tracks.size() % 3 == 0)
+                {
+                    session->tracks.back().create_clip(0, (session_name + "/recorded_audio/"), clip1);
+                }
+                else if(session->tracks.size() % 2 == 0)
+                {
+                    session->tracks.back().create_clip(0, (session_name + "/recorded_audio/"), clip2);
+                }
+                else{
+                    session->tracks.back().create_clip(0, (session_name + "/recorded_audio/"), clip3);
+                }
+                track_stack.create_track_sub_widget(session->tracks.back());
+                keyboard_input.pop_back();
             }
             if (last == KeyPress(Key::K_Minus)) {
                 // remove_track
+                track_stack.sub_widgets.pop_back();
+                session->delete_track(session->tracks.size() - 1);
+                keyboard_input.pop_back();
             }
             if (last == KeyPress(Key::K_S)) {
                 // toggle_track_solo
@@ -94,14 +105,7 @@ struct TapeDeck : Widget {
     }
     void render(Screen &screen) {
         Screen track_screen = {screen.width - 2, screen.height - 2};
-        this->sub_widget.render(screen);
-        track_stack.sub_widgets.clear();
-        track_widget_1 = std::make_unique<TrackWidget>(track1);
-        track_widget_2 = std::make_unique<TrackWidget>(track2);
-        track_widget_3 = std::make_unique<TrackWidget>(track3);
-        track_stack.add_sub_widget(*track_widget_1);
-        track_stack.add_sub_widget(*track_widget_2);
-        track_stack.add_sub_widget(*track_widget_3);
+        this->tapedeck_window.render(screen);
         track_stack.render(track_screen);
         screen.draw(Point(1,1), track_screen);
     }

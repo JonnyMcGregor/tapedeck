@@ -27,6 +27,14 @@ struct Track {
         this->clip_metadata.push_back(ClipMetadata(start_time, reference_file_path));
     }
 
+    void create_clip(u_int start_time, std::string reference_file_path, Clip &clip)
+    {
+        std::string clip_name = name + "Clip" + std::to_string(clips.size() + 1);
+        reference_file_path = reference_file_path + clip_name + ".wav";
+        this->clips.push_back(clip);
+        this->clip_metadata.push_back(ClipMetadata(start_time, reference_file_path));
+    }
+
     void delete_clip(int clip_index) {
         std::vector<Clip>::iterator it = clips.begin();
         advance(it, clip_index);

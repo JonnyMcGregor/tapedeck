@@ -1,15 +1,16 @@
-#include "../components/point.hpp"
-#include "../components/widget.hpp"
-#include <vector>
+#include "track_widget.hpp"
+#include "vbox_layout.hpp"
 #include <memory>
-struct VBoxLayout : Widget {
-    std::vector<Widget*> sub_widgets;
+struct TrackStack : Widget
+{
+    std::vector<std::unique_ptr<TrackWidget>> sub_widgets;
 
-    VBoxLayout() {
+    TrackStack() {
     }
 
-    void add_sub_widget(Widget &sub_widget) {
-        this->sub_widgets.push_back(&sub_widget);
+    void create_track_sub_widget(Track track) {
+        
+        this->sub_widgets.push_back(std::make_unique<TrackWidget>(track));
     }
 
     void process(std::vector<KeyPress> &keyboard_input) {}

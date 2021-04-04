@@ -9,7 +9,7 @@ public:
         //Setup Audio Devices and Parameters
         check_for_available_devices();
         initialise_audio_io();
-        params = std::make_unique<Audio_Params>(params->sample_rate, params->buffer_size, input_params.nChannels, output_params.nChannels);
+        params = std::make_unique<Audio_Params>(input_info.preferredSampleRate, 256, input_params.nChannels, output_params.nChannels);
         if (is_loading_from_xml) {
             this->session_name = xml_path.stem();
         } else {
@@ -39,8 +39,6 @@ public:
         input_info = dac.getDeviceInfo(input_params.deviceId);
         input_params.nChannels = 1;
         input_params.firstChannel = 0;
-
-        params->sample_rate = input_info.preferredSampleRate;
     }
 
     void start_audio_stream() {

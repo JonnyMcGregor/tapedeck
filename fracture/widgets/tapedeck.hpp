@@ -7,11 +7,11 @@
 #include <string>
 
 struct TapeDeck : Widget {
-    DecoratedWindow sub_widget;
+    DecoratedWindow tapedeck_window;
 
     TapeDeck() {
         DecoratedWindow dw = DecoratedWindow("title");
-        this->sub_widget = dw;
+        this->tapedeck_window = dw;
     }
 
     void process(std::vector<KeyPress> &keyboard_input) {
@@ -24,6 +24,6 @@ struct TapeDeck : Widget {
     }
 
     void render(Screen &screen) {
-        this->sub_widget.render(screen);
+        this->tapedeck_window.render(screen);
     };
 };

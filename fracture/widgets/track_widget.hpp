@@ -6,19 +6,19 @@
 struct TrackWidget : Widget
 {
     Track track;
-    std::vector<ClipWidget> clip_widgets;
+    std::vector<std::unique_ptr<ClipWidget>> clip_widgets;
     TrackWidget(Track& track)
     {
         this->track = track;
         for(auto clip : track.clips)
         {
-            clip_widgets.push_back(clip);
+            clip_widgets.push_back(std::make_unique<ClipWidget>(clip));
         }
     }
 
     void process(std::vector<KeyPress> &keyboard_input)
     {
-
+        clip_widgets.push_back(std::make_unique<ClipWidget>(track.clips.back()));
     }
 
     void render(Screen& screen)
@@ -38,7 +38,10 @@ struct TrackWidget : Widget
         DecoratedWindow track_window = {track.name};
         clip_window.render(clip_screen);
         track_window.render(track_bar);
-        clip_widgets[0].render(clip_data_screen);
+        if(clip_widgets.size() > 0)
+        {
+            clip_widgets[0]->render(clip_data_screen);
+        }
 
         clip_screen.draw(Point(1,1), clip_data_screen);
         screen.draw(Point(0, 0), track_bar);
