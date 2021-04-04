@@ -22,6 +22,7 @@ struct StackLayout : Widget {
     void process(std::vector<KeyPress> &keyboard_input) {}
 
     void render(Screen &screen) {
+        //Renders layers on top of each other
         this->sub_widgets.back()->render(screen);
     }
 };

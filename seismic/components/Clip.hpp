@@ -9,11 +9,8 @@
 
 struct Clip {
     std::vector<Sample> audio_data;
-    std::string reference_file_path;
-    int start_time_in_reference = 0;
 
-    Clip(std::string reference_file_path) {
-        this->reference_file_path = reference_file_path;
+    Clip() {
     }
 
     void append_sample(Sample sample) {

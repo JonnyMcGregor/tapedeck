@@ -1,5 +1,5 @@
 #pragma once
-#include "../asciidaw_components/clip.hpp"
+#include "../../seismic/components/Clip.hpp"
 #include "../components/point.hpp"
 #include "../components/screen.hpp"
 #include "../components/widget.hpp"
@@ -27,7 +27,8 @@ struct ClipWidget : Widget {
             int y = screen.height - 1;
             // Number of different height block glyphs
             int number_of_glyphs = 8;
-            int view_units = average * screen.height * number_of_glyphs;
+
+            int view_units = map(average, -1, 1, 0, 1) * screen.height * number_of_glyphs;
             while (view_units > number_of_glyphs) {
                 view_units -= number_of_glyphs;
                 screen.draw(Point(x, y), ScreenCell(int_to_block_glyph(8)));
@@ -55,4 +56,9 @@ private:
         default: throw invalid_argument("Glyph index is invalid");
         }
     }
+    float map(float value, int min, int max, int new_min, int new_max)
+    {
+        return (new_min + ((new_max-new_min)* (value-min))/(max-min));
+    }
 };
+

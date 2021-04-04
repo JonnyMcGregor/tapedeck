@@ -1,58 +1,106 @@
 #include "fracture/components/widget.hpp"
+#include "fracture/widgets/clip_widget.hpp"
 #include "fracture/fracture.hpp"
 #include "fracture/widgets/decorated_window.hpp"
-#include "seismic/Seismic.hpp"
+#include "fracture/widgets/vbox_layout.hpp"
+#include "seismic/AudioManager.hpp"
+#include <rtaudio/RtAudio.h>
 
 struct TapeDeck : Widget {
     DecoratedWindow sub_widget;
-    Seismic seismic;
-
+    VBoxLayout clip_stack;
+    std::string session_name;
+    std::unique_ptr<AudioManager> audio_manager;
+    Clip clip1, clip2, clip3;
+    std::unique_ptr<ClipWidget> clip_widget_1;
+    std::unique_ptr<ClipWidget> clip_widget_2;
+    std::unique_ptr<ClipWidget> clip_widget_3;
     TapeDeck() {
         DecoratedWindow dw = DecoratedWindow("TAPEDECK");
+        
         this->sub_widget = dw;
+        initialiseClip();
+    }
+    void initialiseClip()
+    {
+        float angle = 0;
+        for(int i = 0; i < 48000; i++)
+        {
+            float current_sample = sin(angle);
+            clip1.append_sample(current_sample);
+            angle += (2*M_PI)/(24000);
+        }
+        angle = 0;
+        for(int i = 0; i < 48000; i++)
+        {
+            float current_sample = sin(angle);
+            clip2.append_sample(current_sample);
+            angle += (2*M_PI)/(12000);
+        }
+        angle = 0;
+        for(int i = 0; i < 48000; i++)
+        {
+            float current_sample = sin(angle);
+            clip3.append_sample(current_sample);
+            angle += (2*M_PI)/(6000);
+        }
     }
 
     void process(std::vector<KeyPress> &keyboard_input) {
         if (keyboard_input.size() > 0) {
             KeyPress last = keyboard_input.back();
-            switch (last) {
-            case KeyPress(Key::K_Q, ModifierKey::Control):
+
+            if (last == KeyPress(Key::K_Q, ModifierKey::Control))
                 exit(1);
-                break;
-            case KeyPress(Key::K_UpArrow):
+            if (last == KeyPress(Key::K_UpArrow)) {
                 // previous_track
-            case KeyPress(Key::K_DownArrow):
+            }
+            if (last == KeyPress(Key::K_DownArrow)) {
                 // next_track
-            case KeyPress(Key::K_LeftArrow):
+            }
+            if (last == KeyPress(Key::K_LeftArrow)) {
                 // scrub_backward
-            case KeyPress(Key::K_RightArrow):
+            }
+            if (last == KeyPress(Key::K_RightArrow)) {
                 // scrub_forward
-            case KeyPress(Key::K_Equal, ModifierKey::Shift):
+            }
+            if (last == KeyPress(Key::K_Equal, ModifierKey::Shift)) {
                 // create_track
-            case KeyPress(Key::K_Minus):
+            }
+            if (last == KeyPress(Key::K_Minus)) {
                 // remove_track
-            case KeyPress(Key::K_S):
+            }
+            if (last == KeyPress(Key::K_S)) {
                 // toggle_track_solo
-            case KeyPress(Key::K_M):
+            }
+            if (last == KeyPress(Key::K_M)) {
                 // toggle_track_mute
-            case KeyPress(Key::K_R):
+            }
+            if (last == KeyPress(Key::K_R)) {
                 // toggle_track_armed
-            case KeyPress(Key::K_Space):
+            }
+            if (last == KeyPress(Key::K_Space)) {
                 // play_pause
             }
         }
     }
+    void render(Screen &screen) {
 
-    void
-    render(Screen &screen) {
-        this->sub_widget.render(screen);
-    };
+        //this->sub_widget.render(screen);
+        clip_stack.sub_widgets.clear();
+        clip_widget_1 = std::make_unique<ClipWidget>(clip1);
+        clip_widget_2 = std::make_unique<ClipWidget>(clip2);
+        clip_widget_3 = std::make_unique<ClipWidget>(clip3);
+        clip_stack.add_sub_widget(*clip_widget_1);
+        clip_stack.add_sub_widget(*clip_widget_2);
+        clip_stack.add_sub_widget(*clip_widget_3);
+        clip_stack.render(screen);
+    }
 };
 
-int main() {
+int main() {  
     TapeDeck tapedeck = TapeDeck();
     Fracture frac = Fracture(tapedeck);
-
     while (true) {
         frac.process();
         frac.render_to_viewport();

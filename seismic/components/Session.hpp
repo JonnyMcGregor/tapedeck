@@ -7,15 +7,14 @@
 #include "Xml_Wrapper.hpp"
 #include "wave_file_generator/Wave_File_Generator.hpp"
 #include <assert.h>
-#include <experimental/filesystem>
-using namespace experimental;
+#include <filesystem>
 
 class Session {
 public:
     Session(std::string session_name, Audio_Params params);
-    Session(std::string session_name, u_int sample_rate, u_int buffer_size, u_int num_input_channels, u_int num_output_channels);
     ~Session();
 
+    void create_project_file_structure();
     void load_all_audio_clips();
     void clear_all_audio_clips();
 
@@ -35,7 +34,6 @@ public:
     static double bytes_to_double(unsigned char first_byte, unsigned char second_byte, double max_amplitude);
 
     void load_session_from_xml(string xml_file_name);
-    void load_playhead();
     void load_tracks(int number_of_tracks);
     void load_clips(int number_of_clips);
     int num_record_armed_tracks();

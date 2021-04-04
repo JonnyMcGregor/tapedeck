@@ -2,24 +2,23 @@
 
 #include <rtaudio/RtAudio.h>
 
-//Seismic is the back-end interface which manages the DSP and session structure of TapeDeck
-class Seismic {
+//The back-end interface which manages the DSP and session structure of TapeDeck
+class AudioManager {
 public:
-    Seismic(bool is_loading_from_xml, std::string project_name = "", filesystem::path xml_path = "") {
+    AudioManager(bool is_loading_from_xml, std::string project_name = "", filesystem::path xml_path = "") {
         //Setup Audio Devices and Parameters
         check_for_available_devices();
         initialise_audio_io();
-        params = std::make_unique<Audio_Params>(sample_rate, buffer_size, input_params.nChannels, output_params.nChannels);
+        params = std::make_unique<Audio_Params>(params->sample_rate, params->buffer_size, input_params.nChannels, output_params.nChannels);
         if (is_loading_from_xml) {
-            this->project_name = xml_path.stem();
+            this->session_name = xml_path.stem();
         } else {
-            this->project_name = project_name;
+            this->session_name = project_name;
         }
-        create_project_file_structure();
-        session = std::make_shared<Session>(this->project_name, *params.get());
+        session = std::make_shared<Session>(this->session_name, *params.get());
     }
 
-    ~Seismic() {
+    ~AudioManager() {
     }
 
     void check_for_available_devices() {
@@ -41,16 +40,7 @@ public:
         input_params.nChannels = 1;
         input_params.firstChannel = 0;
 
-        sample_rate = input_info.preferredSampleRate;
-    }
-
-    void create_project_file_structure() {
-        if (!filesystem::exists(project_name))
-            filesystem::create_directory(project_name);
-        if (!filesystem::exists(project_name + "/recorded_audio"))
-            filesystem::create_directory(project_name + "/recorded_audio");
-        if (!filesystem::exists(project_name + "/exported_audio"))
-            filesystem::create_directory(project_name + "/exported_audio");
+        params->sample_rate = input_info.preferredSampleRate;
     }
 
     void start_audio_stream() {
@@ -59,7 +49,7 @@ public:
         session->play_state = Session::Play_State::ToPlay;
         session->prepare_audio();
         dac.openStream(&output_params, &input_params, RTAUDIO_FLOAT64,
-                       sample_rate, &buffer_size, &process_audio_block, session.get());
+                       params->sample_rate, &params->buffer_size, &process_audio_block, session.get());
         dac.startStream();
     }
 
@@ -95,15 +85,13 @@ public:
     }
 
     std::shared_ptr<Session> session;
-    std::unique_ptr<Audio_Params> params;
 
 private:
-    std::string project_name;
-
+    std::string session_name;
+    std::unique_ptr<Audio_Params> params;
     RtAudio dac;
     RtAudio::StreamParameters output_params, input_params;
     RtAudio::DeviceInfo output_info, input_info;
-    unsigned int sample_rate = 44100, buffer_size = 256;
 };
 
 // void exportAllTracks() {
