@@ -1,7 +1,6 @@
 #include "fracture/components/widget.hpp"
-#include "fracture/widgets/clip_widget.hpp"
+#include "fracture/widgets/track_widget.hpp"
 #include "fracture/fracture.hpp"
-#include "fracture/widgets/decorated_window.hpp"
 #include "fracture/widgets/vbox_layout.hpp"
 #include "seismic/AudioManager.hpp"
 #include <rtaudio/RtAudio.h>
@@ -11,15 +10,20 @@ struct TapeDeck : Widget {
     VBoxLayout clip_stack;
     std::string session_name;
     std::unique_ptr<AudioManager> audio_manager;
+    Track track;
     Clip clip1, clip2, clip3;
     std::unique_ptr<ClipWidget> clip_widget_1;
     std::unique_ptr<ClipWidget> clip_widget_2;
     std::unique_ptr<ClipWidget> clip_widget_3;
+
     TapeDeck() {
         DecoratedWindow dw = DecoratedWindow("TAPEDECK");
         
         this->sub_widget = dw;
         initialiseClip();
+        track.clips.push_back(clip1);
+        track.clips.push_back(clip2);
+        track.clips.push_back(clip3);
     }
     void initialiseClip()
     {
@@ -87,14 +91,18 @@ struct TapeDeck : Widget {
     void render(Screen &screen) {
 
         //this->sub_widget.render(screen);
-        clip_stack.sub_widgets.clear();
-        clip_widget_1 = std::make_unique<ClipWidget>(clip1);
-        clip_widget_2 = std::make_unique<ClipWidget>(clip2);
-        clip_widget_3 = std::make_unique<ClipWidget>(clip3);
-        clip_stack.add_sub_widget(*clip_widget_1);
-        clip_stack.add_sub_widget(*clip_widget_2);
-        clip_stack.add_sub_widget(*clip_widget_3);
-        clip_stack.render(screen);
+        // clip_stack.sub_widgets.clear();
+        // clip_widget_1 = std::make_unique<ClipWidget>(clip1);
+        // clip_widget_2 = std::make_unique<ClipWidget>(clip2);
+        // clip_widget_3 = std::make_unique<ClipWidget>(clip3);
+        // clip_stack.add_sub_widget(*clip_widget_1);
+        // clip_stack.add_sub_widget(*clip_widget_2);
+        // clip_stack.add_sub_widget(*clip_widget_3);
+        // clip_stack.render(screen);
+        TrackWidget track_widget = {track};
+        Screen track_screen = {screen.width, screen.height*0.25};
+        track_widget.render(track_screen);
+        screen.draw(Point(0,0), track_screen);
     }
 };
 
