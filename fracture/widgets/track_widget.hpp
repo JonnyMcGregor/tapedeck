@@ -35,7 +35,7 @@ struct TrackWidget : Widget
         track_bar.set_style(track_style);
 
         DecoratedWindow clip_window = {"Clip Window"};
-        DecoratedWindow track_window = {"Track"};
+        DecoratedWindow track_window = {track.name};
         clip_window.render(clip_screen);
         track_window.render(track_bar);
         clip_widgets[0].render(clip_data_screen);

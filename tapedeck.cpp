@@ -7,23 +7,27 @@
 
 struct TapeDeck : Widget {
     DecoratedWindow sub_widget;
-    VBoxLayout clip_stack;
+    VBoxLayout track_stack;
     std::string session_name;
     std::unique_ptr<AudioManager> audio_manager;
-    Track track;
+    Track track1, track2, track3;
     Clip clip1, clip2, clip3;
-    std::unique_ptr<ClipWidget> clip_widget_1;
-    std::unique_ptr<ClipWidget> clip_widget_2;
-    std::unique_ptr<ClipWidget> clip_widget_3;
+    std::unique_ptr<TrackWidget> track_widget_1;
+    std::unique_ptr<TrackWidget> track_widget_2;
+    std::unique_ptr<TrackWidget> track_widget_3;
 
     TapeDeck() {
         DecoratedWindow dw = DecoratedWindow("TAPEDECK");
         
         this->sub_widget = dw;
         initialiseClip();
-        track.clips.push_back(clip1);
-        track.clips.push_back(clip2);
-        track.clips.push_back(clip3);
+        track1.name = "Track01";
+        track2.name = "Track02";
+        track3.name = "Track03";
+
+        track1.clips.push_back(clip1);
+        track2.clips.push_back(clip2);
+        track3.clips.push_back(clip3);
     }
     void initialiseClip()
     {
@@ -89,20 +93,17 @@ struct TapeDeck : Widget {
         }
     }
     void render(Screen &screen) {
-
-        //this->sub_widget.render(screen);
-        // clip_stack.sub_widgets.clear();
-        // clip_widget_1 = std::make_unique<ClipWidget>(clip1);
-        // clip_widget_2 = std::make_unique<ClipWidget>(clip2);
-        // clip_widget_3 = std::make_unique<ClipWidget>(clip3);
-        // clip_stack.add_sub_widget(*clip_widget_1);
-        // clip_stack.add_sub_widget(*clip_widget_2);
-        // clip_stack.add_sub_widget(*clip_widget_3);
-        // clip_stack.render(screen);
-        TrackWidget track_widget = {track};
-        Screen track_screen = {screen.width, screen.height*0.25};
-        track_widget.render(track_screen);
-        screen.draw(Point(0,0), track_screen);
+        Screen track_screen = {screen.width - 2, screen.height - 2};
+        this->sub_widget.render(screen);
+        track_stack.sub_widgets.clear();
+        track_widget_1 = std::make_unique<TrackWidget>(track1);
+        track_widget_2 = std::make_unique<TrackWidget>(track2);
+        track_widget_3 = std::make_unique<TrackWidget>(track3);
+        track_stack.add_sub_widget(*track_widget_1);
+        track_stack.add_sub_widget(*track_widget_2);
+        track_stack.add_sub_widget(*track_widget_3);
+        track_stack.render(track_screen);
+        screen.draw(Point(1,1), track_screen);
     }
 };
 
