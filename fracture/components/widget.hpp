@@ -7,6 +7,6 @@ struct Widget {
     // https://stackoverflow.com/questions/274626/what-is-object-slicing
     virtual void render(Screen &screen) = 0;
     virtual void process(std::vector<KeyPress> &keyboard_input) = 0;
-    bool is_focus = false;
+    bool is_selected = false;
     ScreenCellStyle selected_widget_style;
 };

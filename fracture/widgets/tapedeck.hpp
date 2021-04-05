@@ -4,6 +4,7 @@
 #include "../components/widget.hpp"
 #include "track_stack.hpp"
 #include "decorated_window.hpp"
+#include "time_ruler.hpp"
 #include <iostream>
 #include <optional>
 #include <string>
@@ -11,7 +12,8 @@
 struct TapeDeck : Widget {
     DecoratedWindow tapedeck_window;
     TrackStack track_stack;
-    Widget* selected_widget = nullptr;
+    TimeRuler time_ruler;
+    TrackWidget* selected_widget = nullptr;
     std::string session_name;
     std::unique_ptr<AudioManager> audio_manager;
     std::shared_ptr<Session> session;
@@ -64,7 +66,7 @@ struct TapeDeck : Widget {
             KeyPress last = keyboard_input.back();
             if(selected_widget != nullptr)
             {
-                selected_widget->is_focus = false;
+                selected_widget->is_selected = false;
             }
             if (last == KeyPress(Key::K_Q, ModifierKey::Control))
                 exit(1);
@@ -107,9 +109,13 @@ struct TapeDeck : Widget {
             }
             if (last == KeyPress(Key::K_LeftArrow)) {
                 // scrub_backward
+                keyboard_input.pop_back();
+
             }
             if (last == KeyPress(Key::K_RightArrow)) {
                 // scrub_forward
+                keyboard_input.pop_back();
+
             }
             if (last == KeyPress(Key::K_Equal)) 
             {
@@ -127,7 +133,11 @@ struct TapeDeck : Widget {
                     session->tracks.back().create_clip(0, (session_name + "/recorded_audio/"), clip3);
                 }
                 track_stack.create_track_sub_widget(session->tracks.back());
-                selected_widget = track_stack.sub_widgets.back().get();
+
+                if(track_stack.sub_widgets.size() == 1)
+                {
+                    selected_widget = track_stack.sub_widgets.back().get();
+                }
                 keyboard_input.pop_back();
             }
 
@@ -148,28 +158,44 @@ struct TapeDeck : Widget {
             
             if (last == KeyPress(Key::K_S)) {
                 // toggle_track_solo
+                selected_widget->track.solo = !selected_widget->track.solo;
+                keyboard_input.pop_back();
+
             }
             if (last == KeyPress(Key::K_M)) {
                 // toggle_track_mute
+                selected_widget->track.mute = !selected_widget->track.mute;
+                keyboard_input.pop_back();
+
             }
             if (last == KeyPress(Key::K_R)) {
                 // toggle_track_armed
+                selected_widget->track.record_armed = !selected_widget->track.record_armed;
+                keyboard_input.pop_back();
+
             }
             if (last == KeyPress(Key::K_Space)) {
                 // play_pause
+                keyboard_input.pop_back();
+
             }
             
             if(selected_widget != nullptr)
             {
-                selected_widget->is_focus = true;
+                selected_widget->is_selected = true;
             }
         }
         
     }
     void render(Screen &screen) {
-        Screen track_screen = {screen.width - 2, screen.height * 0.8};
+        Screen time_ruler_screen = {screen.width * 0.9 - 2, 3};
+        Screen track_screen = {screen.width - 2, screen.height * 0.8 - 2};
+        
         this->tapedeck_window.render(screen);
+        time_ruler.render(time_ruler_screen);
         track_stack.render(track_screen);
-        screen.draw(Point(1,screen.height * 0.2), track_screen);
+
+        screen.draw(Point(screen.width * 0.1, screen.height*0.2 - 1), time_ruler_screen);
+        screen.draw(Point(1,screen.height * 0.2 + 1), track_screen);
     }
 };
