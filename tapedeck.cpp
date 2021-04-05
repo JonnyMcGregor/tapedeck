@@ -7,10 +7,13 @@
 struct TapeDeck : Widget {
     DecoratedWindow tapedeck_window;
     TrackStack track_stack;
+    
     std::string session_name;
     std::unique_ptr<AudioManager> audio_manager;
     std::shared_ptr<Session> session;
+
     Clip clip1, clip2, clip3;
+
     TapeDeck() {
         session_name = "Test Session";
          if (filesystem::exists(session_name)) {
@@ -69,17 +72,17 @@ struct TapeDeck : Widget {
             if (last == KeyPress(Key::K_Equal)) {
                 // create_track
                 session->create_track();
-                if(session->tracks.size() % 3 == 0)
-                {
-                    session->tracks.back().create_clip(0, (session_name + "/recorded_audio/"), clip1);
-                }
-                else if(session->tracks.size() % 2 == 0)
-                {
-                    session->tracks.back().create_clip(0, (session_name + "/recorded_audio/"), clip2);
-                }
-                else{
-                    session->tracks.back().create_clip(0, (session_name + "/recorded_audio/"), clip3);
-                }
+                // if(session->tracks.size() % 3 == 0)
+                // {
+                //     session->tracks.back().create_clip(0, (session_name + "/recorded_audio/"), clip1);
+                // }
+                // else if(session->tracks.size() % 2 == 0)
+                // {
+                //     session->tracks.back().create_clip(0, (session_name + "/recorded_audio/"), clip2);
+                // }
+                // else{
+                //     session->tracks.back().create_clip(0, (session_name + "/recorded_audio/"), clip3);
+                // }
                 track_stack.create_track_sub_widget(session->tracks.back());
                 keyboard_input.pop_back();
             }
@@ -104,10 +107,10 @@ struct TapeDeck : Widget {
         }
     }
     void render(Screen &screen) {
-        Screen track_screen = {screen.width - 2, screen.height - 2};
+        Screen track_screen = {screen.width - 2, screen.height * 0.8};
         this->tapedeck_window.render(screen);
         track_stack.render(track_screen);
-        screen.draw(Point(1,1), track_screen);
+        screen.draw(Point(1,screen.height * 0.2), track_screen);
     }
 };
 
