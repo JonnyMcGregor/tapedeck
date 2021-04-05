@@ -17,6 +17,7 @@ struct TrackWidget : Widget
         this->track.mute = true;
         this->track.solo = true;
         this->track.record_armed = true;
+        selected_widget_style.foreground_colour = Colour(1,1,1);
     }
 
     void process(std::vector<KeyPress> &keyboard_input)
@@ -37,10 +38,17 @@ struct TrackWidget : Widget
         Screen track_properties_area = {track_bar.width - 2, track_bar.height - 2};
         Screen clip_area = {screen.width * 0.9, screen.height};
         Screen clip_data_area = {clip_area.width - 2, clip_area.height - 2};
+        if(is_focus)
+        {
+            clip_area.set_style(selected_widget_style);
+            track_bar.set_style(selected_widget_style);
+        }
+        else
+        {
+            clip_area.set_style(clip_style);
+            track_bar.set_style(track_style);
+        }
         
-        clip_area.set_style(clip_style);
-        track_bar.set_style(track_style);
-        track_properties_area.set_style(clip_style);
 
         DecoratedWindow clip_window = {"Clip Window"};
         DecoratedWindow track_window = {track.name};
