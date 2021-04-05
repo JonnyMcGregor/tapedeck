@@ -50,7 +50,7 @@ public:
     std::vector<Track> tracks;
     Wave_File_Generator wav_gen;
     std::unique_ptr<Xml_Wrapper> session_xml;
-    Playhead playhead;
+    std::unique_ptr<Playhead> playhead;
 
 private:
     u_int sample_rate = 0, buffer_size = 0,

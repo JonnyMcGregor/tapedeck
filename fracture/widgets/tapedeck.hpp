@@ -5,6 +5,7 @@
 #include "track_stack.hpp"
 #include "decorated_window.hpp"
 #include "time_ruler.hpp"
+#include "playhead_widget.hpp"
 #include <iostream>
 #include <optional>
 #include <string>
@@ -13,6 +14,7 @@ struct TapeDeck : Widget {
     DecoratedWindow tapedeck_window;
     TrackStack track_stack;
     TimeRuler time_ruler;
+    PlayheadWidget playhead_widget;
     TrackWidget* selected_widget = nullptr;
     std::string session_name;
     std::unique_ptr<AudioManager> audio_manager;
@@ -109,11 +111,13 @@ struct TapeDeck : Widget {
             }
             if (last == KeyPress(Key::K_LeftArrow)) {
                 // scrub_backward
+                session->playhead->movePlayhead(-0.5f);
                 keyboard_input.pop_back();
 
             }
             if (last == KeyPress(Key::K_RightArrow)) {
                 // scrub_forward
+                session->playhead->movePlayhead(0.5f);
                 keyboard_input.pop_back();
 
             }
@@ -190,12 +194,20 @@ struct TapeDeck : Widget {
     void render(Screen &screen) {
         Screen time_ruler_screen = {screen.width * 0.9 - 2, 3};
         Screen track_screen = {screen.width - 2, screen.height * 0.8 - 2};
-        
+        Screen playhead_screen = {1,track_screen.height};
         this->tapedeck_window.render(screen);
         time_ruler.render(time_ruler_screen);
         track_stack.render(track_screen);
-
+        playhead_widget.render(playhead_screen);
+        track_screen.draw(Point(playhead_x_position(track_screen), 0), playhead_screen);
         screen.draw(Point(screen.width * 0.1, screen.height*0.2 - 1), time_ruler_screen);
         screen.draw(Point(1,screen.height * 0.2 + 1), track_screen);
+    }
+
+    int playhead_x_position(Screen track_screen)
+    {
+        int x_pos = 1 + track_screen.width * 0.1;
+        x_pos += session->get_current_time_in_seconds()*time_ruler.cells_between_seconds;
+        return x_pos;
     }
 };

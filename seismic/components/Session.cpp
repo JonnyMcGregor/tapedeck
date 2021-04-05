@@ -7,6 +7,7 @@ Session::Session(std::string session_name, Audio_Params params) {
     this->num_input_channels = params.num_input_channels;
     this->num_output_channels = params.num_output_channels;
     wav_gen.initialise(sample_rate, bit_depth, num_input_channels);
+    playhead = std::make_unique<Playhead>(sample_rate);
     create_project_file_structure();
     std::string xml_file_name = this->session_name + ".xml";
     session_xml = std::make_unique<Xml_Wrapper>(this->session_name, xml_file_name);
@@ -28,7 +29,7 @@ void Session::load_session_from_xml(string xml_file_name) {
     session_xml = make_unique<Xml_Wrapper>(this->session_name, xml_file_name);
     session_xml->xml_doc.LoadFile(session_xml->file_name.c_str());
     session_xml->set_elements();
-    session_xml->load_playhead_data(playhead);
+    session_xml->load_playhead_data(*playhead);
     tracks = session_xml->load_tracks();
     session_xml->xml_doc.SaveFile(session_xml->file_name.c_str());
 }
@@ -55,12 +56,12 @@ void Session::delete_track(int index) {
 void Session::prepare_audio() {
     for (auto &track : tracks) {
         if (track.record_armed) {
-            track.create_clip(playhead.current_time_in_samples, (session_name + "/recorded_audio/"));
+            track.create_clip(playhead->current_time_in_samples, (session_name + "/recorded_audio/"));
         }
     }
 }
 void Session::process_audio_block(double *input_buffer, double *output_buffer) {
-    for (int sample = 0; sample < buffer_size; sample++, playhead.current_time_in_samples++, input_buffer++) {
+    for (int sample = 0; sample < buffer_size; sample++, playhead->current_time_in_samples++, input_buffer++) {
         for (int channel = 0; channel < 2; channel++, output_buffer++) {
             Sample output_sample;
             //when solo enabled is true all non-solo'd tracks are ignored
@@ -119,9 +120,9 @@ int Session::num_record_armed_tracks() {
     return num_record_armed_tracks;
 }
 u_int Session::get_current_time_in_samples() {
-    return playhead.current_time_in_samples;
+    return playhead->current_time_in_samples;
 }
 
 float Session::get_current_time_in_seconds() {
-    return 1.0f * playhead.current_time_in_samples / sample_rate;
+    return 1.0f * playhead->current_time_in_samples / sample_rate;
 }

@@ -56,7 +56,7 @@ public:
         dac.stopStream();
         session->create_files_from_recorded_clips();
         assert(session->tracks.size() > 0);
-        session->session_xml->refresh_xml_document(session->playhead, session->tracks);
+        session->session_xml->refresh_xml_document(*session->playhead, session->tracks);
         session->play_state = Session::Play_State::Stopped;
         dac.closeStream();
     }
