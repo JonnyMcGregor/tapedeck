@@ -6,21 +6,21 @@
 #include <stdexcept>
 
 struct ClipWidget : Widget {
-    Clip clip;
+    std::shared_ptr<Clip> clip;
 
-    ClipWidget(Clip &clip) {
+    ClipWidget(std::shared_ptr<Clip> clip) {
         this->clip = clip;
     }
 
     void process(std::vector<KeyPress> &keyboard_input) {}
 
     void render(Screen &screen) {
-        u_int bucket_size = this->clip.size() / screen.width;
+        u_int bucket_size = this->clip->size() / screen.width;
         for (int x = 0; x < screen.width; x++) {
             // The sum of the values of all samples in the bucket
             double sum = 0;
             for (int i = bucket_size * x; i < bucket_size * (x + 1); i++) {
-                sum += this->clip.get_sample(i).value;
+                sum += this->clip->get_sample(i).value;
             }
             // the average of all samples in the bucket
             double average = sum / bucket_size;
@@ -38,6 +38,8 @@ struct ClipWidget : Widget {
         }
         ScreenCellStyle style = ScreenCellStyle();
         style.foreground_colour = Colour(0.1, 1.0, 1.0);
+        style.background_colour = Colour(0.4, 0.3, 1.0);
+
         screen.set_style(style);
     }
 

@@ -159,7 +159,7 @@ std::map<keycode_vec, KeyPress> keycodes_to_keypress{
     {keycode_vec{27, 91, 50, 49, 126}, KeyPress(Key::K_F10)},
     {keycode_vec{27, 91, 50, 51, 126}, KeyPress(Key::K_F11)},
     {keycode_vec{27, 91, 50, 52, 126}, KeyPress(Key::K_F12)},
-
+    {keycode_vec{32}, KeyPress(Key::K_Space)},
     {keycode_vec{34}, KeyPress(Key::K_Quote, ModifierKey::Shift)},
 
     {keycode_vec{39}, KeyPress(Key::K_Quote)},

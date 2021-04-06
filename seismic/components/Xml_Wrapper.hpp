@@ -18,11 +18,11 @@ struct Xml_Wrapper {
         xml_doc.SaveFile(file_name.c_str());
     }
 
-    void refresh_xml_document(Playhead &playhead, std::vector<Track> &tracks) {
+    void refresh_xml_document(Playhead &playhead, std::vector<std::shared_ptr<Track>> tracks) {
         xml_doc.FirstChild()->DeleteChildren();
         add_playhead_element(playhead, tracks.size());
         for (auto &track : tracks) {
-            add_track_data_to_xml(track);
+            add_track_data_to_xml(*track);
         }
         xml_doc.SaveFile(file_name.c_str());
     }
@@ -51,7 +51,7 @@ struct Xml_Wrapper {
         track_element->SetAttribute("number_of_clips", track.clips.size());
         session_node->InsertEndChild(track_element);
         for (int i = 0; i < track.clips.size(); i++) {
-            add_clip_to_track_element(track.clips[i], track.clip_metadata[i]);
+            add_clip_to_track_element(*track.clips[i], track.clip_metadata[i]);
         }
     }
 
@@ -71,12 +71,13 @@ struct Xml_Wrapper {
         playhead.time_sig_denom = playhead_element->FindAttribute("time_sig_denominator")->IntValue();
     }
 
-    std::vector<Track> load_tracks() {
-        std::vector<Track> tracks;
+    std::vector<std::shared_ptr<Track>> load_tracks() {
+        std::vector<std::shared_ptr<Track>> tracks;
         for (int i = 0; i < get_num_tracks(); i++) {
-            tracks.push_back(Track());
-            tracks.back().name = ("Track" + std::to_string(tracks.size()));
-            load_track_data(tracks.back());
+            tracks.push_back(std::shared_ptr<Track>());
+            tracks.back() = std::make_shared<Track>();
+            tracks.back()->name = ("Track" + std::to_string(tracks.size()));
+            load_track_data(*tracks.back());
         }
         return tracks;
     }
@@ -89,10 +90,10 @@ struct Xml_Wrapper {
         track_element = track_element->NextSiblingElement();
     }
 
-    void load_audio_clip(Clip &clip, ClipMetadata metadata) {
+    void load_audio_clip(std::shared_ptr<Clip> clip, ClipMetadata metadata) {
         WaveFile wave_file = {metadata.reference_file_path};
-        clip.clear();
-        for (int i = 0; i < clip.size(); i++) {
+        clip->clear();
+        for (int i = 0; i < clip->size(); i++) {
             int first_sample_index = 44;
             //each audio sample is 2 bytes therefore index is multiplied by 2 to get byte index of sample
             int sample_pos = first_sample_index + metadata.start_time_in_reference + (i * 2);
@@ -100,7 +101,7 @@ struct Xml_Wrapper {
             double max_amplitude = wave_file.read_byte_pair(34);
             double raw_sample = wave_file.read_byte_pair(sample_pos);
             //sample data is then converted to its original double between 1.0 and -1.0
-            clip.append_sample(Sample(raw_sample / max_amplitude));
+            clip->append_sample(Sample(raw_sample / max_amplitude));
         }
     }
 

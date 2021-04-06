@@ -83,10 +83,10 @@ public:
     }
 
     std::shared_ptr<Session> session;
+    std::unique_ptr<Audio_Params> params;
 
 private:
     std::string session_name;
-    std::unique_ptr<Audio_Params> params;
     RtAudio dac;
     RtAudio::StreamParameters output_params, input_params;
     RtAudio::DeviceInfo output_info, input_info;

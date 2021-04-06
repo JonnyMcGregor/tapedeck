@@ -47,7 +47,7 @@ public:
     };
 
     Play_State play_state = Play_State::Stopped;
-    std::vector<Track> tracks;
+    std::vector<std::shared_ptr<Track>> tracks;
     Wave_File_Generator wav_gen;
     std::unique_ptr<Xml_Wrapper> session_xml;
     std::unique_ptr<Playhead> playhead;

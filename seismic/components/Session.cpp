@@ -36,27 +36,28 @@ void Session::load_session_from_xml(string xml_file_name) {
 
 void Session::clear_all_audio_clips() {
     for (auto &track : tracks) {
-        for (auto &clip : track.clips) {
-            clip.audio_data.clear();
+        for (auto &clip : track->clips) {
+            clip->audio_data.clear();
         }
     }
 }
 
 void Session::create_track() {
-    tracks.push_back(Track());
-    tracks.back().name = ("Track" + std::to_string(tracks.size()));
+    tracks.push_back(std::shared_ptr<Track>());
+    tracks.back() = make_shared<Track>();
+    tracks.back()->name = ("Track" + std::to_string(tracks.size()));
 }
 
 void Session::delete_track(int index) {
-    std::vector<Track>::iterator track_iterator = tracks.begin();
+    std::vector<std::shared_ptr<Track>>::iterator track_iterator = tracks.begin();
     advance(track_iterator, index);
     tracks.erase(track_iterator);
 }
 
 void Session::prepare_audio() {
     for (auto &track : tracks) {
-        if (track.record_armed) {
-            track.create_clip(playhead->current_time_in_samples, (session_name + "/recorded_audio/"));
+        if (track->record_armed) {
+            track->create_clip(playhead->current_time_in_samples, (session_name + "/recorded_audio/"));
         }
     }
 }
@@ -65,15 +66,15 @@ void Session::process_audio_block(double *input_buffer, double *output_buffer) {
         for (int channel = 0; channel < 2; channel++, output_buffer++) {
             Sample output_sample;
             //when solo enabled is true all non-solo'd tracks are ignored
-            for (Track &track : tracks) {
+            for (auto track : tracks) {
                 //input
-                if (play_state == Play_State::Recording && track.record_armed && channel == 0) {
-                    track.clips.back().append_sample(*input_buffer);
+                if (play_state == Play_State::Recording && track->record_armed && channel == 0) {
+                    track->clips.back()->append_sample(*input_buffer);
                 }
                 //output
                 else {
-                    if (track.solo || (!is_solo_enabled() && !track.mute)) {
-                        output_sample += track.get_sample(get_current_time_in_samples());
+                    if (track->solo || (!is_solo_enabled() && !track->mute)) {
+                        output_sample += track->get_sample(get_current_time_in_samples());
                     }
                 }
             }
@@ -84,7 +85,7 @@ void Session::process_audio_block(double *input_buffer, double *output_buffer) {
 
 bool Session::is_solo_enabled() {
     for (auto &track : tracks) {
-        if (track.solo) {
+        if (track->solo) {
             return true;
         }
     }
@@ -94,13 +95,13 @@ bool Session::is_solo_enabled() {
 void Session::create_files_from_recorded_clips() {
     assert(play_state == Play_State::Stopping);
     for (auto &track : tracks) {
-        if (track.record_armed) {
-            for (int i = 0; i < track.clips.size(); i++) {
-                if (track.clips[i].size() > 0) {
-                    wav_file_streamer.open(track.clip_metadata[i].reference_file_path, ios::binary);
+        if (track->record_armed) {
+            for (int i = 0; i < track->clips.size(); i++) {
+                if (track->clips[i]->size() > 0) {
+                    wav_file_streamer.open(track->clip_metadata[i].reference_file_path, ios::binary);
                     wav_gen.openWaveFile(wav_file_streamer);
-                    for (int j = 0; j < track.clips[i].size(); j++) {
-                        wav_gen.writeInputToFile(wav_file_streamer, track.clips[i].get_sample(j).value);
+                    for (int j = 0; j < track->clips[i]->size(); j++) {
+                        wav_gen.writeInputToFile(wav_file_streamer, track->clips[i]->get_sample(j).value);
                     }
                     wav_gen.closeWaveFile(wav_file_streamer);
                     wav_file_streamer.close();
@@ -113,7 +114,7 @@ void Session::create_files_from_recorded_clips() {
 int Session::num_record_armed_tracks() {
     int num_record_armed_tracks = 0;
     for (int i = 0; i < tracks.size(); i++) {
-        if (tracks[i].record_armed) {
+        if (tracks[i]->record_armed) {
             num_record_armed_tracks++;
         }
     }
