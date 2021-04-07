@@ -1,19 +1,16 @@
 #include "track_widget.hpp"
 #include "vbox_layout.hpp"
-#include <memory>
-struct TrackStack : Widget
-{
+struct TrackStack : Widget {
     std::vector<std::unique_ptr<TrackWidget>> sub_widgets;
-    TrackStack() {
-    }
+    std::shared_ptr<TimeRuler> time_ruler;
+    TrackStack(std::shared_ptr<TimeRuler> time_ruler) { this->time_ruler = time_ruler; }
 
-    void create_track_sub_widget(std::shared_ptr<Track> track, int samples_per_cell) {
-        this->sub_widgets.push_back(std::make_unique<TrackWidget>(track, samples_per_cell));
+    void create_track_sub_widget(std::shared_ptr<Track> track) {
+        this->sub_widgets.push_back(std::make_unique<TrackWidget>(track, time_ruler));
     }
 
     void process(std::vector<KeyPress> &keyboard_input) {
-        for(int i = 0; i < sub_widgets.size();i++)
-        {
+        for (int i = 0; i < sub_widgets.size(); i++) {
             sub_widgets[i]->process(keyboard_input);
         }
     }
