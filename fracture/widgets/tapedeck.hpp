@@ -222,7 +222,7 @@ struct TapeDeck : Widget {
         if(x_pos >= track_screen.width - (track_screen.width * 0.9 * 0.5) && is_playing)
         {
             x_pos = track_screen.width - (track_screen.width * 0.9 * 0.5);
-            time_ruler->start_time_on_screen_in_samples = session->get_current_time_in_samples() - x_pos * time_ruler->samples_per_cell();
+            time_ruler->start_time_on_screen_in_samples = session->get_current_time_in_samples() - (x_pos * time_ruler->samples_per_cell());
         }
         return x_pos;
     }
