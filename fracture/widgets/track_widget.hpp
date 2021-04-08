@@ -112,18 +112,28 @@ struct TrackWidget : Widget {
     }
 
     bool clip_is_drawable(int clip_index) {
-        if (track->clip_metadata[clip_index].start_time <= time_ruler->start_time_on_screen_in_samples + time_ruler->window_size_in_samples &&
-            track->clip_metadata[clip_index].start_time + track->clips[clip_index]->size() > time_ruler->start_time_on_screen_in_samples) {
-            return true;
-        } else {
+        if (time_ruler->start_time_on_screen_in_samples + time_ruler->window_size_in_samples <=  track->clip_metadata[clip_index].start_time||
+            track->clip_metadata[clip_index].start_time + track->clips[clip_index]->size() <= time_ruler->start_time_on_screen_in_samples) {
             return false;
+        } else if(calculate_clip_width(clip_index) == 0) {
+            return false;
+        }
+        else{
+            return true;
         }
     }
     int calculate_clip_width(int clip_index) {
-        return track->clips[clip_index]->size() / time_ruler->samples_per_cell();
+        return (calculate_clip_end_sample(clip_index) - calculate_clip_start_sample(clip_index)) / time_ruler->samples_per_cell();
     }
 
-    int calculate_clip_start_cell(int clip_index) {
-        return (track->clip_metadata[clip_index].start_time - time_ruler->start_time_on_screen_in_samples) / time_ruler->samples_per_cell();
+    int calculate_clip_start_sample(int clip_index) {
+        return max((int)track->clip_metadata[clip_index].start_time, time_ruler->start_time_on_screen_in_samples);
+    }
+    int calculate_clip_end_sample(int clip_index) {
+        return min((int)(track->clip_metadata[clip_index].start_time + track->clips[clip_index]->size()), time_ruler->start_time_on_screen_in_samples + time_ruler->window_size_in_samples);
+    }
+
+      int calculate_clip_start_cell(int clip_index) {
+        return max((int)(track->clip_metadata[clip_index].start_time - time_ruler->start_time_on_screen_in_samples) / time_ruler->samples_per_cell(), 0);
     }
 };

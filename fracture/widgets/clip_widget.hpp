@@ -18,22 +18,15 @@ struct ClipWidget : Widget {
     void process(std::vector<KeyPress> &keyboard_input) {}
 
     void render(Screen &screen) {
-        int first_sample_to_draw = 0;
-        int last_sample_to_draw = (clip->size() - 1);
-        if(clip_start_time < time_ruler->start_time_on_screen_in_samples)
-        {
-            first_sample_to_draw = time_ruler->start_time_on_screen_in_samples - clip_start_time;
-        }
-        if(clip_start_time + clip->size() - 1 > time_ruler->start_time_on_screen_in_samples + time_ruler->window_size_in_samples)
-        {
-            last_sample_to_draw =  (time_ruler->start_time_on_screen_in_samples + time_ruler->window_size_in_samples) - (clip_start_time - time_ruler->start_time_on_screen_in_samples);
-        }
+        int first_sample_to_draw = max(clip_start_time, time_ruler->start_time_on_screen_in_samples);
+        int last_sample_to_draw = min((int)(clip_start_time + clip->size()), (time_ruler->start_time_on_screen_in_samples + time_ruler->window_size_in_samples));
+       
         u_int bucket_size = (last_sample_to_draw - first_sample_to_draw) / screen.width;
         for (int x = 0; x < screen.width; x++) {
             // The sum of the values of all samples in the bucket
             double sum = 0;
             for (int i = bucket_size * x; i < bucket_size * x; i++) {
-                sum += this->clip->get_sample(i).value;
+                sum += this->clip->get_sample(i + 1).value;
             }
             // the average of all samples in the bucket
             double average = sum / bucket_size;
