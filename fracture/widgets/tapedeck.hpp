@@ -93,6 +93,17 @@ struct TapeDeck : Widget {
                 advance_clip_window();
                 keyboard_input.pop_back();
             }
+            if (last == KeyPress(Key::K_BracketOpen)) {
+                // zoom_out
+                time_ruler->cells_per_second *= 0.75;
+                keyboard_input.pop_back();
+            }
+            if (last == KeyPress(Key::K_BracketClose)) {
+                // zoom_in
+                time_ruler->cells_per_second *= 1.25;
+
+                keyboard_input.pop_back();
+            }
             if (last == KeyPress(Key::K_Equal)) {
                 create_track();
                 keyboard_input.pop_back();
@@ -167,20 +178,15 @@ struct TapeDeck : Widget {
             }
         }
     }
-    void advance_clip_window()
-    {
-        if(session->get_current_time_in_samples() > time_ruler->start_time_on_screen_in_samples + time_ruler->window_size_in_samples)
-        {
+    void advance_clip_window() {
+        if (session->get_current_time_in_samples() > time_ruler->start_time_on_screen_in_samples + time_ruler->window_size_in_samples) {
             time_ruler->start_time_on_screen_in_samples = session->get_current_time_in_samples();
         }
     }
-    void retreat_clip_window()
-    {
-        if(session->get_current_time_in_samples() < time_ruler->start_time_on_screen_in_samples)
-        {
+    void retreat_clip_window() {
+        if (session->get_current_time_in_samples() < time_ruler->start_time_on_screen_in_samples) {
             time_ruler->start_time_on_screen_in_samples = session->get_current_time_in_samples() - time_ruler->window_size_in_samples;
-            if(time_ruler->start_time_on_screen_in_samples < 0)
-            {
+            if (time_ruler->start_time_on_screen_in_samples < 0) {
                 time_ruler->start_time_on_screen_in_samples = 0;
             }
         }
@@ -212,6 +218,7 @@ struct TapeDeck : Widget {
         track_stack->render(track_screen);
         playhead_widget.render(playhead_screen);
         track_screen.draw(Point(playhead_x_position(track_screen), 0), playhead_screen);
+        
         screen.draw(Point(screen.width * 0.1, screen.height * 0.2 - 1), time_ruler_screen);
         screen.draw(Point(1, screen.height * 0.2 + 1), track_screen);
     }
@@ -219,11 +226,14 @@ struct TapeDeck : Widget {
     int playhead_x_position(Screen track_screen) {
         int x_pos = track_screen.width * 0.1;
         x_pos += (session->get_current_time_in_samples() - time_ruler->start_time_on_screen_in_samples) / time_ruler->samples_per_cell();
-        if(x_pos >= track_screen.width - (track_screen.width * 0.9 * 0.5) && is_playing)
-        {
+        if (x_pos >= track_screen.width - (track_screen.width * 0.9 * 0.5) && is_playing) {
             x_pos = track_screen.width - (track_screen.width * 0.9 * 0.5);
-            time_ruler->start_time_on_screen_in_samples = session->get_current_time_in_samples() - (x_pos * time_ruler->samples_per_cell());
+            update_clip_window();
         }
         return x_pos;
+    }
+
+    void update_clip_window() {
+        time_ruler->start_time_on_screen_in_samples = session->get_current_time_in_samples() - time_ruler->window_size_in_samples / 2;
     }
 };

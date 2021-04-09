@@ -214,6 +214,8 @@ std::map<keycode_vec, KeyPress> keycodes_to_keypress{
     {keycode_vec{88}, KeyPress(Key::K_X, ModifierKey::Shift)},
     {keycode_vec{89}, KeyPress(Key::K_Y, ModifierKey::Shift)},
     {keycode_vec{90}, KeyPress(Key::K_Z, ModifierKey::Shift)},
+    {keycode_vec{91}, KeyPress(Key::K_BracketOpen)},
+    {keycode_vec{93}, KeyPress(Key::K_BracketClose)},
 
     {keycode_vec{96}, KeyPress(Key::K_Grave)},
 

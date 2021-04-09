@@ -2,7 +2,7 @@
 #include "../components/widget.hpp"
 #include <memory>
 struct TimeRuler : Widget {
-    int cells_per_second = 60;
+    float cells_per_second = 60.0f;
     int cells_per_time_marker = 20;
     int start_time_on_screen_in_samples = 0;
     int sample_rate = 0;
@@ -18,14 +18,16 @@ struct TimeRuler : Widget {
         ScreenCellStyle time_marker_style, second_marker_style;
         time_marker_style.foreground_colour = Colour(1, 1, 1);
         second_marker_style.foreground_colour = Colour(0.5, 1, 1);
+
+        cells_per_time_marker = screen.width/5;
+        int cells_per_micro_marker = screen.width / 15;
         for (int x = 0; x < screen.width; x++) {
             if (x % cells_per_time_marker == 0) {
-
                 std::string time = to_string((1.0 * x / cells_per_second) + (1.0 * start_time_on_screen_in_samples / sample_rate));
                 time.resize(time.find(".") + 2);
                 ruler.set_style(time_marker_style);
                 ruler.draw(Point(x, 0), time);
-            } else if (x % (cells_per_second / 5) == 0) {
+            } else if (x % cells_per_micro_marker == 0) {
                 ruler.set_style(second_marker_style);
                 ruler.draw(Point(x, 0), "|");
             }
