@@ -1,17 +1,18 @@
 #ifndef _SESSION_H_
 #define _SESSION_H_
 
-#include "Audio_Params.hpp"
+#include "AudioParams.hpp"
 #include "Playhead.hpp"
 #include "Track.hpp"
-#include "Xml_Wrapper.hpp"
+#include "Buffer.hpp"
+#include "XmlWrapper.hpp"
 #include "wave_file_generator/Wave_File_Generator.hpp"
 #include <assert.h>
 #include <filesystem>
 
 class Session {
 public:
-    Session(std::string session_name, Audio_Params params);
+    Session(std::string session_name, AudioParams params);
     ~Session();
 
     void create_project_file_structure();
@@ -22,7 +23,7 @@ public:
     void delete_track(int index);
 
     void prepare_audio();
-    void process_audio_block(double *input_buffer, double *output_buffer);
+    void process_audio_block(Buffer &input_buffer, Buffer &output_buffer);
     bool is_solo_enabled();
 
     void create_files_from_recorded_clips();
@@ -49,7 +50,7 @@ public:
     Play_State play_state = Play_State::Stopped;
     std::vector<std::shared_ptr<Track>> tracks;
     Wave_File_Generator wav_gen;
-    std::unique_ptr<Xml_Wrapper> session_xml;
+    std::unique_ptr<XmlWrapper> session_xml;
     std::unique_ptr<Playhead> playhead;
 
 private:

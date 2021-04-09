@@ -2,7 +2,7 @@
 #include <stdexcept>
 
 struct Sample {
-    double value;
+    float value;
 
     Sample() {
         this->value = 0;

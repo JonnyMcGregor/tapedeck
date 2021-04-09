@@ -1,5 +1,5 @@
 #pragma once
-#include "../../seismic/AudioManager.hpp"
+#include "../../seismic/AudioManager.hpp" 
 #include "../components/point.hpp"
 #include "../components/widget.hpp"
 #include "decorated_window.hpp"

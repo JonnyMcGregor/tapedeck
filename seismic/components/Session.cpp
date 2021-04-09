@@ -1,5 +1,5 @@
 #include "Session.hpp"
-Session::Session(std::string session_name, Audio_Params params) {
+Session::Session(std::string session_name, AudioParams params) {
     
     this->session_name = session_name;
     this->sample_rate = params.sample_rate;
@@ -10,7 +10,7 @@ Session::Session(std::string session_name, Audio_Params params) {
     playhead = std::make_unique<Playhead>(sample_rate);
     create_project_file_structure();
     std::string xml_file_name = this->session_name + ".xml";
-    session_xml = std::make_unique<Xml_Wrapper>(this->session_name, xml_file_name);
+    session_xml = std::make_unique<XmlWrapper>(this->session_name, xml_file_name);
 }
 
 Session::~Session() {
@@ -26,7 +26,7 @@ void Session::create_project_file_structure() {
         filesystem::create_directory(session_name + "/exported_audio");
 }
 void Session::load_session_from_xml(string xml_file_name) {
-    session_xml = make_unique<Xml_Wrapper>(this->session_name, xml_file_name);
+    session_xml = make_unique<XmlWrapper>(this->session_name, xml_file_name);
     session_xml->xml_doc.LoadFile(session_xml->file_name.c_str());
     session_xml->set_elements();
     session_xml->load_playhead_data(*playhead);
@@ -61,15 +61,15 @@ void Session::prepare_audio() {
         }
     }
 }
-void Session::process_audio_block(double *input_buffer, double *output_buffer) {
-    for (int sample = 0; sample < buffer_size; sample++, playhead->current_time_in_samples++, input_buffer++) {
-        for (int channel = 0; channel < 2; channel++, output_buffer++) {
+void Session::process_audio_block(Buffer &input_buffer, Buffer &output_buffer) {
+    for (int sample = 0; sample < buffer_size; sample++, playhead->current_time_in_samples++) {
+        for (int channel = 0; channel < 2; channel++) {
             Sample output_sample;
             //when solo enabled is true all non-solo'd tracks are ignored
             for (auto track : tracks) {
                 //input
                 if (play_state == Play_State::Recording && track->record_armed && channel == 0) {
-                    track->clips.back()->append_sample(*input_buffer);
+                    track->clips.back()->append_sample(input_buffer.get_sample(channel, sample));
                 }
                 //output
                 else {
@@ -78,7 +78,7 @@ void Session::process_audio_block(double *input_buffer, double *output_buffer) {
                     }
                 }
             }
-            *output_buffer = output_sample.value * 0.5;
+            output_buffer.set_sample(channel, sample, output_sample.value * 0.7);
         }
     }
 }

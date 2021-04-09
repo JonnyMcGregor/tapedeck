@@ -1,15 +1,16 @@
 #include "components/Session.hpp"
-
+#include "juce_modules/juce_audio_devices/juce_audio_devices.h"
 #include <rtaudio/RtAudio.h>
 
 //The back-end interface which manages the DSP and session structure of TapeDeck
-class AudioManager {
+class AudioManager : juce::AudioIODeviceCallback {
 public:
     AudioManager(bool is_loading_from_xml, std::string project_name = "", filesystem::path xml_path = "") {
         //Setup Audio Devices and Parameters
-        check_for_available_devices();
-        initialise_audio_io();
-        params = std::make_unique<Audio_Params>(input_info.preferredSampleRate, 256, input_params.nChannels, output_params.nChannels);
+        device_manager.initialiseWithDefaultDevices(1, 2);
+        juce::AudioIODevice* current_device = device_manager.getCurrentAudioDevice();
+        params = std::make_unique<AudioParams>(current_device->getCurrentSampleRate(), 
+                    current_device->getCurrentBufferSizeSamples(), 1, 2);
         if (is_loading_from_xml) {
             this->session_name = xml_path.stem();
         } else {
@@ -21,56 +22,11 @@ public:
     ~AudioManager() {
     }
 
-    void check_for_available_devices() {
-        if (dac.getDeviceCount() < 1) {
-            std::cout << "No audio devices found, exiting ...\n";
-            exit(0);
-        }
-    }
+    void audioDeviceIOCallback(const float **inputChannelData, int numInputChannels, float **outputChannelData, int numOutputChannels, int numSamples) {
 
-    void initialise_audio_io() {
-        output_params.deviceId = dac.getDefaultOutputDevice();
-        input_params.deviceId = dac.getDefaultInputDevice();
-
-        output_info = dac.getDeviceInfo(output_params.deviceId);
-        output_params.nChannels = output_info.outputChannels;
-        output_params.firstChannel = 0;
-
-        input_info = dac.getDeviceInfo(input_params.deviceId);
-        input_params.nChannels = 1;
-        input_params.firstChannel = 0;
-    }
-
-    void start_audio_stream() {
-        if (session->tracks.size() == 0)
-            return;
-        session->play_state = Session::Play_State::ToPlay;
-        session->prepare_audio();
-        dac.openStream(&output_params, &input_params, RTAUDIO_FLOAT64,
-                       params->sample_rate, &params->buffer_size, &process_audio_block, session.get());
-        dac.startStream();
-    }
-
-    void stop_audio_stream() {
-        session->play_state = Session::Play_State::Stopping;
-        dac.stopStream();
-        session->create_files_from_recorded_clips();
-        assert(session->tracks.size() > 0);
-        session->session_xml->refresh_xml_document(*session->playhead, session->tracks);
-        session->play_state = Session::Play_State::Stopped;
-        dac.closeStream();
-    }
-
-    static int process_audio_block(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
-                                   double streamTime, RtAudioStreamStatus status, void *userData) {
-        unsigned int sample_index, channel_index;
-        double *out_buffer = (double *)outputBuffer;
-        double *in_buffer = (double *)inputBuffer;
-        Session *session = (Session *)userData;
-
-        if (status)
-            std::cout << "Stream underflow detected!" << std::endl;
-        //Temporary for testing purposes...
+        Buffer out_buffer = {outputChannelData};
+        Buffer in_buffer = {inputChannelData};
+        
         //If tracks are armed, record audio
         if (session->num_record_armed_tracks() > 0)
             session->play_state = Session::Play_State::Recording;
@@ -79,17 +35,42 @@ public:
             session->play_state = Session::Play_State::Playing;
 
         session->process_audio_block(in_buffer, out_buffer);
-        return 0;
+    }
+
+    void audioDeviceAboutToStart(juce::AudioIODevice *device) {
+    }
+
+    /** Called to indicate that the device has stopped. */
+    void audioDeviceStopped(){
+    }
+
+    void start_audio_stream() {
+        if (session->tracks.size() == 0)
+            return;
+        session->play_state = Session::Play_State::ToPlay;
+        session->prepare_audio();
+        device_manager.addAudioCallback(this);
+
+        // dac.openStream(&output_params, &input_params, RTAUDIO_FLOAT64,
+        //                params->sample_rate, &params->buffer_size, &process_audio_block, session.get());
+        // dac.startStream();
+    }
+
+    void stop_audio_stream() {
+        device_manager.removeAudioCallback(this);
+        session->play_state = Session::Play_State::Stopping;
+        session->create_files_from_recorded_clips();
+        assert(session->tracks.size() > 0);
+        session->session_xml->refresh_xml_document(*session->playhead, session->tracks);
+        session->play_state = Session::Play_State::Stopped;
     }
 
     std::shared_ptr<Session> session;
-    std::unique_ptr<Audio_Params> params;
+    std::unique_ptr<AudioParams> params;
 
 private:
     std::string session_name;
-    RtAudio dac;
-    RtAudio::StreamParameters output_params, input_params;
-    RtAudio::DeviceInfo output_info, input_info;
+    juce::AudioDeviceManager device_manager;
 };
 
 // void exportAllTracks() {
