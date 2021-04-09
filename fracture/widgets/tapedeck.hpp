@@ -210,15 +210,29 @@ struct TapeDeck : Widget {
     }
 
     void render(Screen &screen) {
+        Screen top_bar = {screen.width, screen.height * 0.2 - 2};
         Screen time_ruler_screen = {screen.width * 0.9, 3};
         Screen track_screen = {screen.width - 2, screen.height * 0.8 - 2};
         Screen playhead_screen = {1, track_screen.height};
+
         this->tapedeck_window.render(screen);
         time_ruler->render(time_ruler_screen);
         track_stack->render(track_screen);
         playhead_widget.render(playhead_screen);
+
+        top_bar.draw(Point(2, 1), "Key Commands:");
+        top_bar.draw(Point(2, 3), "Create/Delete track    '='/'-'");
+        top_bar.draw(Point(2, 4), "Navigate tracks        'Up'/'Down'");
+        top_bar.draw(Point(2, 5), "Scrub through time     ','/'.'");
+        top_bar.draw(Point(40, 3), "Record Arm Selected Track    'R'");
+        top_bar.draw(Point(40, 4), "Solo Selected Track          'S'");
+        top_bar.draw(Point(40, 5), "Mute Selected Track          'M'");
+        top_bar.draw(Point(78, 3), "Playback/Record/Stop Audio    'Space'");
+        top_bar.draw(Point(78, 4), "Zoom out/in                   '['/']'");
+        top_bar.draw(Point(78, 4), "Quit Tapedeck                 'Ctrl-Q'");
+
         track_screen.draw(Point(playhead_x_position(track_screen), 0), playhead_screen);
-        
+        screen.draw(Point(1,1), top_bar);
         screen.draw(Point(screen.width * 0.1, screen.height * 0.2 - 1), time_ruler_screen);
         screen.draw(Point(1, screen.height * 0.2 + 1), track_screen);
     }
