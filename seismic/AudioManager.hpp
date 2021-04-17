@@ -50,10 +50,6 @@ public:
         session->play_state = Session::Play_State::ToPlay;
         session->prepare_audio();
         device_manager.addAudioCallback(this);
-
-        // dac.openStream(&output_params, &input_params, RTAUDIO_FLOAT64,
-        //                params->sample_rate, &params->buffer_size, &process_audio_block, session.get());
-        // dac.startStream();
     }
 
     void stop_audio_stream() {

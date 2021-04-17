@@ -1,5 +1,5 @@
 #pragma once
-#include "../../seismic/AudioManager.hpp" 
+#include "../../seismic/AudioManager.hpp"
 #include "../components/point.hpp"
 #include "../components/widget.hpp"
 #include "decorated_window.hpp"
@@ -15,20 +15,20 @@ struct TapeDeck : Widget {
     std::shared_ptr<TrackStack> track_stack;
     std::shared_ptr<TimeRuler> time_ruler;
     PlayheadWidget playhead_widget;
-    TrackWidget *selected_widget = nullptr;
+    TrackWidget *selected_track = nullptr;
+    ClipWidget *selected_clip = nullptr;
     std::string session_name;
     std::unique_ptr<AudioManager> audio_manager;
     std::shared_ptr<Session> session;
     bool is_playing = false;
-
-    Clip clip1, clip2, clip3;
+    bool close_ui_thread = false;
 
     TapeDeck() {
         DecoratedWindow dw = DecoratedWindow("TAPEDECK");
         this->tapedeck_window = dw;
         initialise_session("test_session");
-        selected_widget = track_stack->sub_widgets.front().get();
-        selected_widget->is_selected = true;
+        selected_track = track_stack->sub_widgets.front().get();
+        selected_track->is_selected = true;
     }
 
     void initialise_session(std::string session_name) {
@@ -50,23 +50,36 @@ struct TapeDeck : Widget {
         session->session_xml->refresh_xml_document(*session->playhead, session->tracks);
         if (keyboard_input.size() > 0) {
             KeyPress last = keyboard_input.back();
-            if (selected_widget != nullptr) {
-                selected_widget->is_selected = false;
+            if (selected_track != nullptr) {
+                selected_track->is_selected = false;
             }
-            if (last == KeyPress(Key::K_Q, ModifierKey::Control))
-                exit(1);
+            if (selected_clip != nullptr) {
+                selected_clip->is_selected = false;
+            }
+            if (last == KeyPress(Key::K_Q, ModifierKey::Control)) {
+                close_ui_thread = true;
+                keyboard_input.pop_back();
+            }
             if (last == KeyPress(Key::K_UpArrow)) {
                 select_previous_track();
+                selected_clip = nullptr;
                 keyboard_input.pop_back();
             }
             if (last == KeyPress(Key::K_DownArrow)) {
                 select_next_track();
+                selected_clip = nullptr;
                 keyboard_input.pop_back();
             }
             if (last == KeyPress(Key::K_LeftArrow)) {
+                if (selected_track->clip_widgets.size() > 0) {
+                    select_previous_clip();
+                }
                 keyboard_input.pop_back();
             }
             if (last == KeyPress(Key::K_RightArrow)) {
+                if (selected_track->clip_widgets.size() > 0) {
+                    select_next_clip();
+                }
                 keyboard_input.pop_back();
             }
             if (last == KeyPress(Key::K_Comma)) {
@@ -114,52 +127,50 @@ struct TapeDeck : Widget {
             }
             if (last == KeyPress(Key::K_S)) {
                 // toggle_track_solo
-                selected_widget->track->solo = !selected_widget->track->solo;
+                selected_track->track->solo = !selected_track->track->solo;
                 keyboard_input.pop_back();
             }
             if (last == KeyPress(Key::K_M)) {
                 // toggle_track_mute
-                selected_widget->track->mute = !selected_widget->track->mute;
+                selected_track->track->mute = !selected_track->track->mute;
                 keyboard_input.pop_back();
             }
             if (last == KeyPress(Key::K_R)) {
                 // toggle_track_armed
-                selected_widget->track->record_armed = !selected_widget->track->record_armed;
+                selected_track->track->record_armed = !selected_track->track->record_armed;
                 keyboard_input.pop_back();
             }
             if (last == KeyPress(Key::K_Space)) {
                 // play_pause
-                track_stack->process(keyboard_input);
                 if (is_playing) {
-                    try {
-                        audio_manager->stop_audio_stream();
-                    } catch (RtAudioError &e) {
-                        exit(1);
-                    }
+                    audio_manager->stop_audio_stream();
                     is_playing = false;
+                    track_stack->process(keyboard_input);
                 } else {
-                    try {
-                        audio_manager->start_audio_stream();
-                    } catch (RtAudioError &e) {
-                        exit(1);
-                    }
+                    audio_manager->start_audio_stream();
                     is_playing = true;
                 }
                 keyboard_input.pop_back();
             }
 
-            if (selected_widget != nullptr) {
-                selected_widget->is_selected = true;
+            if (selected_track != nullptr) {
+                selected_track->is_selected = true;
+            } else if (track_stack->sub_widgets.size() > 0) {
+                selected_track = track_stack->sub_widgets[0].get();
+                selected_track->is_selected = true;
+            }
+            if (selected_clip != nullptr) {
+                selected_clip->is_selected = true;
             }
         }
     }
     void select_previous_track() {
         for (int i = 0; i < track_stack->sub_widgets.size(); i++) {
-            if (track_stack->sub_widgets[i].get() == selected_widget) {
+            if (track_stack->sub_widgets[i].get() == selected_track) {
                 if (i != 0) {
-                    selected_widget = track_stack->sub_widgets[i - 1].get();
+                    selected_track = track_stack->sub_widgets[i - 1].get();
                 } else {
-                    selected_widget = track_stack->sub_widgets.back().get();
+                    selected_track = track_stack->sub_widgets.back().get();
                     break;
                 }
             }
@@ -168,14 +179,36 @@ struct TapeDeck : Widget {
 
     void select_next_track() {
         for (int i = 0; i < track_stack->sub_widgets.size(); i++) {
-            if (track_stack->sub_widgets[i].get() == selected_widget) {
+            if (track_stack->sub_widgets[i].get() == selected_track) {
                 if (i + 1 == track_stack->sub_widgets.size()) {
-                    selected_widget = track_stack->sub_widgets.front().get();
+                    selected_track = track_stack->sub_widgets.front().get();
                 } else {
-                    selected_widget = track_stack->sub_widgets[i + 1].get();
+                    selected_track = track_stack->sub_widgets[i + 1].get();
                     break;
                 }
             }
+        }
+    }
+    void select_previous_clip() {
+        for (int i = 0; i < selected_track->clip_widgets.size(); i++) {
+            if (selected_track->clip_widgets[i].get() == selected_clip) {
+                if (i != 0) {
+                    selected_clip = selected_track->clip_widgets[i - 1].get();
+                }
+            }
+        }
+    }
+    void select_next_clip() {
+        for (int i = 0; i < selected_track->clip_widgets.size(); i++) {
+            if (selected_track->clip_widgets[i].get() == selected_clip) {
+                if (i + 1 != selected_track->clip_widgets.size()) {
+                    selected_clip = selected_track->clip_widgets[i + 1].get();
+                    break;
+                }
+            }
+        }
+        if (selected_clip == nullptr) {
+            selected_clip = selected_track->clip_widgets[0].get();
         }
     }
     void advance_clip_window() {
@@ -195,22 +228,24 @@ struct TapeDeck : Widget {
         session->create_track();
         track_stack->create_track_sub_widget(session->tracks.back());
         if (track_stack->sub_widgets.size() == 1) {
-            selected_widget = track_stack->sub_widgets.back().get();
+            selected_track = track_stack->sub_widgets.back().get();
         }
     }
 
     void remove_track() {
-        if (track_stack->sub_widgets.size() == 1) {
-            selected_widget = nullptr;
-        } else if (selected_widget == track_stack->sub_widgets.back().get() && track_stack->sub_widgets.size() > 1) {
-            selected_widget = track_stack->sub_widgets[track_stack->sub_widgets.size() - 2].get();
+        std::vector<std::unique_ptr<TrackWidget>>::iterator widget_iterator = track_stack->sub_widgets.begin();
+        for (int i = 0; i < track_stack->sub_widgets.size(); i++) {
+            if (selected_track == track_stack->sub_widgets[i].get()) {
+                selected_track = nullptr;
+                advance(widget_iterator, i);
+                track_stack->sub_widgets.erase(widget_iterator);
+                session->delete_track(i);
+            }
         }
-        track_stack->sub_widgets.pop_back();
-        session->delete_track(session->tracks.size() - 1);
     }
 
     void render(Screen &screen) {
-        Screen top_bar = {screen.width, screen.height * 0.2 - 2};
+        Screen top_bar = {screen.width - 2, screen.height * 0.2 - 2};
         Screen time_ruler_screen = {screen.width * 0.9, 3};
         Screen track_screen = {screen.width - 2, screen.height * 0.8 - 2};
         Screen playhead_screen = {1, track_screen.height};
@@ -232,7 +267,7 @@ struct TapeDeck : Widget {
         top_bar.draw(Point(78, 4), "Quit Tapedeck                 'Ctrl-Q'");
 
         track_screen.draw(Point(playhead_x_position(track_screen), 0), playhead_screen);
-        screen.draw(Point(1,1), top_bar);
+        screen.draw(Point(1, 1), top_bar);
         screen.draw(Point(screen.width * 0.1, screen.height * 0.2 - 1), time_ruler_screen);
         screen.draw(Point(1, screen.height * 0.2 + 1), track_screen);
     }

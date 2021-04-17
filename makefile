@@ -1,6 +1,6 @@
 SEISMIC_INCLUDES = seismic/components/tiny_xml_2/tinyxml2.cpp seismic/components/Session.cpp 
 JUCE_INCLUDES = seismic/juce_modules/juce_core/juce_core.cpp seismic/juce_modules/juce_audio_basics/juce_audio_basics.cpp seismic/juce_modules/juce_audio_devices/juce_audio_devices.cpp seismic/juce_modules/juce_events/juce_events.cpp
-LINKS = -lasound -ldl -lcurl -lrtaudio -lstdc++fs
+LINKS = -lasound -ldl -lcurl -lstdc++fs
 
 asciidaw: main.cpp fracture/* fracture/components/* seismic/components/*
 	g++ -g main.cpp seismic/components/Session.cpp seismic/components/tiny_xml_2/tinyxml2.cpp -l rtaudio -l stdc++fs -Wno-return-type -o asciidaw

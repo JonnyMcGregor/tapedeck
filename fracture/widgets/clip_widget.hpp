@@ -13,6 +13,9 @@ struct ClipWidget : Widget {
         this->clip = clip;
         this->time_ruler = time_ruler;
         this->clip_start_time = clip_start_time;
+        selected_widget_style.foreground_colour = Colour(1, 1, 1);
+        selected_widget_style.background_colour = Colour(0.3,0.3,0.3);
+
     }
 
     void process(std::vector<KeyPress> &keyboard_input) {}
@@ -45,8 +48,13 @@ struct ClipWidget : Widget {
         ScreenCellStyle style = ScreenCellStyle();
         style.foreground_colour = Colour(0.1, 1.0, 1.0);
         style.background_colour = Colour(0.4, 0.3, 1.0);
-
-        screen.set_style(style);
+        if(is_selected)
+        {
+            screen.set_style(selected_widget_style);
+        }
+        else{
+            screen.set_style(style);
+        }
     }
 
 private:

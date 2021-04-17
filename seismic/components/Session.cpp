@@ -78,7 +78,7 @@ void Session::process_audio_block(Buffer &input_buffer, Buffer &output_buffer) {
                     }
                 }
             }
-            output_buffer.set_sample(channel, sample, output_sample.value * 0.7);
+            output_buffer.set_sample(channel, sample, output_sample.value);
         }
     }
 }
