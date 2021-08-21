@@ -1,15 +1,13 @@
-#include "fracture/fracture.hpp" 
-#include "fracture/widgets/tapedeck.hpp"
+#include "Fracture/Fracture.hpp" 
+#include "Fracture/Widgets/Tapedeck.hpp"
 #include <unistd.h>
 #include <thread>
- 
 
- 
-void load_ui(Fracture* frac, TapeDeck* tape_deck)
+void runUIThread(Fracture* frac, TapeDeck* tapeDeck)
 {
-    while(!tape_deck->close_ui_thread)
+    while(!tapeDeck->closeUIThread)
     {
-        frac->render_to_viewport();
+        frac->renderToViewport();
         usleep(1000000/60);
     }
     exit(0);
@@ -17,11 +15,12 @@ void load_ui(Fracture* frac, TapeDeck* tape_deck)
 
 int main() 
 {
-    TapeDeck tape_deck;
-    Fracture frac(tape_deck);
-    std::thread ui_thread(load_ui, &frac, &tape_deck);
+    TapeDeck tapeDeck;
+    Fracture frac(tapeDeck);
+    std::thread ui_thread(runUIThread, &frac, &tapeDeck);
     while(true)
     {
         frac.process();
     }
 } 
+
