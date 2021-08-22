@@ -5,7 +5,7 @@
 #include <sys/ioctl.h> //ioctl() and TIOCGWINSZ
 #include <termios.h>
 #include <unistd.h>
-
+#include "../Components/KeyMaps.hpp"
 namespace terminal {
     struct termios orig_termios;
 

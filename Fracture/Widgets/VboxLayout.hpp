@@ -1,3 +1,5 @@
+#pragma once
+
 #include "../Components/Point.hpp"
 #include "../Components/Widget.hpp"
 #include <vector>

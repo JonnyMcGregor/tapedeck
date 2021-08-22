@@ -5,12 +5,12 @@
 
 struct TrackWidget : Widget {
     std::shared_ptr<Track> track;
-    std::vector<std::unique_ptr<ClipWidget>> clipWidgets;
+    std::vector<std::shared_ptr<ClipWidget>> clipWidgets;
     std::shared_ptr<TimeRuler> timeRuler;
     TrackWidget(std::shared_ptr<Track> track, std::shared_ptr<TimeRuler> timeRuler) {
         this->track = track;
         for (int i = 0; i < track->clips.size(); i++) {
-            clipWidgets.push_back(std::make_unique<ClipWidget>(track->clips[i], timeRuler, track->clipMetadata[i].startTime));
+            clipWidgets.push_back(std::make_shared<ClipWidget>(track->clips[i], timeRuler, track->clipMetadata[i].startTime));
         }
         selectedWidgetStyle.foregroundColour = Colour(1, 1, 1);
         this->timeRuler = timeRuler;
@@ -19,7 +19,7 @@ struct TrackWidget : Widget {
     void process(std::vector<KeyPress> &keyboardInput) {
         clipWidgets.clear();
         for (int i = 0; i < track->clips.size(); i++) {
-            clipWidgets.push_back(std::make_unique<ClipWidget>(track->clips[i], timeRuler, track->clipMetadata[i].startTime));
+            clipWidgets.push_back(std::make_shared<ClipWidget>(track->clips[i], timeRuler, track->clipMetadata[i].startTime));
         }
     }
     void render(Screen &screen) {

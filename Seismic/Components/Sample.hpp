@@ -13,12 +13,23 @@ struct Sample {
     }
 
     void set_value(double new_value) {
-        assert_is_sample_in_bounds(new_value);
-        this->value = new_value;
+        if(is_sample_in_bounds(new_value))
+        {
+            this->value = new_value;
+        }
     }
 
     void operator+=(const Sample &other) {
         this->value += other.value;
+    }
+
+    void clamp()
+    {
+        if(!is_sample_in_bounds(value))
+        {
+            if(value <= -1) { value = -0.999; }
+            else { value = 0.999; }
+        }
     }
 
 private:

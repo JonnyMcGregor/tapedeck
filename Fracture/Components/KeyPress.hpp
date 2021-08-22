@@ -41,26 +41,3 @@ struct KeyPress {
         return thisValue < otherValue;
     }
 };
-
-/** Debuggery Helpers */
-#include "KeyMaps.hpp"
-std::string to_string(KeyPress kp) {
-    if (keypressToString.count(kp) > 0) {
-        return keypressToString.at(kp);
-    } else {
-        return "";
-    }
-}
-
-std::string to_debug_string(KeyPress kp) {
-    std::string output = "";
-    if (kp.modifierKeys & ModifierKey::Control) output += "Control+";
-    if (kp.modifierKeys & ModifierKey::Shift) output += "Shift+";
-    if (kp.modifierKeys & ModifierKey::Alt) output += "Alt+";
-    if (keyToKeyname.count(kp.key) > 0) {
-        output += keyToKeyname.at(kp.key);
-    } else {
-        output += "<unknown>";
-    }
-    return output;
-}

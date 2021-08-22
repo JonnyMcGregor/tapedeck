@@ -78,6 +78,7 @@ void Session::processAudioBlock(Buffer &inputBuffer, Buffer &outputBuffer) {
                     }
                 }
             }
+            outputSample.clamp();
             outputBuffer.setSample(channel, sample, outputSample.value);
         }
     }
