@@ -1,9 +1,9 @@
 #include "Components/Session.hpp"
 #include "juce_modules/juce_audio_devices/juce_audio_devices.h"
-#include <rtaudio/RtAudio.h>
 
-//The back-end interface which manages the DSP and session structure of TapeDeck
-class AudioManager : juce::AudioIODeviceCallback {
+//The back-end interface which manages the DSP and session structure of Tapedeck
+class AudioManager : juce::AudioIODeviceCallback 
+{
 public:
     AudioManager(bool isLoadingFromXml, std::string projectName = "", filesystem::path xmlPath = "") {
         //Setup Audio Devices and Parameters
@@ -17,6 +17,12 @@ public:
             this->sessionName = projectName;
         }
         session = std::make_shared<Session>(this->sessionName, *params.get());
+        audioDeviceLog = std::make_unique<juce::File>(projectName + "_audio_device_log.txt");
+        audioDeviceLog->getNonexistentSibling().create();
+        audioDeviceLog->appendText(juce::Time::getCurrentTime().toString(true, true, false, true) + " Audio Device Initialised:\n" + 
+                        deviceManager.getCurrentAudioDevice()->getName() + "\n\tNum Input Channels: " + juce::String(params->numInputChannels) + 
+                        "\n\tNum Output Channels: " + juce::String(params->numOutputChannels) + "\n\tSample rate: " + juce::String(params->sampleRate) + 
+                        "\n\tBuffer Size: " + juce::String(params->bufferSize) + "\n==========\n");
     }
 
     ~AudioManager() {
@@ -26,29 +32,35 @@ public:
 
         Buffer outBuffer = {outputChannelData};
         Buffer inBuffer = {inputChannelData};
-        
-        //If tracks are armed, record audio
-        if (session->numRecordArmedTracks() > 0)
-            session->playState = Session::Play_State::Recording;
-        //Else playback audio
-        else
-            session->playState = Session::Play_State::Playing;
 
         session->processAudioBlock(inBuffer, outBuffer);
     }
 
     void audioDeviceAboutToStart(juce::AudioIODevice *device) {
+        audioDeviceLog->appendText(juce::Time::getCurrentTime().toString(false, true, true, true) +  "\tAudio Device Started: " + device->getName() + "\n");
     }
 
     /** Called to indicate that the device has stopped. */
     void audioDeviceStopped(){
+        audioDeviceLog->appendText(juce::Time::getCurrentTime().toString(false, true, true, true) +  "\tAudio Device Stopped\n");
+    }
+
+    void audioDeviceError (const juce::String& errorMessage)
+    {
+        audioDeviceLog->appendText(juce::Time::getCurrentTime().toString(false, true, true, true) + "\t" + errorMessage + "\n");
     }
 
     void startAudioStream() {
-        if (session->tracks.size() == 0)
-            return;
+        if (session->tracks.size() == 0) { return; }
+        
         session->playState = Session::Play_State::ToPlay;
         session->prepareAudio();
+        
+        //If tracks are armed, record audio
+        if (session->numRecordArmedTracks() > 0) { session->playState = Session::Play_State::Recording; }
+        //Else playback audio
+        else { session->playState = Session::Play_State::Playing; }
+        
         deviceManager.addAudioCallback(this);
     }
 
@@ -67,6 +79,7 @@ public:
 private:
     std::string sessionName;
     juce::AudioDeviceManager deviceManager;
+    std::unique_ptr<juce::File> audioDeviceLog;
 };
 
 // void exportAllTracks() {
