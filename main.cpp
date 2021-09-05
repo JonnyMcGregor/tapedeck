@@ -1,15 +1,27 @@
-#include "fracture/fracture.hpp" 
-#include "fracture/widgets/tapedeck.hpp"
+#include "Fracture/Fracture.hpp" 
+#include "Fracture/Widgets/Tapedeck.hpp"
 #include <unistd.h>
-int main()
+#include <thread>
+#include <map>
+void runUIThread(Fracture* frac, Tapedeck* tapedeck)
 {
-    TapeDeck tape_deck;
-    Fracture frac(tape_deck);
+    while(!tapedeck->closeUIThread)
+    {
+        frac->renderToViewport();
+        usleep(1000000/60); // Hard sets the refresh rate of the screen
+    }
+    exit(0);
+}
 
+int main() 
+{
+    Tapedeck tapedeck;
+    Fracture frac(tapedeck);
+
+    std::thread ui_thread(runUIThread, &frac, &tapedeck);
     while(true)
     {
         frac.process();
-        frac.render_to_viewport();
-        usleep(1000000/60);
     }
 } 
+
