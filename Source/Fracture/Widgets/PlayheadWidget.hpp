@@ -1,16 +1,19 @@
 #pragma once
 #include "../Components/Widget.hpp"
 #include "../../Seismic/Components/Playhead.hpp"
-#include <memory>
-struct PlayheadWidget : Widget
+#include <JuceHeader.h>
+
+struct PlayheadWidget : juce::Component
 {
+public:
     PlayheadWidget(){}
-    void process(std::vector<KeyPress> &keyboardInput){}
-    void render(Screen& screen)
-    {
-        for(int y = 0; y < screen.height; y++)
-        {
-            screen.draw(Point(0,y), "|");
-        }
-    }
+
+	void paint(Graphics& g) override
+	{
+        g.setColour(Colours::white);
+        g.fillAll();
+	}
+    void resized() override {}
+
+private:
 };

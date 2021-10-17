@@ -52,7 +52,7 @@ struct Track {
         for (int i = 0; i < this->clips.size(); i++) {
             u_int clipStartTime = clipMetadata[i].startTime;
             u_int clipEndTime = clipStartTime + this->clips[i]->size();
-            if (clipStartTime <= sampleIndex && sampleIndex <= clipEndTime) {
+            if (clipStartTime <= sampleIndex && sampleIndex < clipEndTime) {
                 return this->clips[i]->getSample(sampleIndex - clipStartTime);
             }
         }

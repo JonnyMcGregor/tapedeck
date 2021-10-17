@@ -1,11 +1,11 @@
 #pragma once
-#ifndef _CLIP_H_
-#define _CLIP_H_
 
 #include "Sample.hpp"
 #include <stdexcept>
 #include <string>
 #include <vector>
+
+using u_int = uint32_t;
 
 struct Clip {
     std::vector<Sample> audioData;
@@ -47,5 +47,3 @@ private:
         return false;
     }
 };
-
-#endif

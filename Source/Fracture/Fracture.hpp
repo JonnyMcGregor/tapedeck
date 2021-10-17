@@ -9,7 +9,7 @@
 #include <optional>
 
 struct Fracture {
-    // Store as a pointer to prevent 'object slicing'
+    // Store as a pointer
     std::optional<Widget *> rootWidget;
     std::vector<KeyPress> keyboardInput;
 

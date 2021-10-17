@@ -7,13 +7,13 @@
 using namespace std;
 
 struct Screen {
-    u_short width;
-    u_short height;
+    u_int width;
+    u_int height;
     vector<vector<ScreenCell>> content;
 
     Screen() {}
 
-    Screen(u_short width, u_short height) {
+    Screen(u_int width, u_int height) {
 
         this->width = width;
         this->height = height;

@@ -1,39 +1,34 @@
 #pragma once
-#include "../Components/Widget.hpp"
+//#include "../Components/Widget.hpp"
 #include <memory>
-struct TimeRuler : Widget {
+struct TimeRuler : juce::Component {
     float cellsPerSecond = 60.0f;
     int cellsPerTimeMarker = 20;
     int startTimeOnScreenInSamples = 0;
     int sampleRate = 0;
     int windowSizeInSamples = 0;
-    TimeRuler(int sampleRate) { this->sampleRate = sampleRate; }
 
-    void process(std::vector<KeyPress> &keyboardInput) {}
+    TimeRuler(int sampleRate) 
+    { 
+        this->sampleRate = sampleRate; 
+    }
 
-    void render(Screen &screen) {
-        DecoratedWindow border;
-        Screen ruler = {screen.width - 2, 1};
-        windowSizeInSamples = ruler.width * samplesPerCell();
-        ScreenCellStyle time_marker_style, second_marker_style;
-        time_marker_style.foregroundColour = Colour(1, 1, 1);
-        second_marker_style.foregroundColour = Colour(0.5, 1, 1);
+    void paint(juce::Graphics &screen) override {
+        windowSizeInSamples = getWidth() * samplesPerCell();
 
-        cellsPerTimeMarker = screen.width/5;
-        int cells_per_micro_marker = screen.width / 15;
-        for (int x = 0; x < screen.width; x++) {
+        cellsPerTimeMarker = getWidth()/5;
+        int cells_per_micro_marker = getWidth() / 15;
+        for (int x = 0; x < getWidth(); x++) {
             if (x % cellsPerTimeMarker == 0) {
                 std::string time = to_string((1.0 * x / cellsPerSecond) + (1.0 * startTimeOnScreenInSamples / sampleRate));
                 time.resize(time.find(".") + 2);
-                ruler.set_style(time_marker_style);
-                ruler.draw(Point(x, 0), time);
+                screen.setColour(juce::Colours::white);
+                screen.drawText(time, x, 0, 10, 10, juce::Justification::centred);
             } else if (x % cells_per_micro_marker == 0) {
-                ruler.set_style(second_marker_style);
-                ruler.draw(Point(x, 0), "|");
+                screen.setColour(juce::Colours::white);
+                screen.drawText("|", x, 0, 10, 10, juce::Justification::centred);                
             }
         }
-        border.render(screen);
-        screen.draw(Point(1, 1), ruler);
     }
 
     int samplesPerCell() {

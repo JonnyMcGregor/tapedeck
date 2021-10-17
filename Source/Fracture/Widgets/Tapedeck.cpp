@@ -1,16 +1,27 @@
 #include "Tapedeck.hpp"
 
-Tapedeck::Tapedeck()
-{
-    DecoratedWindow dw = DecoratedWindow("TAPEDECK");
-    this->tapedeckWindow = dw;
-    initialise_session("test_session");
+Tapedeck::Tapedeck(int width, int height) {
+    setWantsKeyboardFocus(true);
+    setSize(width, height);
+    tapedeckWindow = std::make_unique<DecoratedWindow>("TAPEDECK", getWidth(), getHeight());
+    initialiseSession("test_session");
+    
+	playhead = std::make_unique<DrawableRectangle>();
+    playhead->setFill(Colours::white);
+    addAndMakeVisible(tapedeckWindow.get());
+    addAndMakeVisible(trackStack.get());
+    addAndMakeVisible(playhead.get());
+    addAndMakeVisible(timeRuler.get());
+
+    updatePlayheadPosition();
     selectedTrack = trackStack->subWidgets.front().get();
-    selectedTrack->is_selected = true;
+    selectedTrack->isSelected = true;
+    resized();
 }
-Tapedeck::~Tapedeck(){}
-void Tapedeck::initialise_session(std::string sessionName) 
-{
+
+Tapedeck::~Tapedeck() {}
+
+void Tapedeck::initialiseSession(std::string sessionName) {
     this->sessionName = sessionName;
     if (filesystem::exists(sessionName)) {
         filesystem::remove_all(sessionName);
@@ -21,169 +32,154 @@ void Tapedeck::initialise_session(std::string sessionName)
     timeRuler = make_shared<TimeRuler>(audioManager->params->sampleRate);
     trackStack = make_shared<TrackStack>(timeRuler);
     for (int i = 0; i < 4; i++) {
-        create_track();
+        createTrack();
     }
 }
+bool keyStateChanged(bool isKeyDown, juce::Component *originatingComponent) { return true; }
 
-void Tapedeck::process(std::vector<KeyPress> &keyboardInput) 
-{
+bool Tapedeck::keyPressed(const juce::KeyPress &key) {
     session->sessionXml->refreshXmlDocument(*session->playhead, session->tracks);
-    if (keyboardInput.size() > 0) {
-        /// Flip bool for selected track in case it changes
-        if (selectedTrack != nullptr) {
-            selectedTrack->is_selected = false;
-        }
-        if (selectedClip != nullptr) {
-            selectedClip->is_selected = false;
-        }
-        
-        KeyPress last = keyboardInput.back();
-        // QUIT
-        if (last == KeyPress(Key::K_Q, ModifierKey::Control)) {
-            closeUIThread = true;
-            keyboardInput.pop_back();
-        }
-        if (last == KeyPress(Key::K_UpArrow)) {
-            select_previous_track();
-            selectedClip = nullptr;
-            keyboardInput.pop_back();
-        }
-        if (last == KeyPress(Key::K_DownArrow)) {
-            select_next_track();
-            selectedClip = nullptr;
-            keyboardInput.pop_back();
-        }
-        if (last == KeyPress(Key::K_LeftArrow)) {
-            if (selectedTrack->clipWidgets.size() > 0) {
-                select_previous_clip();
-            }
-            keyboardInput.pop_back();
-        }
-        if (last == KeyPress(Key::K_RightArrow)) {
-            if (selectedTrack->clipWidgets.size() > 0) {
-                select_next_clip();
-            }
-            keyboardInput.pop_back();
-        }
-        if (last == KeyPress(Key::K_LeftArrow, ModifierKey::Control)) {
-            if (selectedClip != nullptr) {
-                if (*selectedClip->clipStartTime - timeRuler->windowSizeInSamples * 0.125 >= 0) {
-                    *selectedClip->clipStartTime -= timeRuler->windowSizeInSamples * 0.125;
-                } else {
-                    *selectedClip->clipStartTime = 0;
-                }
-            }
-            keyboardInput.pop_back();
-        }
-        if (last == KeyPress(Key::K_RightArrow, ModifierKey::Control)) {
-            if (selectedClip != nullptr) {
-                *selectedClip->clipStartTime += timeRuler->windowSizeInSamples * 0.125;
-            }
-            keyboardInput.pop_back();
-        }
-        if (last == KeyPress(Key::K_LeftArrow, ModifierKey::Shift)) {
-            if (selectedClip != nullptr) {
-                if ((int)*selectedClip->clipStartTime - 500 >= 0) {
-                    *selectedClip->clipStartTime -= 500;
-                } else {
-                    *selectedClip->clipStartTime = 0;
-                }
-            }
-            keyboardInput.pop_back();
-        }
-        if (last == KeyPress(Key::K_RightArrow, ModifierKey::Shift)) {
-            if (selectedClip != nullptr) {
-                *selectedClip->clipStartTime += 500;
-            }
-            keyboardInput.pop_back();
-        }
-        if (last == KeyPress(Key::K_Comma)) {
-            // scrub_backward
-            session->playhead->movePlayhead(-0.5f);
-            retreat_clip_window();
-            keyboardInput.pop_back();
-        }
-        if (last == KeyPress(Key::K_Period)) {
-            // scrub_forward
-            session->playhead->movePlayhead(0.5f);
-            advance_clip_window();
-            keyboardInput.pop_back();
-        }
-        if (last == KeyPress(Key::K_Comma, ModifierKey::Shift)) {
-            // big_scrub_backward
-            session->playhead->movePlayhead((-0.5f * 4.0f));
-            retreat_clip_window();
-            keyboardInput.pop_back();
-        }
-        if (last == KeyPress(Key::K_Period, ModifierKey::Shift)) {
-            // big_scrub_forward
-            session->playhead->movePlayhead((0.5f * 4.0f));
-            advance_clip_window();
-            keyboardInput.pop_back();
-        }
-        if (last == KeyPress(Key::K_BracketOpen)) {
-            // zoom_out
-            timeRuler->cellsPerSecond *= 0.75;
-            keyboardInput.pop_back();
-        }
-        if (last == KeyPress(Key::K_BracketClose)) {
-            // zoom_in
-            timeRuler->cellsPerSecond *= 1.25;
-            keyboardInput.pop_back();
-        }
-        if (last == KeyPress(Key::K_Equal)) {
-            create_track();
-            keyboardInput.pop_back();
-        }
-        if (last == KeyPress(Key::K_Minus)) {
-            remove_track();
-            keyboardInput.pop_back();
-        }
-        if (last == KeyPress(Key::K_S)) {
-            // toggle_track_solo
-            selectedTrack->track->solo = !selectedTrack->track->solo;
-            keyboardInput.pop_back();
-        }
-        if (last == KeyPress(Key::K_M)) {
-            // toggle_track_mute
-            selectedTrack->track->mute = !selectedTrack->track->mute;
-            keyboardInput.pop_back();
-        }
-        if (last == KeyPress(Key::K_R)) {
-            // toggle_track_armed
-            selectedTrack->track->recordArmed = !selectedTrack->track->recordArmed;
-            keyboardInput.pop_back();
-        }
-        if (last == KeyPress(Key::K_Space)) {
-            // play_pause
-            if(audioManager)
-            {
-                if (isPlaying) {
-                    audioManager->stopAudioStream();
-                    isPlaying = false;
-                    trackStack->process(keyboardInput);
-                } 
-                else 
-                {
-                    audioManager->startAudioStream();
-                    isPlaying = true;
-                }
-            }
-            
-            keyboardInput.pop_back();
-        }
-        if (selectedTrack != nullptr) {
-            selectedTrack->is_selected = true;
-        } else if (trackStack->subWidgets.size() > 0) {
-            selectedTrack = trackStack->subWidgets[0].get();
-            selectedTrack->is_selected = true;
-        }
-        if (selectedClip != nullptr) {
-            selectedClip->is_selected = true;
+
+    /// Flip bool for selected track in case it changes
+    if (selectedTrack != nullptr) {
+        selectedTrack->isSelected = false;
+    }
+    if (selectedClip != nullptr) {
+        selectedClip->isSelected = false;
+    }
+
+    // QUIT
+    if (key.getKeyCode() == 'q' && key.getModifiers() == juce::ModifierKeys::ctrlModifier) {
+        closeUIThread = true;
+        juce::JUCEApplication::getInstance()->systemRequestedQuit();
+    }
+    if (key == juce::KeyPress::upKey) {
+        selectPreviousTrack();
+        selectedClip = nullptr;
+    }
+    if (key == juce::KeyPress::downKey) {
+        selectNextTrack();
+        selectedClip = nullptr;
+    }
+    if (key == juce::KeyPress::leftKey) {
+        if (selectedTrack->clipWidgets.size() > 0) {
+            selectPreviousClip();
         }
     }
+    if (key == juce::KeyPress::rightKey) {
+        if (selectedTrack->clipWidgets.size() > 0) {
+            selectNextClip();
+        }
+    }
+    if (key == juce::KeyPress::leftKey && key.getModifiers() == juce::ModifierKeys::ctrlModifier) {
+        if (selectedClip != nullptr) {
+            if (selectedClip->clipStartTime - timeRuler->windowSizeInSamples * 0.125 >= 0) {
+                selectedClip->clipStartTime -= timeRuler->windowSizeInSamples * 0.125;
+            } else {
+                selectedClip->clipStartTime = 0;
+            }
+        }
+    }
+    if (key == juce::KeyPress::rightKey && key.getModifiers() == juce::ModifierKeys::ctrlModifier) {
+        if (selectedClip != nullptr) {
+            selectedClip->clipStartTime += timeRuler->windowSizeInSamples * 0.125;
+        }
+    }
+    if (key == juce::KeyPress::leftKey && key.getModifiers() == juce::ModifierKeys::shiftModifier) {
+        if (selectedClip != nullptr) {
+            if ((int)selectedClip->clipStartTime - 500 >= 0) {
+                selectedClip->clipStartTime -= 500;
+            } else {
+                selectedClip->clipStartTime = 0;
+            }
+        }
+    }
+    if (key == juce::KeyPress::rightKey && key.getModifiers() == juce::ModifierKeys::shiftModifier) {
+        if (selectedClip != nullptr) {
+            selectedClip->clipStartTime += 500;
+        }
+    }
+    if (key.getKeyCode() == ',') {
+        // scrub_backward
+        session->playhead->movePlayhead(-0.5f);
+        updatePlayheadPosition();
+        retreatClipWindow();
+    }
+    if (key.getKeyCode() == '.') {
+        // scrub_forward
+        session->playhead->movePlayhead(0.5f);
+        updatePlayheadPosition();
+        advanceClipWindow();
+    }
+    if (key.getKeyCode() == ',' && key.getModifiers() == juce::ModifierKeys::shiftModifier) {
+        // big_scrub_backward
+        session->playhead->movePlayhead((-0.5f * 4.0f));
+        updatePlayheadPosition();
+        retreatClipWindow();
+    }
+    if (key.getKeyCode() == '.' && key.getModifiers() == juce::ModifierKeys::shiftModifier) {
+        // big_scrub_forward
+        session->playhead->movePlayhead((0.5f * 4.0f));
+        updatePlayheadPosition();
+        advanceClipWindow();
+    }
+    if (key.getKeyCode() == '[') {
+        // zoom_out
+        timeRuler->cellsPerSecond *= 0.75;
+    }
+    if (key.getKeyCode() == ']') {
+        // zoom_in
+        timeRuler->cellsPerSecond *= 1.25;
+    }
+    if (key.getKeyCode() == '=') {
+        createTrack();
+    }
+    if (key.getKeyCode() == '-') {
+        removeTrack();
+    }
+    if (key.getTextCharacter() == 's') {
+        // toggle_track_solo
+        selectedTrack->track->solo = !selectedTrack->track->solo;
+        selectedTrack->refresh();
+    }
+    if (key.getTextCharacter() == 'm') {
+        // toggle_track_mute
+        selectedTrack->track->mute = !selectedTrack->track->mute;
+        selectedTrack->refresh();
+    }
+    if (key.getTextCharacter() == 'r') {
+        // toggle_track_armed
+        selectedTrack->track->recordArmed = !selectedTrack->track->recordArmed;
+        selectedTrack->refresh();
+    }
+    if (key == juce::KeyPress::spaceKey) {
+        // play/pause
+        if (audioManager) {
+            if (isPlaying) {
+                audioManager->stopAudioStream();
+                isPlaying = false;
+                trackStack->process();
+                stopTimer();
+            } else {
+                audioManager->startAudioStream();
+                isPlaying = true;
+                startTimerHz(30);
+            }
+        }
+    }
+    if (selectedTrack != nullptr) {
+        selectedTrack->isSelected = true;
+    } else if (trackStack->subWidgets.size() > 0) {
+        selectedTrack = trackStack->subWidgets[0].get();
+        selectedTrack->isSelected = true;
+    }
+    if (selectedClip != nullptr) {
+        selectedClip->isSelected = true;
+    }
+    repaint();
+    return true;
 }
-void Tapedeck::select_previous_track() {
+void Tapedeck::selectPreviousTrack() {
     for (int i = 0; i < trackStack->subWidgets.size(); i++) {
         if (trackStack->subWidgets[i].get() == selectedTrack) {
             if (i != 0) {
@@ -195,7 +191,7 @@ void Tapedeck::select_previous_track() {
         }
     }
 }
-void Tapedeck::select_next_track() {
+void Tapedeck::selectNextTrack() {
     for (int i = 0; i < trackStack->subWidgets.size(); i++) {
         if (trackStack->subWidgets[i].get() == selectedTrack) {
             if (i + 1 == trackStack->subWidgets.size()) {
@@ -207,7 +203,7 @@ void Tapedeck::select_next_track() {
         }
     }
 }
-void Tapedeck::select_previous_clip() {
+void Tapedeck::selectPreviousClip() {
     for (int i = 0; i < selectedTrack->clipWidgets.size(); i++) {
         if (selectedTrack->clipWidgets[i].get() == selectedClip) {
             if (i != 0) {
@@ -216,7 +212,7 @@ void Tapedeck::select_previous_clip() {
         }
     }
 }
-void Tapedeck::select_next_clip() {
+void Tapedeck::selectNextClip() {
     for (int i = 0; i < selectedTrack->clipWidgets.size(); i++) {
         if (selectedTrack->clipWidgets[i].get() == selectedClip) {
             if (i + 1 != selectedTrack->clipWidgets.size()) {
@@ -229,12 +225,12 @@ void Tapedeck::select_next_clip() {
         selectedClip = selectedTrack->clipWidgets[0].get();
     }
 }
-void Tapedeck::advance_clip_window() {
+void Tapedeck::advanceClipWindow() {
     if (session->getCurrentTimeInSamples() > timeRuler->startTimeOnScreenInSamples + timeRuler->windowSizeInSamples) {
         timeRuler->startTimeOnScreenInSamples = session->getCurrentTimeInSamples();
     }
 }
-void Tapedeck::retreat_clip_window() {
+void Tapedeck::retreatClipWindow() {
     if (session->getCurrentTimeInSamples() < timeRuler->startTimeOnScreenInSamples) {
         timeRuler->startTimeOnScreenInSamples = session->getCurrentTimeInSamples() - timeRuler->windowSizeInSamples;
         if (timeRuler->startTimeOnScreenInSamples < 0) {
@@ -242,14 +238,15 @@ void Tapedeck::retreat_clip_window() {
         }
     }
 }
-void Tapedeck::create_track() {
+void Tapedeck::createTrack() {
     session->createTrack();
     trackStack->createTrackSubWidgets(session->tracks.back());
     if (trackStack->subWidgets.size() == 1) {
         selectedTrack = trackStack->subWidgets.back().get();
     }
+    trackStack->resized();
 }
-void Tapedeck::remove_track() {
+void Tapedeck::removeTrack() {
     std::vector<std::unique_ptr<TrackWidget>>::iterator widgetIterator = trackStack->subWidgets.begin();
     for (int i = 0; i < trackStack->subWidgets.size(); i++) {
         if (selectedTrack == trackStack->subWidgets[i].get()) {
@@ -259,40 +256,50 @@ void Tapedeck::remove_track() {
             session->deleteTrack(i);
         }
     }
+    trackStack->resized();
 }
-void Tapedeck::render(Screen &screen) {
-    Screen topBar = {screen.width - 2, screen.height * 0.2 - 2};
-    Screen timeRulerScreen = {screen.width * 0.9, 3};
-    Screen trackScreen = {screen.width - 2, screen.height * 0.8 - 2};
-    Screen playheadScreen = {1, trackScreen.height};
-    this->tapedeckWindow.render(screen);
-    timeRuler->render(timeRulerScreen);
-    trackStack->render(trackScreen);
-    playheadWidget.render(playheadScreen);
-    topBar.draw(Point(2, 1), "Key Commands:");
-    topBar.draw(Point(2, 3), "Create/Delete track    '='/'-'");
-    topBar.draw(Point(2, 4), "Navigate tracks        'Up'/'Down'");
-    topBar.draw(Point(2, 5), "Scrub through time     ','/'.'");
-    topBar.draw(Point(40, 3), "Record Arm Selected Track    'R'");
-    topBar.draw(Point(40, 4), "Solo Selected Track          'S'");
-    topBar.draw(Point(40, 5), "Mute Selected Track          'M'");
-    topBar.draw(Point(78, 3), "Playback/Record/Stop Audio    'Space'");
-    topBar.draw(Point(78, 4), "Zoom out/in                   '['/']'");
-    topBar.draw(Point(78, 4), "Quit Tapedeck                 'Ctrl-Q'");
-    trackScreen.draw(Point(playhead_x_position(trackScreen), 0), playheadScreen);
-    screen.draw(Point(1, 1), topBar);
-    screen.draw(Point(screen.width * 0.1, screen.height * 0.2 - 1), timeRulerScreen);
-    screen.draw(Point(1, screen.height * 0.2 + 1), trackScreen);
+void Tapedeck::paint(juce::Graphics &screen) {
+
+    // topBar.draw(Point(2, 1), "Key Commands:");
+    // topBar.draw(Point(2, 3), "Create/Delete track    '='/'-'");
+    // topBar.draw(Point(2, 4), "Navigate tracks        'Up'/'Down'");
+    // topBar.draw(Point(2, 5), "Scrub through time     ','/'.'");
+    // topBar.draw(Point(40, 3), "Record Arm Selected Track    'R'");
+    // topBar.draw(Point(40, 4), "Solo Selected Track          'S'");
+    // topBar.draw(Point(40, 5), "Mute Selected Track          'M'");
+    // topBar.draw(Point(78, 3), "Playback/Record/Stop Audio    'Space'");
+    // topBar.draw(Point(78, 4), "Zoom out/in                   '['/']'");
+    // topBar.draw(Point(78, 4), "Quit Tapedeck                 'Ctrl-Q'");
 }
-int Tapedeck::playhead_x_position(Screen trackScreen) {
-    int x_pos = trackScreen.width * 0.1;
+
+void Tapedeck::resized() {
+    if (tapedeckWindow) {
+        tapedeckWindow->setBounds(getBounds());
+        trackStack->setBounds(getWidth() * 0.01, getHeight() * 0.2, getWidth() * 0.98, getHeight() * 0.75);
+        timeRuler->setBounds(trackStack->getX() + (trackStack->getWidth() * 0.1), trackStack->getY() - (getHeight() * 0.03), getWidth() * 0.9, getHeight() * 0.1);
+        updatePlayheadPosition();
+    }
+}
+
+void Tapedeck::timerCallback() {
+    if (playhead->getX() != playheadXPosition()) {
+        updatePlayheadPosition();
+    }
+}
+
+int Tapedeck::playheadXPosition() {
+    int x_pos = trackStack->timeRuler->getX();
     x_pos += (session->getCurrentTimeInSamples() - timeRuler->startTimeOnScreenInSamples) / timeRuler->samplesPerCell();
-    if (x_pos >= trackScreen.width - (trackScreen.width * 0.9 * 0.5) && isPlaying) {
-        x_pos = trackScreen.width - (trackScreen.width * 0.9 * 0.5);
-        update_clip_window();
+    if (x_pos >= getWidth() - (getWidth() * 0.9 * 0.5) && isPlaying) {
+        x_pos = getWidth() - (getWidth() * 0.9 * 0.5);
+        updateClipWindow();
     }
     return x_pos;
 }
-void Tapedeck::update_clip_window() {
+void Tapedeck::updatePlayheadPosition() {
+    juce::Rectangle<float> r = { (float)playheadXPosition(), (float)trackStack->getY(), 2.0f, (float)trackStack->getHeight() };
+    playhead->setRectangle(juce::Parallelogram<float>(r));
+}
+void Tapedeck::updateClipWindow() {
     timeRuler->startTimeOnScreenInSamples = session->getCurrentTimeInSamples() - timeRuler->windowSizeInSamples / 2;
 }

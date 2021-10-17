@@ -1,6 +1,6 @@
 #include "Session.hpp"
 Session::Session(std::string sessionName, AudioParams params) {
-    
+
     this->sessionName = sessionName;
     this->sampleRate = params.sampleRate;
     this->bufferSize = params.bufferSize;
@@ -122,7 +122,11 @@ int Session::numRecordArmedTracks() {
     return numRecordArmedTracks;
 }
 u_int Session::getCurrentTimeInSamples() {
-    return playhead->currentTimeInSamples;
+	if (playhead)
+	{
+        return playhead->currentTimeInSamples;
+	}
+    return 0;
 }
 
 float Session::getCurrentTimeInSeconds() {

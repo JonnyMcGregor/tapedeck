@@ -3,6 +3,7 @@
 #include "Playhead.hpp"
 #include "Track.hpp"
 #include <filesystem>
+
 using namespace tinyxml2;
 
 struct XmlWrapper {

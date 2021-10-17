@@ -1,33 +1,42 @@
 #pragma once
 #include "TrackWidget.hpp"
-#include "VboxLayout.hpp"
-struct TrackStack : Widget {
-    std::vector<std::unique_ptr<TrackWidget>> subWidgets;
-    std::shared_ptr<TimeRuler> timeRuler;
-    TrackStack(std::shared_ptr<TimeRuler> timeRuler) { this->timeRuler = timeRuler; }
+
+struct TrackStack : public juce::Component {
+    
+    TrackStack(std::shared_ptr<TimeRuler> timeRuler) 
+    { 
+        this->timeRuler = timeRuler; 
+        DecoratedWindow window = {"Track Stack", getWidth(), getHeight()};
+        window.setTopLeftPosition(0,0);
+        addAndMakeVisible(window);
+    }
 
     void createTrackSubWidgets(std::shared_ptr<Track> track) {
         this->subWidgets.push_back(std::make_unique<TrackWidget>(track, timeRuler));
+        addAndMakeVisible(subWidgets.back().get());
+        resized();
     }
-
-    void process(std::vector<KeyPress> &keyboardInput) {
+    
+    void process() {
         for (int i = 0; i < subWidgets.size(); i++) {
-            subWidgets[i]->process(keyboardInput);
+            subWidgets[i]->updateClipWidgets();
         }
     }
 
-    void render(Screen &screen) {
-        if (this->subWidgets.size() == 0) {
-            return;
-        }
-        u_short widgetY = 0;
-        u_short widgetHeight = screen.height / this->subWidgets.size();
+    void paint(juce::Graphics &screen) override{
+    }
+    void resized() override
+    {
+        u_int widgetY = 0;
+        u_int widgetHeight = this->subWidgets.size() > 0 ? this->getHeight() / this->subWidgets.size() : this->getHeight();
 
-        for (u_short i = 0; i < this->subWidgets.size(); i++) {
-            Screen subWidgetScreen = Screen(screen.width, widgetHeight);
-            this->subWidgets[i]->render(subWidgetScreen);
-            screen.draw(Point(0, widgetY), subWidgetScreen);
+        for(auto &subWidget : subWidgets)
+        {
+            subWidget->setBounds(0, widgetY, getWidth(), widgetHeight);
             widgetY += widgetHeight;
-        };
+        }
     }
+    juce::Colour backgroundColour = juce::Colours::orange;
+    std::vector<std::unique_ptr<TrackWidget>> subWidgets;
+    std::shared_ptr<TimeRuler> timeRuler;
 };

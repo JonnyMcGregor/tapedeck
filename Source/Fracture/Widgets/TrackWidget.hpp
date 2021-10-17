@@ -2,138 +2,130 @@
 #include "../../Seismic/Components/Track.hpp"
 #include "ClipWidget.hpp"
 #include "DecoratedWindow.hpp"
+#include "TrackToggleButton.h"
 
-struct TrackWidget : Widget {
+struct TrackWidget : public juce::Component, public juce::Button::Listener {
     std::shared_ptr<Track> track;
     std::vector<std::shared_ptr<ClipWidget>> clipWidgets;
     std::shared_ptr<TimeRuler> timeRuler;
+    std::unique_ptr<DecoratedWindow> clipArea;
+    std::unique_ptr<DecoratedWindow> trackBar;
+    std::unique_ptr<TrackToggleButton> but_recordArm;
+    std::unique_ptr<TrackToggleButton> but_solo;
+    std::unique_ptr<TrackToggleButton> but_mute;
+
+    bool isSelected = false;
     TrackWidget(std::shared_ptr<Track> track, std::shared_ptr<TimeRuler> timeRuler) {
         this->track = track;
         for (int i = 0; i < track->clips.size(); i++) {
             clipWidgets.push_back(std::make_shared<ClipWidget>(track->clips[i], timeRuler, track->clipMetadata[i].startTime));
+            addAndMakeVisible(clipWidgets.back().get());
         }
-        selectedWidgetStyle.foregroundColour = Colour(1, 1, 1);
         this->timeRuler = timeRuler;
+        trackBar = std::make_unique<DecoratedWindow>(track->name, getWidth() * 0.1, getHeight());
+        clipArea = std::make_unique<DecoratedWindow>(getWidth() * 0.9, getHeight());
+
+        but_recordArm = std::make_unique<TrackToggleButton>();
+        but_recordArm->setButtonText("R");
+        but_recordArm->setColour(ToggleButton::ColourIds::tickColourId, Colours::red);
+        but_solo = std::make_unique<TrackToggleButton>();
+        but_solo->setButtonText("S");
+        but_solo->setColour(ToggleButton::ColourIds::tickColourId, Colours::red);
+        but_mute = std::make_unique<TrackToggleButton>();
+        but_mute->setButtonText("M");
+        but_mute->setColour(ToggleButton::ColourIds::tickColourId, Colours::red);
+
+        addAndMakeVisible(trackBar.get());
+        addAndMakeVisible(clipArea.get());
+        addAndMakeVisible(but_recordArm.get());
+        addAndMakeVisible(but_solo.get());
+        addAndMakeVisible(but_mute.get());
     }
 
-    void process(std::vector<KeyPress> &keyboardInput) {
+    void updateClipWidgets() {
         clipWidgets.clear();
         for (int i = 0; i < track->clips.size(); i++) {
-            clipWidgets.push_back(std::make_shared<ClipWidget>(track->clips[i], timeRuler, track->clipMetadata[i].startTime));
+            clipWidgets.emplace_back(std::make_shared<ClipWidget>(track->clips[i], timeRuler, track->clipMetadata[i].startTime));
+            addAndMakeVisible(clipWidgets.back().get());
         }
-    }
-    void render(Screen &screen) {
-        ScreenCellStyle clip_style, track_style;
-        clip_style.foregroundColour = Colour(1, 0, 0);
-        track_style.foregroundColour = Colour(0, 0.5, 1);
-
-        Screen track_bar_area = {screen.width * 0.1, screen.height};
-        Screen track_properties_area = {track_bar_area.width - 2, track_bar_area.height - 2};
-        Screen clip_area_border = {screen.width * 0.9, screen.height};
-        Screen clip_data_area = {clip_area_border.width - 2, clip_area_border.height - 2};
-
-        if (is_selected) {
-            clip_area_border.set_style(selectedWidgetStyle);
-            track_bar_area.set_style(selectedWidgetStyle);
-        } else {
-            clip_area_border.set_style(track_style);
-            track_bar_area.set_style(track_style);
-        }
-
-        DecoratedWindow clip_area;
-        DecoratedWindow track_bar = {track->name};
-
-        draw_toggle_buttons(track_properties_area);
-        draw_clips(clip_data_area);
-
-        track_bar.render(track_bar_area);
-        clip_area.render(clip_area_border);
-
-        track_bar_area.draw(Point(1, 1), track_properties_area);
-        clip_area_border.draw(Point(1, 1), clip_data_area);
-        screen.draw(Point(0, 0), track_bar_area);
-        screen.draw(Point(screen.width * 0.1, 0), clip_area_border);
+        resized();
     }
 
-    void draw_toggle_buttons(Screen &screen) {
-        ScreenCellStyle button_on_style, button_off_style;
-
-        button_on_style.foregroundColour = Colour(1, 1, 1);
-        button_on_style.backgroundColour = Colour(0.8, 0, 0);
-        button_off_style.foregroundColour = Colour(1, 1, 1);
-        button_off_style.backgroundColour = Colour(0, 0, 0);
-
-        if (track->recordArmed) {
-            Screen record_button = {3, 1};
-            draw_button(record_button, button_on_style, "R");
-            screen.draw(Point(screen.width / 4 - 1, screen.height / 2 - 1), record_button);
-        } else {
-            Screen record_button = {3, 1};
-            draw_button(record_button, button_off_style, "R");
-            screen.draw(Point(screen.width / 4 - 1, screen.height / 2 - 1), record_button);
+    void refresh() {
+        if (track->solo != but_solo->getToggleState()) {
+            but_solo->setToggleState(track->solo, dontSendNotification);
         }
-
-        if (track->solo) {
-            Screen solo_button = {3, 1};
-            draw_button(solo_button, button_on_style, "S");
-            screen.draw(Point(screen.width * 2 / 4 - 1, screen.height / 2 - 1), solo_button);
-        } else {
-            Screen solo_button = {3, 1};
-            draw_button(solo_button, button_off_style, "S");
-            screen.draw(Point(screen.width * 2 / 4 - 1, screen.height / 2 - 1), solo_button);
+        if (track->mute != but_mute->getToggleState()) {
+            but_mute->setToggleState(track->mute, dontSendNotification);
         }
-
-        if (track->mute) {
-            Screen mute_button = {3, 1};
-            draw_button(mute_button, button_on_style, "M");
-            screen.draw(Point(screen.width * 3 / 4 - 1, screen.height / 2 - 1), mute_button);
-        } else {
-            Screen mute_button = {3, 1};
-            draw_button(mute_button, button_off_style, "M");
-            screen.draw(Point(screen.width * 3 / 4 - 1, screen.height / 2 - 1), mute_button);
+        if (track->recordArmed != but_recordArm->getToggleState()) {
+            but_recordArm->setToggleState(track->recordArmed, dontSendNotification);
         }
     }
 
-    void draw_button(Screen &screen, ScreenCellStyle style, std::string character) {
-        screen.set_style(style);
-        screen.draw(Point(1, 0), character);
+    void buttonClicked(Button *but) override {
+		if (but == but_recordArm.get())
+		{
+            track->recordArmed = but->getToggleState();
+		}
+        else if (but == but_solo.get()) 
+		{
+            track->solo = but->getToggleState();
+        }
+        else if (but == but_mute.get()) 
+		{
+            track->mute = but->getToggleState();
+        }
     }
 
-    void draw_clips(Screen &screen) {
+    void paint(juce::Graphics &screen) override {}
+
+    void resized() override {
+        trackBar->setBounds(0, 0, getWidth() * 0.1, getHeight());
+        juce::Rectangle<float> toggleBtnArea = {trackBar->getWidth() - 2.0f, trackBar->getHeight() - 2.0f};
+        float btnHeight = toggleBtnArea.getHeight() * 0.15f;
+        but_solo->setBounds(toggleBtnArea.getCentreX() - (btnHeight * 0.5), toggleBtnArea.getCentreY() - (btnHeight * 0.5), btnHeight, btnHeight);
+        but_recordArm->setBounds(but_solo->getX() - btnHeight - 5, but_solo->getY(), btnHeight, btnHeight);
+        but_mute->setBounds(but_solo->getX() + btnHeight + 5, but_solo->getY(), btnHeight, btnHeight);
+
+        clipArea->setBounds(trackBar->getRight(), 0, getWidth() - trackBar->getWidth(), getHeight());
+        juce::Rectangle<float> clipDataArea = {clipArea->getX() + 5.0f, clipArea->getY() + (clipArea->getHeight() * 0.05f), clipArea->getWidth() - 2.0f, clipArea->getHeight() * 0.9f};
+        drawClips(clipDataArea);
+    }
+
+    void drawClips(juce::Rectangle<float> area) {
         if (clipWidgets.size() > 0) {
             for (int i = 0; i < clipWidgets.size(); i++) {
-                if (clip_is_drawable(i)) {
-                    Screen single_clip_screen = {calculate_clip_width(i), screen.height};
-                    clipWidgets[i]->render(single_clip_screen);
-                    screen.draw(Point(calculate_clip_start_cell(i), 0), single_clip_screen);
+                if (clipIsDrawable(i)) {
+                    clipWidgets[i]->setBounds(area.getX() + calculateClipX(i), area.getY(), calculateClipWidth(i), area.getHeight());
+                    clipWidgets[i]->repaint();
                 }
             }
         }
     }
 
-    bool clip_is_drawable(int clip_index) {
-        if (timeRuler->startTimeOnScreenInSamples + timeRuler->windowSizeInSamples <=  track->clipMetadata[clip_index].startTime||
-            track->clipMetadata[clip_index].startTime + track->clips[clip_index]->size() <= timeRuler->startTimeOnScreenInSamples) {
+    bool clipIsDrawable(int clipIndex) {
+        if (timeRuler->startTimeOnScreenInSamples + timeRuler->windowSizeInSamples <= track->clipMetadata[clipIndex].startTime ||
+            track->clipMetadata[clipIndex].startTime + track->clips[clipIndex]->size() <= timeRuler->startTimeOnScreenInSamples) {
             return false;
-        } else if(calculate_clip_width(clip_index) == 0) {
+        } else if (calculateClipWidth(clipIndex) == 0) {
             return false;
-        }
-        else{
+        } else {
             return true;
         }
     }
-    int calculate_clip_width(int clip_index) {
-        return (calculate_clip_end_sample(clip_index) - calculate_clip_start_sample(clip_index)) / timeRuler->samplesPerCell();
+    int calculateClipWidth(int clipIndex) {
+        return (calculateClipEndSample(clipIndex) - calculateClipStartSample(clipIndex)) / timeRuler->samplesPerCell();
     }
 
-    int calculate_clip_start_sample(int clip_index) {
-        return max((int)track->clipMetadata[clip_index].startTime, timeRuler->startTimeOnScreenInSamples);
+    int calculateClipStartSample(int clipIndex) {
+        return max((int)track->clipMetadata[clipIndex].startTime, timeRuler->startTimeOnScreenInSamples);
     }
-    int calculate_clip_end_sample(int clip_index) {
-        return min((int)(track->clipMetadata[clip_index].startTime + track->clips[clip_index]->size()), timeRuler->startTimeOnScreenInSamples + timeRuler->windowSizeInSamples);
+    int calculateClipEndSample(int clipIndex) {
+        return min((int)(track->clipMetadata[clipIndex].startTime + track->clips[clipIndex]->size()), timeRuler->startTimeOnScreenInSamples + timeRuler->windowSizeInSamples);
     }
 
-      int calculate_clip_start_cell(int clip_index) {
-        return max((int)(track->clipMetadata[clip_index].startTime - timeRuler->startTimeOnScreenInSamples) / timeRuler->samplesPerCell(), 0);
+    int calculateClipX(int clipIndex) {
+        return max((int)(track->clipMetadata[clipIndex].startTime - timeRuler->startTimeOnScreenInSamples) / timeRuler->samplesPerCell(), 0);
     }
 };

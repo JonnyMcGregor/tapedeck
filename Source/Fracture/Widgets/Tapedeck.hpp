@@ -1,9 +1,8 @@
 
 #include "../../Seismic/AudioManager.hpp"
 #include "../Components/Point.hpp"
-#include "../Components/Widget.hpp"
+//#include "../Components/Widget.hpp"
 #include "DecoratedWindow.hpp"
-#include "PlayheadWidget.hpp"
 #include "TimeRuler.hpp"
 #include "TrackStack.hpp"
 
@@ -11,38 +10,41 @@
 #include <optional>
 #include <string>
 
-class Tapedeck : public Widget 
+class Tapedeck : public juce::Component, private juce::Timer 
 {
 public:
-    Tapedeck();
+    Tapedeck(int width, int height);
     ~Tapedeck();
     // Sets up the session wih a given session name
-    void initialise_session(std::string sessionName);
-    
+    void initialiseSession(std::string sessionName);
+
     //Manages all cases of keyboard input
-    void process(std::vector<KeyPress> &keyboardInput);
+    bool keyPressed(const juce::KeyPress &key) override;
 
-    void select_previous_track();
-    void select_next_track();
-    void select_previous_clip();
-    void select_next_clip();
-    void advance_clip_window();
-    void retreat_clip_window();
-    void create_track();
-    void remove_track();
+    void selectPreviousTrack();
+    void selectNextTrack();
+    void selectPreviousClip();
+    void selectNextClip();
+    void advanceClipWindow();
+    void retreatClipWindow();
+    void createTrack();
+    void removeTrack();
     /** Draws all elements on the main screen */
-    void render(Screen &screen);
-    int playhead_x_position(Screen trackScreen);
-    void update_clip_window();
-
+    void paint(juce::Graphics &screen) override;
+    void resized() override;
+    int playheadXPosition();
+    void updateClipWindow();
+    void updatePlayheadPosition();
     bool closeUIThread = false;
 
 private:
+    void timerCallback() override;
 
-    DecoratedWindow tapedeckWindow;
+    std::unique_ptr<DecoratedWindow> tapedeckWindow;
     std::shared_ptr<TrackStack> trackStack;
     std::shared_ptr<TimeRuler> timeRuler;
-    PlayheadWidget playheadWidget;
+    std::unique_ptr<DrawableRectangle> playhead;
+
     TrackWidget *selectedTrack = nullptr;
     ClipWidget *selectedClip = nullptr;
     std::string sessionName;

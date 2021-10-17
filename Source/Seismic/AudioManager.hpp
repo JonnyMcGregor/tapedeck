@@ -13,14 +13,13 @@ public:
         params = std::make_unique<AudioParams>(currentDevice->getCurrentSampleRate(), 
                     currentDevice->getCurrentBufferSizeSamples(), 1, 2);
         if (isLoadingFromXml) {
-            this->sessionName = xmlPath.stem();
+            this->sessionName = xmlPath.stem().string();
         } else {
             this->sessionName = projectName;
         }
         session = std::make_shared<Session>(this->sessionName, *params.get());
         //Setup Output Log
-        audioDeviceLog = std::make_unique<juce::File>(projectName + "_audio_device_log.txt");
-        audioDeviceLog->getNonexistentSibling().create();
+        audioDeviceLog = std::make_unique<juce::File>(juce::File::getCurrentWorkingDirectory().getFullPathName() + "\\" +  projectName + "_audio_device_log.txt");
         audioDeviceLog->appendText(juce::Time::getCurrentTime().toString(true, true, false, true) + " Audio Device Initialised:\n" + 
                         deviceManager.getCurrentAudioDevice()->getName() + "\n\tNum Input Channels: " + juce::String(params->numInputChannels) + 
                         "\n\tNum Output Channels: " + juce::String(params->numOutputChannels) + "\n\tSample rate: " + juce::String(params->sampleRate) + 
