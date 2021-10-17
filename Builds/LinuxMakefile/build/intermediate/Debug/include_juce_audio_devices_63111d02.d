@@ -58,6 +58,7 @@ build/intermediate/Debug/include_juce_audio_devices_63111d02.o: \
  ../../JuceLibraryCode/modules/juce_core/text/juce_TextDiff.h \
  ../../JuceLibraryCode/modules/juce_core/text/juce_LocalisedStrings.h \
  ../../JuceLibraryCode/modules/juce_core/text/juce_Base64.h \
+ ../../JuceLibraryCode/modules/juce_core/misc/juce_Functional.h \
  ../../JuceLibraryCode/modules/juce_core/misc/juce_Result.h \
  ../../JuceLibraryCode/modules/juce_core/misc/juce_Uuid.h \
  ../../JuceLibraryCode/modules/juce_core/misc/juce_ConsoleApplication.h \
@@ -144,6 +145,7 @@ build/intermediate/Debug/include_juce_audio_devices_63111d02.o: \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_InterprocessConnectionServer.h \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_ConnectedChildProcess.h \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_NetworkServiceDiscovery.h \
+ ../../JuceLibraryCode/modules/juce_events/native/juce_ScopedLowPowerModeDisabler.h \
  ../../JuceLibraryCode/modules/juce_events/native/juce_linux_EventLoop.h \
  ../../JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \
  ../../JuceLibraryCode/modules/juce_audio_basics/buffers/juce_AudioDataConverters.h \
@@ -230,8 +232,8 @@ build/intermediate/Debug/include_juce_audio_devices_63111d02.o: \
  ../../JuceLibraryCode/modules/juce_audio_devices/sources/juce_AudioSourcePlayer.h \
  ../../JuceLibraryCode/modules/juce_audio_devices/sources/juce_AudioTransportSource.h \
  ../../JuceLibraryCode/modules/juce_audio_devices/audio_io/juce_AudioDeviceManager.h \
- ../../JuceLibraryCode/modules/juce_audio_devices/native/juce_MidiDataConcatenator.h \
  ../../JuceLibraryCode/modules/juce_audio_devices/native/juce_linux_ALSA.cpp \
+ ../../JuceLibraryCode/modules/juce_audio_basics/midi/juce_MidiDataConcatenator.h \
  ../../JuceLibraryCode/modules/juce_audio_devices/native/juce_linux_Midi.cpp \
  ../../JuceLibraryCode/modules/juce_audio_devices/audio_io/juce_AudioDeviceManager.cpp \
  ../../JuceLibraryCode/modules/juce_audio_devices/audio_io/juce_AudioIODevice.cpp \

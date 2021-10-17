@@ -57,6 +57,7 @@ build/intermediate/Debug/include_juce_events_fd7d695.o: \
  ../../JuceLibraryCode/modules/juce_core/text/juce_TextDiff.h \
  ../../JuceLibraryCode/modules/juce_core/text/juce_LocalisedStrings.h \
  ../../JuceLibraryCode/modules/juce_core/text/juce_Base64.h \
+ ../../JuceLibraryCode/modules/juce_core/misc/juce_Functional.h \
  ../../JuceLibraryCode/modules/juce_core/misc/juce_Result.h \
  ../../JuceLibraryCode/modules/juce_core/misc/juce_Uuid.h \
  ../../JuceLibraryCode/modules/juce_core/misc/juce_ConsoleApplication.h \
@@ -143,6 +144,7 @@ build/intermediate/Debug/include_juce_events_fd7d695.o: \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_InterprocessConnectionServer.h \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_ConnectedChildProcess.h \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_NetworkServiceDiscovery.h \
+ ../../JuceLibraryCode/modules/juce_events/native/juce_ScopedLowPowerModeDisabler.h \
  ../../JuceLibraryCode/modules/juce_events/native/juce_linux_EventLoop.h \
  ../../JuceLibraryCode/modules/juce_events/messages/juce_ApplicationBase.cpp \
  ../../JuceLibraryCode/modules/juce_events/messages/juce_DeletedAtShutdown.cpp \
@@ -157,4 +159,5 @@ build/intermediate/Debug/include_juce_events_fd7d695.o: \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_InterprocessConnectionServer.cpp \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_ConnectedChildProcess.cpp \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_NetworkServiceDiscovery.cpp \
+ ../../JuceLibraryCode/modules/juce_events/native/juce_ScopedLowPowerModeDisabler.cpp \
  ../../JuceLibraryCode/modules/juce_events/native/juce_linux_Messaging.cpp

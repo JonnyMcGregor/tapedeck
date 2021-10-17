@@ -56,6 +56,7 @@ build/intermediate/Debug/include_juce_core_f26d17db.o: \
  ../../JuceLibraryCode/modules/juce_core/text/juce_TextDiff.h \
  ../../JuceLibraryCode/modules/juce_core/text/juce_LocalisedStrings.h \
  ../../JuceLibraryCode/modules/juce_core/text/juce_Base64.h \
+ ../../JuceLibraryCode/modules/juce_core/misc/juce_Functional.h \
  ../../JuceLibraryCode/modules/juce_core/misc/juce_Result.h \
  ../../JuceLibraryCode/modules/juce_core/misc/juce_Uuid.h \
  ../../JuceLibraryCode/modules/juce_core/misc/juce_ConsoleApplication.h \
@@ -216,9 +217,9 @@ build/intermediate/Debug/include_juce_core_f26d17db.o: \
  ../../JuceLibraryCode/modules/juce_core/native/juce_curl_Network.cpp \
  ../../JuceLibraryCode/modules/juce_core/native/juce_linux_SystemStats.cpp \
  ../../JuceLibraryCode/modules/juce_core/native/juce_linux_Threads.cpp \
- ../../JuceLibraryCode/modules/juce_core/threads/juce_ChildProcess.cpp \
  ../../JuceLibraryCode/modules/juce_core/threads/juce_HighResolutionTimer.cpp \
  ../../JuceLibraryCode/modules/juce_core/threads/juce_WaitableEvent.cpp \
  ../../JuceLibraryCode/modules/juce_core/network/juce_URL.cpp \
+ ../../JuceLibraryCode/modules/juce_core/threads/juce_ChildProcess.cpp \
  ../../JuceLibraryCode/modules/juce_core/network/juce_WebInputStream.cpp \
  ../../JuceLibraryCode/modules/juce_core/streams/juce_URLInputSource.cpp

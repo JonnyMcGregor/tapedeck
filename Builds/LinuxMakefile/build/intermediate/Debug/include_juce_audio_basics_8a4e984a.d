@@ -56,6 +56,7 @@ build/intermediate/Debug/include_juce_audio_basics_8a4e984a.o: \
  ../../JuceLibraryCode/modules/juce_core/text/juce_TextDiff.h \
  ../../JuceLibraryCode/modules/juce_core/text/juce_LocalisedStrings.h \
  ../../JuceLibraryCode/modules/juce_core/text/juce_Base64.h \
+ ../../JuceLibraryCode/modules/juce_core/misc/juce_Functional.h \
  ../../JuceLibraryCode/modules/juce_core/misc/juce_Result.h \
  ../../JuceLibraryCode/modules/juce_core/misc/juce_Uuid.h \
  ../../JuceLibraryCode/modules/juce_core/misc/juce_ConsoleApplication.h \
@@ -193,4 +194,24 @@ build/intermediate/Debug/include_juce_audio_basics_8a4e984a.o: \
  ../../JuceLibraryCode/modules/juce_audio_basics/sources/juce_ResamplingAudioSource.cpp \
  ../../JuceLibraryCode/modules/juce_audio_basics/sources/juce_ReverbAudioSource.cpp \
  ../../JuceLibraryCode/modules/juce_audio_basics/sources/juce_ToneGeneratorAudioSource.cpp \
- ../../JuceLibraryCode/modules/juce_audio_basics/synthesisers/juce_Synthesiser.cpp
+ ../../JuceLibraryCode/modules/juce_audio_basics/synthesisers/juce_Synthesiser.cpp \
+ ../../JuceLibraryCode/modules/juce_audio_basics/midi/ump/juce_UMP.h \
+ ../../JuceLibraryCode/modules/juce_audio_basics/midi/ump/../juce_MidiDataConcatenator.h \
+ ../../JuceLibraryCode/modules/juce_audio_basics/midi/ump/juce_UMPProtocols.h \
+ ../../JuceLibraryCode/modules/juce_audio_basics/midi/ump/juce_UMPUtils.h \
+ ../../JuceLibraryCode/modules/juce_audio_basics/midi/ump/juce_UMPacket.h \
+ ../../JuceLibraryCode/modules/juce_audio_basics/midi/ump/juce_UMPSysEx7.h \
+ ../../JuceLibraryCode/modules/juce_audio_basics/midi/ump/juce_UMPView.h \
+ ../../JuceLibraryCode/modules/juce_audio_basics/midi/ump/juce_UMPIterator.h \
+ ../../JuceLibraryCode/modules/juce_audio_basics/midi/ump/juce_UMPackets.h \
+ ../../JuceLibraryCode/modules/juce_audio_basics/midi/ump/juce_UMPFactory.h \
+ ../../JuceLibraryCode/modules/juce_audio_basics/midi/ump/juce_UMPConversion.h \
+ ../../JuceLibraryCode/modules/juce_audio_basics/midi/ump/juce_UMPMidi1ToBytestreamTranslator.h \
+ ../../JuceLibraryCode/modules/juce_audio_basics/midi/ump/juce_UMPMidi1ToMidi2DefaultTranslator.h \
+ ../../JuceLibraryCode/modules/juce_audio_basics/midi/ump/juce_UMPConverters.h \
+ ../../JuceLibraryCode/modules/juce_audio_basics/midi/ump/juce_UMPDispatcher.h \
+ ../../JuceLibraryCode/modules/juce_audio_basics/midi/ump/juce_UMPReceiver.h \
+ ../../JuceLibraryCode/modules/juce_audio_basics/midi/ump/juce_UMPUtils.cpp \
+ ../../JuceLibraryCode/modules/juce_audio_basics/midi/ump/juce_UMPView.cpp \
+ ../../JuceLibraryCode/modules/juce_audio_basics/midi/ump/juce_UMPSysEx7.cpp \
+ ../../JuceLibraryCode/modules/juce_audio_basics/midi/ump/juce_UMPMidi1ToMidi2DefaultTranslator.cpp

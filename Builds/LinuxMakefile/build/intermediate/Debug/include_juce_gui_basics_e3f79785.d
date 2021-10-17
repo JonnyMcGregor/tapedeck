@@ -58,6 +58,7 @@ build/intermediate/Debug/include_juce_gui_basics_e3f79785.o: \
  ../../JuceLibraryCode/modules/juce_core/text/juce_TextDiff.h \
  ../../JuceLibraryCode/modules/juce_core/text/juce_LocalisedStrings.h \
  ../../JuceLibraryCode/modules/juce_core/text/juce_Base64.h \
+ ../../JuceLibraryCode/modules/juce_core/misc/juce_Functional.h \
  ../../JuceLibraryCode/modules/juce_core/misc/juce_Result.h \
  ../../JuceLibraryCode/modules/juce_core/misc/juce_Uuid.h \
  ../../JuceLibraryCode/modules/juce_core/misc/juce_ConsoleApplication.h \
@@ -145,6 +146,7 @@ build/intermediate/Debug/include_juce_gui_basics_e3f79785.o: \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_InterprocessConnectionServer.h \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_ConnectedChildProcess.h \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_NetworkServiceDiscovery.h \
+ ../../JuceLibraryCode/modules/juce_events/native/juce_ScopedLowPowerModeDisabler.h \
  ../../JuceLibraryCode/modules/juce_events/native/juce_linux_EventLoop.h \
  ../../JuceLibraryCode/modules/juce_graphics/geometry/juce_AffineTransform.h \
  ../../JuceLibraryCode/modules/juce_graphics/geometry/juce_Point.h \
@@ -199,7 +201,8 @@ build/intermediate/Debug/include_juce_gui_basics_e3f79785.o: \
  ../../JuceLibraryCode/modules/juce_gui_basics/mouse/juce_MouseEvent.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/keyboard/juce_KeyPress.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/keyboard/juce_KeyListener.h \
- ../../JuceLibraryCode/modules/juce_gui_basics/keyboard/juce_KeyboardFocusTraverser.h \
+ ../../JuceLibraryCode/modules/juce_gui_basics/components/juce_ComponentTraverser.h \
+ ../../JuceLibraryCode/modules/juce_gui_basics/components/juce_FocusTraverser.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/components/juce_ModalComponentManager.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/components/juce_ComponentListener.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/components/juce_CachedComponentImage.h \
@@ -217,6 +220,7 @@ build/intermediate/Debug/include_juce_gui_basics_e3f79785.o: \
  ../../JuceLibraryCode/modules/juce_gui_basics/mouse/juce_TextDragAndDropTarget.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/mouse/juce_TooltipClient.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/keyboard/juce_CaretComponent.h \
+ ../../JuceLibraryCode/modules/juce_gui_basics/keyboard/juce_KeyboardFocusTraverser.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/keyboard/juce_SystemClipboard.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/keyboard/juce_TextEditorKeyMapper.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/keyboard/juce_TextInputTarget.h \
@@ -285,6 +289,7 @@ build/intermediate/Debug/include_juce_gui_basics_e3f79785.o: \
  ../../JuceLibraryCode/modules/juce_gui_basics/misc/juce_JUCESplashScreen.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/widgets/juce_TreeView.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/windows/juce_TopLevelWindow.h \
+ ../../JuceLibraryCode/modules/juce_gui_basics/windows/juce_MessageBoxOptions.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/windows/juce_AlertWindow.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/windows/juce_CallOutBox.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/windows/juce_ComponentPeer.h \
@@ -325,14 +330,25 @@ build/intermediate/Debug/include_juce_gui_basics_e3f79785.o: \
  ../../JuceLibraryCode/modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V3.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V4.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/mouse/juce_LassoComponent.h \
+ ../../JuceLibraryCode/modules/juce_gui_basics/accessibility/interfaces/juce_AccessibilityCellInterface.h \
+ ../../JuceLibraryCode/modules/juce_gui_basics/accessibility/interfaces/juce_AccessibilityTableInterface.h \
+ ../../JuceLibraryCode/modules/juce_gui_basics/accessibility/interfaces/juce_AccessibilityTextInterface.h \
+ ../../JuceLibraryCode/modules/juce_gui_basics/accessibility/interfaces/juce_AccessibilityValueInterface.h \
+ ../../JuceLibraryCode/modules/juce_gui_basics/accessibility/enums/juce_AccessibilityActions.h \
+ ../../JuceLibraryCode/modules/juce_gui_basics/accessibility/enums/juce_AccessibilityEvent.h \
+ ../../JuceLibraryCode/modules/juce_gui_basics/accessibility/enums/juce_AccessibilityRole.h \
+ ../../JuceLibraryCode/modules/juce_gui_basics/accessibility/juce_AccessibilityState.h \
+ ../../JuceLibraryCode/modules/juce_gui_basics/accessibility/juce_AccessibilityHandler.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/native/x11/juce_linux_XWindowSystem.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/native/x11/juce_linux_X11_Symbols.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/layout/juce_FlexItem.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/layout/juce_FlexBox.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/layout/juce_GridItem.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/layout/juce_Grid.h \
+ ../../JuceLibraryCode/modules/juce_gui_basics/accessibility/juce_AccessibilityHandler.cpp \
  ../../JuceLibraryCode/modules/juce_gui_basics/components/juce_Component.cpp \
  ../../JuceLibraryCode/modules/juce_gui_basics/components/juce_ComponentListener.cpp \
+ ../../JuceLibraryCode/modules/juce_gui_basics/components/juce_FocusTraverser.cpp \
  ../../JuceLibraryCode/modules/juce_gui_basics/mouse/juce_MouseInputSource.cpp \
  ../../JuceLibraryCode/modules/juce_gui_basics/desktop/juce_Displays.cpp \
  ../../JuceLibraryCode/modules/juce_gui_basics/desktop/juce_Desktop.cpp \
