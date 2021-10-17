@@ -6,8 +6,8 @@ Tapedeck::Tapedeck(int width, int height) {
     tapedeckWindow = std::make_unique<DecoratedWindow>("TAPEDECK", getWidth(), getHeight());
     initialiseSession("test_session");
     
-	playhead = std::make_unique<DrawableRectangle>();
-    playhead->setFill(Colours::white);
+	playhead = std::make_unique<juce::DrawableRectangle>();
+    playhead->setFill(juce::Colours::white);
     addAndMakeVisible(tapedeckWindow.get());
     addAndMakeVisible(trackStack.get());
     addAndMakeVisible(playhead.get());

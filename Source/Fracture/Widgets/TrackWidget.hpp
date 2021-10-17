@@ -27,13 +27,13 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
 
         but_recordArm = std::make_unique<TrackToggleButton>();
         but_recordArm->setButtonText("R");
-        but_recordArm->setColour(ToggleButton::ColourIds::tickColourId, Colours::red);
+        but_recordArm->setColour(juce::ToggleButton::ColourIds::tickColourId, juce::Colours::red);
         but_solo = std::make_unique<TrackToggleButton>();
         but_solo->setButtonText("S");
-        but_solo->setColour(ToggleButton::ColourIds::tickColourId, Colours::red);
+        but_solo->setColour(juce::ToggleButton::ColourIds::tickColourId, juce::Colours::red);
         but_mute = std::make_unique<TrackToggleButton>();
         but_mute->setButtonText("M");
-        but_mute->setColour(ToggleButton::ColourIds::tickColourId, Colours::red);
+        but_mute->setColour(juce::ToggleButton::ColourIds::tickColourId, juce::Colours::red);
 
         addAndMakeVisible(trackBar.get());
         addAndMakeVisible(clipArea.get());
@@ -53,17 +53,17 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
 
     void refresh() {
         if (track->solo != but_solo->getToggleState()) {
-            but_solo->setToggleState(track->solo, dontSendNotification);
+            but_solo->setToggleState(track->solo, juce::dontSendNotification);
         }
         if (track->mute != but_mute->getToggleState()) {
-            but_mute->setToggleState(track->mute, dontSendNotification);
+            but_mute->setToggleState(track->mute, juce::dontSendNotification);
         }
         if (track->recordArmed != but_recordArm->getToggleState()) {
-            but_recordArm->setToggleState(track->recordArmed, dontSendNotification);
+            but_recordArm->setToggleState(track->recordArmed, juce::dontSendNotification);
         }
     }
 
-    void buttonClicked(Button *but) override {
+    void buttonClicked(juce::Button *but) override {
 		if (but == but_recordArm.get())
 		{
             track->recordArmed = but->getToggleState();

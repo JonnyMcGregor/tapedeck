@@ -43,7 +43,7 @@ private:
     std::unique_ptr<DecoratedWindow> tapedeckWindow;
     std::shared_ptr<TrackStack> trackStack;
     std::shared_ptr<TimeRuler> timeRuler;
-    std::unique_ptr<DrawableRectangle> playhead;
+    std::unique_ptr<juce::DrawableRectangle> playhead;
 
     TrackWidget *selectedTrack = nullptr;
     ClipWidget *selectedClip = nullptr;

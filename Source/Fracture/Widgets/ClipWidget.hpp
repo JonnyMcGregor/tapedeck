@@ -20,8 +20,8 @@ struct ClipWidget : juce::Component
     {
 		if (getWidth() > 0)
 		{
-            int firstSampleToDraw = jmax(0, (int)timeRuler->startTimeOnScreenInSamples - (int)clipStartTime);
-            int lastSampleToDraw = jmin((int)(clip->size() - 1), (timeRuler->startTimeOnScreenInSamples + timeRuler->windowSizeInSamples - (int)clipStartTime));
+            int firstSampleToDraw = juce::jmax(0, (int)timeRuler->startTimeOnScreenInSamples - (int)clipStartTime);
+            int lastSampleToDraw = juce::jmin((int)(clip->size() - 1), (timeRuler->startTimeOnScreenInSamples + timeRuler->windowSizeInSamples - (int)clipStartTime));
 
             u_int bucketSize = (lastSampleToDraw - firstSampleToDraw) / getWidth();
             juce::Path waveform;
@@ -49,7 +49,7 @@ struct ClipWidget : juce::Component
             }
 
             screen.setColour(waveformColour);
-            screen.strokePath(waveform, PathStrokeType{2});
+            screen.strokePath(waveform, juce::PathStrokeType{2});
 		}
         
     }
