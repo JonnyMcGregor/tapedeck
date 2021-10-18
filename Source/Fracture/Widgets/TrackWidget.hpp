@@ -28,18 +28,22 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
         but_recordArm = std::make_unique<TrackToggleButton>();
         but_recordArm->setButtonText("R");
         but_recordArm->setColour(juce::ToggleButton::ColourIds::tickColourId, juce::Colours::red);
+        but_recordArm->addListener(this);
         but_solo = std::make_unique<TrackToggleButton>();
         but_solo->setButtonText("S");
         but_solo->setColour(juce::ToggleButton::ColourIds::tickColourId, juce::Colours::red);
+        but_solo->addListener(this);
         but_mute = std::make_unique<TrackToggleButton>();
         but_mute->setButtonText("M");
         but_mute->setColour(juce::ToggleButton::ColourIds::tickColourId, juce::Colours::red);
+        but_mute->addListener(this);
 
         addAndMakeVisible(trackBar.get());
         addAndMakeVisible(clipArea.get());
         addAndMakeVisible(but_recordArm.get());
         addAndMakeVisible(but_solo.get());
         addAndMakeVisible(but_mute.get());
+		
     }
 
     void updateClipWidgets() {
