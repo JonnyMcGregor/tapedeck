@@ -13,14 +13,13 @@ struct Sample {
     }
 
     void set_value(double new_value) {
-        if(is_sample_in_bounds(new_value))
-        {
-            this->value = new_value;
-        }
+        this->value = new_value;
+        this->clamp(); // ensure value is between -1 and 1;
     }
 
     void operator+=(const Sample &other) {
         this->value += other.value;
+        this->clamp(); // ensure value is between -1 and 1;
     }
 
     void clamp()
@@ -33,11 +32,7 @@ struct Sample {
     }
 
 private:
-    void assert_is_sample_in_bounds(double sample) {
-        if (!is_sample_in_bounds(sample)) {
-            throw std::invalid_argument("Sample must be between -1 and 1 (inclusive)");
-        }
-    }
+
     bool is_sample_in_bounds(double sample) {
         if (-1 <= sample && sample <= 1) {
             return true;

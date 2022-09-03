@@ -55,16 +55,19 @@ void Session::deleteTrack(int index) {
 }
 
 void Session::prepareAudio() {
+    // Create new clip if track is record armed...
     for (auto &track : tracks) {
         if (track->recordArmed) {
             track->createClip(playhead->currentTimeInSamples, (sessionName + "/recorded_audio/"));
         }
     }
 }
+
+// Main audio processing callback for engine...
 void Session::processAudioBlock(Buffer &inputBuffer, Buffer &outputBuffer) {
     for (int sample = 0; sample < bufferSize; sample++, playhead->currentTimeInSamples++) {
         for (int channel = 0; channel < 2; channel++) {
-            Sample outputSample;
+            Sample outputSample = 0;
             //when solo enabled is true all non-solo'd tracks are ignored
             for (auto track : tracks) {
                 //input
@@ -75,6 +78,9 @@ void Session::processAudioBlock(Buffer &inputBuffer, Buffer &outputBuffer) {
                 else {
                     if (track->solo || (!isSoloEnabled() && !track->mute)) {
                         outputSample += track->getSample(getCurrentTimeInSamples());
+                    }
+                    else {
+                        // No change to output sample
                     }
                 }
             }

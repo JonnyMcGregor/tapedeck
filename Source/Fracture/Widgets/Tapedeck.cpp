@@ -8,6 +8,8 @@ Tapedeck::Tapedeck(int width, int height) {
     
 	playhead = std::make_unique<juce::DrawableRectangle>();
     playhead->setFill(juce::Colours::white);
+    
+    //Initialise main ui components
     addAndMakeVisible(tapedeckWindow.get());
     addAndMakeVisible(trackStack.get());
     addAndMakeVisible(playhead.get());
@@ -24,8 +26,10 @@ Tapedeck::~Tapedeck() {}
 void Tapedeck::initialiseSession(std::string sessionName) {
     this->sessionName = sessionName;
     if (filesystem::exists(sessionName)) {
+        // Here we should add check for setting up loading functionality
+        // For now to test the project we'll clear out the directory and start from scratch
         filesystem::remove_all(sessionName);
-    }
+    } 
     audioManager = make_unique<AudioManager>(false, sessionName, "");
     session = audioManager->session;
     session->sessionXml->createXmlDocument();
@@ -35,6 +39,7 @@ void Tapedeck::initialiseSession(std::string sessionName) {
         createTrack();
     }
 }
+
 bool keyStateChanged(bool isKeyDown, juce::Component *originatingComponent) { return true; }
 
 bool Tapedeck::keyPressed(const juce::KeyPress &key) {

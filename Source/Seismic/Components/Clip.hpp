@@ -17,7 +17,7 @@ struct Clip {
         audioData.push_back(sample);
     }
 
-    void removeSample() {
+    void removeLastSample() {
         audioData.pop_back();
     }
 

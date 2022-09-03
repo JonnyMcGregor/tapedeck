@@ -3,7 +3,7 @@
 #define _TRACK_H_
 #include <memory>
 #include "Clip.hpp"
-
+#include <JuceHeader.h>
 struct ClipMetadata {
     u_int startTime, startTimeInReference = 0;
     std::string referenceFilePath;
@@ -14,7 +14,7 @@ struct ClipMetadata {
 };
 
 struct Track {
-    std::vector<std::shared_ptr<Clip>> clips;
+    std::vector<std::shared_ptr<Clip>> clips; 
     std::vector<ClipMetadata> clipMetadata;
     std::string name; // a user-provided name for display purposes
     bool recordArmed = false, solo = false, mute = false;
@@ -23,6 +23,9 @@ struct Track {
     }
 
     void createClip(u_int startTime, std::string referenceFilePath) {
+        jassert(startTime >= 0);
+        jassert(referenceFilePath != "");
+
         std::string clip_name = name + "Clip" + std::to_string(clips.size() + 1);
         referenceFilePath = referenceFilePath + clip_name + ".wav";
         this->clips.push_back(std::shared_ptr<Clip>());
@@ -32,6 +35,10 @@ struct Track {
 
     void createClip(u_int startTime, std::string referenceFilePath, Clip &clip)
     {
+        jassert(startTime >= 0);
+        jassert(referenceFilePath != "");
+        jassert(&clip != nullptr);
+     
         std::string clip_name = name + "Clip" + std::to_string(clips.size() + 1);
         referenceFilePath = referenceFilePath + clip_name + ".wav";
         this->clips.push_back(std::make_shared<Clip>(clip));
@@ -39,12 +46,14 @@ struct Track {
     }
 
     void deleteClip(int clipIndex) {
+        jassert(clipIndex >= 0);
         std::vector<std::shared_ptr<Clip>>::iterator it = clips.begin();
         advance(it, clipIndex);
         clips.erase(it);
     }
 
     void moveClip(u_int index, u_int newStartTime) {
+        jassert(index >= 0 && index < clipMetadata.size()); //Index is within bounds of array
         clipMetadata[index].startTime = newStartTime;
     }
 
