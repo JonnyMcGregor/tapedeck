@@ -7,6 +7,16 @@
 
 using u_int = uint32_t;
 
+struct ClipMetadata {
+    u_int startTime, startTimeInReference = 0;
+    std::string referenceFilePath;
+    ClipMetadata(u_int startTime, std::string referenceFilePath)
+    {
+        this->startTime = startTime;
+        this->referenceFilePath = referenceFilePath;
+    };
+};
+
 struct Clip {
     std::vector<Sample> audioData;
 

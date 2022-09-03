@@ -82,7 +82,15 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
         }
     }
 
-    void paint(juce::Graphics &screen) override {}
+    void paint(juce::Graphics &screen) override {
+        if (isSelected) {
+            trackBar->outlineColour = juce::Colour(0, 0, 255);
+        }
+        else {
+            trackBar->outlineColour = juce::Colour(255, 255, 255);
+        }
+        trackBar->repaint();
+    }
 
     void resized() override {
         trackBar->setBounds(0, 0, getWidth() * 0.1, getHeight());

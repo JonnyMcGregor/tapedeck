@@ -4,14 +4,6 @@
 #include <memory>
 #include "Clip.hpp"
 #include <JuceHeader.h>
-struct ClipMetadata {
-    u_int startTime, startTimeInReference = 0;
-    std::string referenceFilePath;
-    ClipMetadata(u_int startTime, std::string referenceFilePath) {
-        this->startTime = startTime;
-        this->referenceFilePath = referenceFilePath;
-    };
-};
 
 struct Track {
     std::vector<std::shared_ptr<Clip>> clips; 
