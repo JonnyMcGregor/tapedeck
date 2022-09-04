@@ -5,6 +5,7 @@
               companyName="Spaghetti Van Ltd" cppLanguageStandard="20">
   <MAINGROUP id="bnCUsk" name="Tapedeck">
     <GROUP id="{9F6D7309-D982-C545-BE48-4A8F1E20435E}" name="Source">
+      <FILE id="fwANg1" name="defs_UI.h" compile="0" resource="0" file="Source/defs_UI.h"/>
       <GROUP id="{029C02AF-225D-CD25-6861-0A6EF5E7D00D}" name="Fracture">
         <GROUP id="{7EBC76A0-540D-59FB-2A60-435E62A8FDDA}" name="Components">
           <FILE id="bo50d6" name="Colour.hpp" compile="0" resource="0" file="Source/Fracture/Components/Colour.hpp"/>

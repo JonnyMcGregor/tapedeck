@@ -1,13 +1,13 @@
 #include "Tapedeck.hpp"
 
 Tapedeck::Tapedeck(int width, int height) {
-    setWantsKeyboardFocus(true);
     setSize(width, height);
     tapedeckWindow = std::make_unique<DecoratedWindow>("TAPEDECK", getWidth(), getHeight());
+    tapedeckWindow->backgroundColour = ColourPalette::colourGreyDark;
     initialiseSession("test_session");
     
 	playhead = std::make_unique<juce::DrawableRectangle>();
-    playhead->setFill(juce::Colours::white);
+    playhead->setFill(ColourPalette::colourGreyLight);
     
     //Initialise main ui components
     addAndMakeVisible(tapedeckWindow.get());

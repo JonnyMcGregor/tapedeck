@@ -27,15 +27,15 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
 
         but_recordArm = std::make_unique<TrackToggleButton>();
         but_recordArm->setButtonText("R");
-        but_recordArm->setColour(juce::ToggleButton::ColourIds::tickColourId, juce::Colours::red);
+        but_recordArm->setColour(juce::ToggleButton::ColourIds::tickColourId, ColourPalette::colourGreyDark);
         but_recordArm->addListener(this);
         but_solo = std::make_unique<TrackToggleButton>();
         but_solo->setButtonText("S");
-        but_solo->setColour(juce::ToggleButton::ColourIds::tickColourId, juce::Colours::red);
+        but_solo->setColour(juce::ToggleButton::ColourIds::tickColourId, ColourPalette::colourGreyDark);
         but_solo->addListener(this);
         but_mute = std::make_unique<TrackToggleButton>();
         but_mute->setButtonText("M");
-        but_mute->setColour(juce::ToggleButton::ColourIds::tickColourId, juce::Colours::red);
+        but_mute->setColour(juce::ToggleButton::ColourIds::tickColourId, ColourPalette::colourGreyDark);
         but_mute->addListener(this);
 
         addAndMakeVisible(trackBar.get());
@@ -83,13 +83,12 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
     }
 
     void paint(juce::Graphics &screen) override {
-        if (isSelected) {
-            trackBar->outlineColour = juce::Colour(0, 0, 255);
-        }
-        else {
-            trackBar->outlineColour = juce::Colour(255, 255, 255);
-        }
-        trackBar->repaint();
+        trackBar->backgroundColour = isSelected ? ColourPalette::colourPrimary : ColourPalette::colourAlternate;
+        trackBar->outlineColour = ColourPalette::colourDark;
+        clipArea->backgroundColour = ColourPalette::colourAlternate;
+        clipArea->outlineColour = ColourPalette::colourGreyLight;
+
+
     }
 
     void resized() override {

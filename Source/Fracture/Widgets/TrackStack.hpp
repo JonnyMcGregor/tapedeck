@@ -36,7 +36,7 @@ struct TrackStack : public juce::Component {
             widgetY += widgetHeight;
         }
     }
-    juce::Colour backgroundColour = juce::Colours::orange;
+    juce::Colour backgroundColour = ColourPalette::colourDark;
     std::vector<std::unique_ptr<TrackWidget>> subWidgets;
     std::shared_ptr<TimeRuler> timeRuler;
 };

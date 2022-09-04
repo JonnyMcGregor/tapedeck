@@ -8,9 +8,9 @@ struct PlayheadWidget : juce::Component
 public:
     PlayheadWidget(){}
 
-	void paint(Graphics& g) override
+	void paint(juce::Graphics& g) override
 	{
-        g.setColour(Colours::white);
+        g.setColour(juce::Colours::white);
         g.fillAll();
 	}
     void resized() override {}

@@ -1,7 +1,7 @@
 
 #include "../../Seismic/AudioManager.hpp"
 #include "../Components/Point.hpp"
-//#include "../Components/Widget.hpp"
+#include "../../defs_UI.h"
 #include "DecoratedWindow.hpp"
 #include "TimeRuler.hpp"
 #include "TrackStack.hpp"
