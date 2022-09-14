@@ -34,3 +34,9 @@ namespace ColourPalette {
     const juce::Colour colourTextDark{0xff411530};
 
 }
+
+enum CommandIDs {
+    loadSession = 1,
+    saveSession,
+    openPropertiesWindow,
+};
