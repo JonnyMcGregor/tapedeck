@@ -4,6 +4,7 @@ Tapedeck::Tapedeck(int width, int height) {
     setSize(width, height);
     tapedeckWindow = std::make_unique<DecoratedWindow>("TAPEDECK", getWidth(), getHeight());
     tapedeckWindow->backgroundColour = ColourPalette::colourGreyDark;
+    tapedeckWindow->outlineColour = ColourPalette::colourTextDark;
     initialiseSession("test_session");
     
 	playhead = std::make_unique<juce::DrawableRectangle>();
@@ -304,6 +305,7 @@ int Tapedeck::playheadXPosition() {
 void Tapedeck::updatePlayheadPosition() {
     juce::Rectangle<float> r = { (float)playheadXPosition(), (float)trackStack->getY(), 2.0f, (float)trackStack->getHeight() };
     playhead->setRectangle(juce::Parallelogram<float>(r));
+    trackStack->repaint();
 }
 void Tapedeck::updateClipWindow() {
     timeRuler->startTimeOnScreenInSamples = session->getCurrentTimeInSamples() - timeRuler->windowSizeInSamples / 2;

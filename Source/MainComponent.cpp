@@ -6,7 +6,10 @@ MainComponent::MainComponent()
 {
     setSize (1440, 800);
     juce::LookAndFeel::setDefaultLookAndFeel(&lf);
-
+    // Initialise logger for tracking app issues
+    //juce::FileLogger *logger = juce::FileLogger::createDateStampedLogger("Tapedeck/logs", "TapedeckLogger_", "txt", "//========= TAPEDECK LOGS =========//");
+    juce::FileLogger *logger = juce::FileLogger::createDefaultAppLogger("Tapedeck/logs", "TapedeckLogger.txt", "//========= TAPEDECK LOGS =========//");
+    juce::FileLogger::setCurrentLogger(logger);
     tapedeck = std::make_unique<Tapedeck>(getWidth(), getHeight());
     addAndMakeVisible(tapedeck.get());
 }
@@ -14,6 +17,7 @@ MainComponent::MainComponent()
 MainComponent::~MainComponent()
 {
     juce::LookAndFeel::setDefaultLookAndFeel(nullptr);
+    juce::FileLogger::setCurrentLogger(nullptr);
 }
 
 //==============================================================================

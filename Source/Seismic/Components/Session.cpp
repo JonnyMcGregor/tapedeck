@@ -1,11 +1,18 @@
 #include "Session.hpp"
 Session::Session(std::string sessionName, AudioParams params) {
-
+    juce::FileLogger::getCurrentLogger()->writeToLog("Creating Session...");
     this->sessionName = sessionName;
     this->sampleRate = params.sampleRate;
     this->bufferSize = params.bufferSize;
     this->numInputChannels = params.numInputChannels;
     this->numOutputChannels = params.numOutputChannels;
+    juce::FileLogger::getCurrentLogger()->writeToLog("Session name: " + this->sessionName);
+    juce::FileLogger::getCurrentLogger()->writeToLog("Sample Rate: " + juce::String(this->sampleRate));
+    juce::FileLogger::getCurrentLogger()->writeToLog("Buffer Size: " + juce::String(this->bufferSize));
+    juce::FileLogger::getCurrentLogger()->writeToLog("Num Input Channels: " + juce::String(this->numInputChannels));
+    juce::FileLogger::getCurrentLogger()->writeToLog("Num Output Channels: " + juce::String(this->numOutputChannels));
+
+    //Init wave file generator for converting new audio clips to wave files
     wavFileGen.initialise(sampleRate, bitDepth, numInputChannels);
     playhead = std::make_unique<Playhead>(sampleRate);
     createProjectFileStructure();
@@ -25,6 +32,7 @@ void Session::createProjectFileStructure() {
     if (!filesystem::exists(sessionName + "/exported_audio"))
         filesystem::create_directory(sessionName + "/exported_audio");
 }
+
 void Session::loadSessionFromXml(string xmlFileName) {
     sessionXml = make_unique<XmlWrapper>(this->sessionName, xmlFileName);
     sessionXml->xmlDoc.LoadFile(sessionXml->fileName.c_str());
@@ -65,6 +73,9 @@ void Session::prepareAudio() {
 
 // Main audio processing callback for engine...
 void Session::processAudioBlock(Buffer &inputBuffer, Buffer &outputBuffer) {
+    if (!&inputBuffer || !&outputBuffer) {
+        
+    }
     for (int sample = 0; sample < bufferSize; sample++, playhead->currentTimeInSamples++) {
         for (int channel = 0; channel < 2; channel++) {
             Sample outputSample = 0;

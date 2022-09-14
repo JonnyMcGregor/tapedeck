@@ -24,6 +24,9 @@ struct TrackStack : public juce::Component {
     }
 
     void paint(juce::Graphics &screen) override{
+        for (auto &subwidget : subWidgets) {
+            subwidget->repaint();
+        }
     }
     void resized() override
     {

@@ -20,6 +20,7 @@ struct ClipWidget : juce::Component
     {
 		if (getWidth() > 0)
 		{
+            // Look into startTimeOnScreenInSamples - somethings going wrong here...
             int firstSampleToDraw = juce::jmax(0, (int)timeRuler->startTimeOnScreenInSamples - (int)clipStartTime);
             int lastSampleToDraw = juce::jmin((int)(clip->size() - 1), (timeRuler->startTimeOnScreenInSamples + timeRuler->windowSizeInSamples - (int)clipStartTime));
 
@@ -29,7 +30,7 @@ struct ClipWidget : juce::Component
             
 			for (int x = 0; x < getWidth(); x++) 
 			{
-                int currentSampleToDraw = (x * bucketSize) + firstSampleToDraw;
+                int currentSampleToDraw = (x * bucketSize) + firstSampleToDraw;// do something here to fix it pls
                 if (currentSampleToDraw < lastSampleToDraw) 
 				{
                     int y = juce::jmap(clip->getSample(currentSampleToDraw).value, -1.0f, 1.0f, (float)getHeight(), 0.0f);

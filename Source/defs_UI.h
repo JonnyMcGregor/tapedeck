@@ -25,10 +25,12 @@ namespace juce {
 }
 
 namespace ColourPalette {
-    const juce::Colour colourPrimary = juce::Colours::Thistle;
-    const juce::Colour colourSecondary = juce::Colours::MagicMint;
-    const juce::Colour colourAlternate = juce::Colours::Opal;
-    const juce::Colour colourGreyLight = juce::Colours::TaupeGrey;
-    const juce::Colour colourGreyDark = juce::Colours::DavysGrey;
-    const juce::Colour colourDark = juce::Colours::OuterSpaceCrayola;
+    const juce::Colour colourPrimary{0xFFD36B00};
+    const juce::Colour colourSecondary{0xffF5DFBC};
+    const juce::Colour colourAlternate{0xffF1A661};
+    const juce::Colour colourGreyLight {0xffCEE7E6};
+    const juce::Colour colourGreyDark {0xffF1EFDC};
+    const juce::Colour colourDark {0xffF1EFDC};
+    const juce::Colour colourTextDark{0xff411530};
+
 }
