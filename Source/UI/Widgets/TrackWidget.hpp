@@ -1,5 +1,5 @@
 #pragma once
-#include "../../Seismic/Components/Track.hpp"
+#include "../../Model/Components/Track.hpp"
 #include "ClipWidget.hpp"
 #include "DecoratedWindow.hpp"
 #include "TrackToggleButton.h"

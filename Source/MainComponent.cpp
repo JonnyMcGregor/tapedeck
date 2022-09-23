@@ -40,7 +40,7 @@ void MainComponent::resized()
     if (mainMenuBar) {
         mainMenuBar->setBounds(0, curY, getWidth(), 30);
     }
-    curY += 15;
+    curY += 15; //should be 30 but for some reason 30 creates a gap between tapedeck widget and top menu
     if(tapedeck)
     {
         tapedeck->setBounds(0, curY, getWidth(), getHeight() - 15);

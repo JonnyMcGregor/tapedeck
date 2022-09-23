@@ -6,75 +6,51 @@
   <MAINGROUP id="bnCUsk" name="Tapedeck">
     <GROUP id="{9F6D7309-D982-C545-BE48-4A8F1E20435E}" name="Source">
       <FILE id="fwANg1" name="defs_UI.h" compile="0" resource="0" file="Source/defs_UI.h"/>
-      <GROUP id="{029C02AF-225D-CD25-6861-0A6EF5E7D00D}" name="Fracture">
-        <GROUP id="{7EBC76A0-540D-59FB-2A60-435E62A8FDDA}" name="Components">
-          <FILE id="bo50d6" name="Colour.hpp" compile="0" resource="0" file="Source/Fracture/Components/Colour.hpp"/>
-          <FILE id="tn3seT" name="Key.hpp" compile="0" resource="0" file="Source/Fracture/Components/Key.hpp"/>
-          <FILE id="wbftg2" name="KeyMaps.hpp" compile="0" resource="0" file="Source/Fracture/Components/KeyMaps.hpp"/>
-          <FILE id="CU6uDI" name="KeyPress.hpp" compile="0" resource="0" file="Source/Fracture/Components/KeyPress.hpp"/>
-          <FILE id="NsnIuE" name="Point.hpp" compile="0" resource="0" file="Source/Fracture/Components/Point.hpp"/>
-          <FILE id="T7WFq2" name="Screen.hpp" compile="0" resource="0" file="Source/Fracture/Components/Screen.hpp"/>
-          <FILE id="uP2xkn" name="ScreenCell.hpp" compile="0" resource="0" file="Source/Fracture/Components/ScreenCell.hpp"/>
-          <FILE id="YXV8EK" name="ScreenCellStyle.hpp" compile="0" resource="0"
-                file="Source/Fracture/Components/ScreenCellStyle.hpp"/>
-          <FILE id="e0YUqI" name="Widget.hpp" compile="0" resource="0" file="Source/Fracture/Components/Widget.hpp"/>
+      <GROUP id="{029C02AF-225D-CD25-6861-0A6EF5E7D00D}" name="UI">
+        <GROUP id="{EBF3BBED-20EA-7FC4-C967-A6C7A940C319}" name="Widgets">
+          <FILE id="iqbVz0" name="ClipWidget.hpp" compile="0" resource="0" file="Source/UI/Widgets/ClipWidget.hpp"/>
+          <FILE id="FPJVBL" name="DecoratedWindow.hpp" compile="0" resource="0"
+                file="Source/UI/Widgets/DecoratedWindow.hpp"/>
+          <FILE id="d3B7YR" name="Label.hpp" compile="0" resource="0" file="Source/UI/Widgets/Label.hpp"/>
+          <FILE id="hXlJhX" name="PlayheadWidget.hpp" compile="0" resource="0"
+                file="Source/UI/Widgets/PlayheadWidget.hpp"/>
+          <FILE id="sLw35N" name="StackLayout.hpp" compile="0" resource="0" file="Source/UI/Widgets/StackLayout.hpp"/>
+          <FILE id="KjU37d" name="TabbedLayout.hpp" compile="0" resource="0"
+                file="Source/UI/Widgets/TabbedLayout.hpp"/>
+          <FILE id="hTEYgi" name="Tapedeck.cpp" compile="1" resource="0" file="Source/UI/Widgets/Tapedeck.cpp"/>
+          <FILE id="ZznzsM" name="Tapedeck.hpp" compile="0" resource="0" file="Source/UI/Widgets/Tapedeck.hpp"/>
+          <FILE id="vgT6II" name="TimeRuler.hpp" compile="0" resource="0" file="Source/UI/Widgets/TimeRuler.hpp"/>
+          <FILE id="OsSpsn" name="TrackStack.hpp" compile="0" resource="0" file="Source/UI/Widgets/TrackStack.hpp"/>
+          <FILE id="vn1Ntv" name="TrackToggleButton.h" compile="0" resource="0"
+                file="Source/UI/Widgets/TrackToggleButton.h"/>
+          <FILE id="rOvEY3" name="TrackWidget.hpp" compile="0" resource="0" file="Source/UI/Widgets/TrackWidget.hpp"/>
+          <FILE id="yKlGKe" name="VboxLayout.hpp" compile="0" resource="0" file="Source/UI/Widgets/VboxLayout.hpp"/>
         </GROUP>
-        <GROUP id="{F6B1B65C-D6B9-7136-E431-B72827A33243}" name="Terminal">
-          <FILE id="A2hCPf" name="terminal.hpp" compile="0" resource="0" file="Source/Fracture/Terminal/terminal.hpp"/>
-          <FILE id="tWzs2G" name="terminal_control.hpp" compile="0" resource="0"
-                file="Source/Fracture/Terminal/terminal_control.hpp"/>
-          <FILE id="Rmiw8a" name="terminal_cursor.hpp" compile="0" resource="0"
-                file="Source/Fracture/Terminal/terminal_cursor.hpp"/>
-          <FILE id="GZtbYz" name="terminal_formatting.hpp" compile="0" resource="0"
-                file="Source/Fracture/Terminal/terminal_formatting.hpp"/>
-          <FILE id="q5vVrl" name="terminal_info.hpp" compile="0" resource="0"
-                file="Source/Fracture/Terminal/terminal_info.hpp"/>
-        </GROUP>
-        <GROUP id="{C54FECA6-640A-95CD-E1FC-0B0A3B2C0440}" name="Widgets">
-          <FILE id="Wsxz7Y" name="ClipWidget.hpp" compile="0" resource="0" file="Source/Fracture/Widgets/ClipWidget.hpp"/>
-          <FILE id="rToGCr" name="DecoratedWindow.hpp" compile="0" resource="0"
-                file="Source/Fracture/Widgets/DecoratedWindow.hpp"/>
-          <FILE id="q2LXnd" name="Label.hpp" compile="0" resource="0" file="Source/Fracture/Widgets/Label.hpp"/>
-          <FILE id="V7YpKT" name="PlayheadWidget.hpp" compile="0" resource="0"
-                file="Source/Fracture/Widgets/PlayheadWidget.hpp"/>
-          <FILE id="VssE8A" name="StackLayout.hpp" compile="0" resource="0" file="Source/Fracture/Widgets/StackLayout.hpp"/>
-          <FILE id="U4MCHx" name="TabbedLayout.hpp" compile="0" resource="0"
-                file="Source/Fracture/Widgets/TabbedLayout.hpp"/>
-          <FILE id="dGzoDW" name="Tapedeck.cpp" compile="1" resource="0" file="Source/Fracture/Widgets/Tapedeck.cpp"/>
-          <FILE id="A9rcn2" name="Tapedeck.hpp" compile="0" resource="0" file="Source/Fracture/Widgets/Tapedeck.hpp"/>
-          <FILE id="XW9d2v" name="TimeRuler.hpp" compile="0" resource="0" file="Source/Fracture/Widgets/TimeRuler.hpp"/>
-          <FILE id="EWpwaO" name="TrackStack.hpp" compile="0" resource="0" file="Source/Fracture/Widgets/TrackStack.hpp"/>
-          <FILE id="dxxpju" name="TrackToggleButton.h" compile="0" resource="0"
-                file="Source/Fracture/Widgets/TrackToggleButton.h"/>
-          <FILE id="NjOTQi" name="TrackWidget.hpp" compile="0" resource="0" file="Source/Fracture/Widgets/TrackWidget.hpp"/>
-          <FILE id="rukUPp" name="VboxLayout.hpp" compile="0" resource="0" file="Source/Fracture/Widgets/VboxLayout.hpp"/>
-        </GROUP>
-        <FILE id="f4PegF" name="Fracture.hpp" compile="0" resource="0" file="Source/Fracture/Fracture.hpp"/>
       </GROUP>
-      <GROUP id="{51958BA8-8482-AD24-2C79-33D506D5EC1F}" name="Seismic">
-        <GROUP id="{3C620B91-03D3-8163-4B09-6D0531FAE3E1}" name="Components">
-          <GROUP id="{57CA2C06-94A3-563E-F85B-F6F006BBE6DB}" name="tinyxml2">
-            <FILE id="OF4s9q" name="tinyxml2.cpp" compile="1" resource="0" file="Source/Seismic/Components/tinyxml2/tinyxml2.cpp"/>
-            <FILE id="KYo85m" name="tinyxml2.hpp" compile="0" resource="0" file="Source/Seismic/Components/tinyxml2/tinyxml2.hpp"/>
+      <GROUP id="{51958BA8-8482-AD24-2C79-33D506D5EC1F}" name="Model">
+        <GROUP id="{4CCEC1DA-F765-48BE-1BB5-BF406E006A45}" name="Components">
+          <GROUP id="{C4E20E96-71D5-B5BA-D854-56016D384550}" name="tinyxml2">
+            <FILE id="CxLYD7" name="tinyxml2.cpp" compile="1" resource="0" file="Source/Model/Components/tinyxml2/tinyxml2.cpp"/>
+            <FILE id="xGoVMy" name="tinyxml2.hpp" compile="0" resource="0" file="Source/Model/Components/tinyxml2/tinyxml2.hpp"/>
           </GROUP>
-          <GROUP id="{694E63B9-B589-2381-F995-E096036AC0D4}" name="WaveFileGenerator">
-            <FILE id="UE9x29" name="endian.hpp" compile="0" resource="0" file="Source/Seismic/Components/WaveFileGenerator/endian.hpp"/>
-            <FILE id="VfBjO4" name="WaveFileGenerator.hpp" compile="0" resource="0"
-                  file="Source/Seismic/Components/WaveFileGenerator/WaveFileGenerator.hpp"/>
+          <GROUP id="{AC3CE068-3649-2F1A-268B-47A6B657E265}" name="WaveFileGenerator">
+            <FILE id="czLuB0" name="endian.hpp" compile="0" resource="0" file="Source/Model/Components/WaveFileGenerator/endian.hpp"/>
+            <FILE id="QdlJlS" name="WaveFileGenerator.hpp" compile="0" resource="0"
+                  file="Source/Model/Components/WaveFileGenerator/WaveFileGenerator.hpp"/>
           </GROUP>
-          <FILE id="I8oova" name="AudioParams.hpp" compile="0" resource="0" file="Source/Seismic/Components/AudioParams.hpp"/>
-          <FILE id="D4Umve" name="Buffer.hpp" compile="0" resource="0" file="Source/Seismic/Components/Buffer.hpp"/>
-          <FILE id="AOQRBD" name="Clip.hpp" compile="0" resource="0" file="Source/Seismic/Components/Clip.hpp"/>
-          <FILE id="KNJGDV" name="Playhead.hpp" compile="0" resource="0" file="Source/Seismic/Components/Playhead.hpp"/>
-          <FILE id="B1b3ct" name="Sample.hpp" compile="0" resource="0" file="Source/Seismic/Components/Sample.hpp"/>
-          <FILE id="tSXG3J" name="Session.cpp" compile="1" resource="0" file="Source/Seismic/Components/Session.cpp"/>
-          <FILE id="ivFVVS" name="Session.hpp" compile="0" resource="0" file="Source/Seismic/Components/Session.hpp"/>
-          <FILE id="vAnjxs" name="Track.hpp" compile="0" resource="0" file="Source/Seismic/Components/Track.hpp"/>
-          <FILE id="do74wH" name="WaveFile.hpp" compile="0" resource="0" file="Source/Seismic/Components/WaveFile.hpp"/>
-          <FILE id="OctkFg" name="XmlWrapper.hpp" compile="0" resource="0" file="Source/Seismic/Components/XmlWrapper.hpp"/>
+          <FILE id="yF9VMa" name="AudioParams.hpp" compile="0" resource="0" file="Source/Model/Components/AudioParams.hpp"/>
+          <FILE id="EDhmn2" name="Buffer.hpp" compile="0" resource="0" file="Source/Model/Components/Buffer.hpp"/>
+          <FILE id="soUwWd" name="Clip.hpp" compile="0" resource="0" file="Source/Model/Components/Clip.hpp"/>
+          <FILE id="yo8tL6" name="Playhead.hpp" compile="0" resource="0" file="Source/Model/Components/Playhead.hpp"/>
+          <FILE id="n6Mu1K" name="Sample.hpp" compile="0" resource="0" file="Source/Model/Components/Sample.hpp"/>
+          <FILE id="HpZJFU" name="Session.cpp" compile="1" resource="0" file="Source/Model/Components/Session.cpp"/>
+          <FILE id="qYjeQ0" name="Session.hpp" compile="0" resource="0" file="Source/Model/Components/Session.hpp"/>
+          <FILE id="Gl2ZmX" name="Track.hpp" compile="0" resource="0" file="Source/Model/Components/Track.hpp"/>
+          <FILE id="zzYFaY" name="WaveFile.hpp" compile="0" resource="0" file="Source/Model/Components/WaveFile.hpp"/>
+          <FILE id="pAmFAg" name="XmlWrapper.hpp" compile="0" resource="0" file="Source/Model/Components/XmlWrapper.hpp"/>
         </GROUP>
-        <FILE id="Zs8VgI" name="AudioManager.hpp" compile="0" resource="0"
-              file="Source/Seismic/AudioManager.hpp"/>
+        <FILE id="tYhbtU" name="AudioManager.hpp" compile="0" resource="0"
+              file="Source/Model/AudioManager.hpp"/>
       </GROUP>
       <FILE id="PezXVx" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
       <FILE id="eqF127" name="MainComponent.cpp" compile="1" resource="0"
