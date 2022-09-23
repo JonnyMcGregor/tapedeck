@@ -1,6 +1,6 @@
 #pragma once
 #include "../../Model/Components/Clip.hpp"
-#include "../Components/Point.hpp"
+//#include "../Components/Point.hpp"
 //#include "../Components/Screen.hpp"
 //#include "../Components/Widget.hpp"
 #include <stdexcept>

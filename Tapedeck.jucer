@@ -7,6 +7,10 @@
     <GROUP id="{9F6D7309-D982-C545-BE48-4A8F1E20435E}" name="Source">
       <FILE id="fwANg1" name="defs_UI.h" compile="0" resource="0" file="Source/defs_UI.h"/>
       <GROUP id="{029C02AF-225D-CD25-6861-0A6EF5E7D00D}" name="UI">
+        <GROUP id="{76A0D7D7-38AF-9794-A478-693ABBFA0324}" name="Windows">
+          <FILE id="SDXaZB" name="PropertiesWindow.h" compile="0" resource="0"
+                file="Source/UI/PropertiesWindow.h"/>
+        </GROUP>
         <GROUP id="{EBF3BBED-20EA-7FC4-C967-A6C7A940C319}" name="Widgets">
           <FILE id="iqbVz0" name="ClipWidget.hpp" compile="0" resource="0" file="Source/UI/Widgets/ClipWidget.hpp"/>
           <FILE id="FPJVBL" name="DecoratedWindow.hpp" compile="0" resource="0"

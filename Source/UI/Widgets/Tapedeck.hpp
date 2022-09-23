@@ -1,6 +1,5 @@
 
 #include "../../Model/AudioManager.hpp"
-#include "../Components/Point.hpp"
 #include "../../defs_UI.h"
 #include "DecoratedWindow.hpp"
 #include "TimeRuler.hpp"

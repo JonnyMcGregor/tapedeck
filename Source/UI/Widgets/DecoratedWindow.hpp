@@ -1,13 +1,10 @@
 #pragma once
-#include "../Components/Point.hpp"
-#include "../Components/Widget.hpp"
 #include <iostream>
 #include <optional>
 #include <string>
 
 struct DecoratedWindow : juce::Component {
     std::string title;
-    std::optional<Widget *> subWidget;
     juce::Colour backgroundColour = juce::Colours::black;
     juce::Colour outlineColour = juce::Colours::white;
 
@@ -20,14 +17,6 @@ struct DecoratedWindow : juce::Component {
         this->title = newTitle;
         setSize(width, height);
     }
-
-    // Takes a reference
-    void set_sub_widget(Widget &subWidget) {
-        // Set this->subWidget pointer to point to the _address_ of subWidget.
-        this->subWidget = &subWidget;
-    }
-
-    //void process(std::vector<KeyPress> &keyboardInput) {}
 
     void paint(juce::Graphics &screen) {
         screen.fillAll(backgroundColour);

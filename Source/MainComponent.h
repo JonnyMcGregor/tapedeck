@@ -1,6 +1,7 @@
 #pragma once
 
 #include "UI/Widgets/Tapedeck.hpp"
+#include "UI/PropertiesWindow.h"
 #include "TPDK_LookAndFeel.h"
 #include "defs_UI.h"
 #include <JuceHeader.h>
@@ -30,7 +31,7 @@ private:
     TPDK_LookAndFeel lf;
     
     //Use this to handle application commands
-    juce::ApplicationCommandManager commandManager;
+    std::shared_ptr<juce::ApplicationCommandManager> commandManager;
     //Top Menu bar component
     std::unique_ptr<juce::MenuBarComponent> mainMenuBar;
 
@@ -46,4 +47,8 @@ private:
     void getAllCommands(juce::Array<juce::CommandID> &commands);
     void getCommandInfo(juce::CommandID commandID, juce::ApplicationCommandInfo &result);
     bool perform(const InvocationInfo &info) override;
+
+    //Properties Window
+    std::unique_ptr<PropertiesWindow> propertiesWindow;
+    void openPropertiesWindow();
 };
