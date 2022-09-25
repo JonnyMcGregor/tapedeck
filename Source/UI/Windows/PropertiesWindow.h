@@ -17,7 +17,7 @@ class PropertiesPanel : public juce::Component {
 public:
     PropertiesPanel(std::shared_ptr<juce::AudioDeviceManager> deviceManager)
     {
-        propertiesTabs = std::make_unique<juce::TabbedComponent>(juce::TabbedButtonBar::Orientation::TabsAtLeft);
+        propertiesTabs.reset(new juce::TabbedComponent(juce::TabbedButtonBar::Orientation::TabsAtLeft));
         propertiesTabs->setColour(juce::TabbedComponent::ColourIds::backgroundColourId, juce::Colours::azure);
         audioPropertiesTab.reset(new AudioPropertiesTab(deviceManager));
         propertiesTabs->addTab("Audio Devices", ColourPalette::colourAlternate, audioPropertiesTab.get(), true, 1);
@@ -37,15 +37,17 @@ public:
 private:
     std::unique_ptr<juce::TabbedComponent> propertiesTabs;
     std::unique_ptr<AudioPropertiesTab> audioPropertiesTab;
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PropertiesPanel)
 };
 
 class PropertiesWindow : public juce::DocumentWindow {
 public:
-    PropertiesWindow(std::shared_ptr<PropertiesPanel> propertiesPanel, std::shared_ptr<juce::ApplicationCommandManager> cmdManager, juce::String title, juce::Colour backgroundColour) 
+    PropertiesWindow(std::shared_ptr<juce::ApplicationCommandManager> cmdManager, juce::String title, juce::Colour backgroundColour) 
         : DocumentWindow(title, backgroundColour, DocumentWindow::closeButton, true)
     {
-        setContentComponent(propertiesPanel.get());
         this->cmdManager = cmdManager;
+    }
+    ~PropertiesWindow() {
     }
     virtual void closeButtonPressed() {
         cmdManager->invoke(CommandIDs::togglePropertiesWindow, true);
@@ -53,5 +55,6 @@ public:
 
 private:
     std::shared_ptr<juce::ApplicationCommandManager> cmdManager;
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PropertiesWindow)
 };
 

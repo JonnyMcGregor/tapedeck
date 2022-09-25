@@ -41,7 +41,6 @@ private:
     //Top Menu bar component
     std::unique_ptr<juce::MenuBarComponent> mainMenuBar;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 
     // Inherited via MenuBarModel
     juce::StringArray getMenuBarNames() override;
@@ -56,6 +55,8 @@ private:
 
     //Properties Window
     std::unique_ptr<juce::DocumentWindow> propertiesWindow;
-    std::shared_ptr<PropertiesPanel> propertiesPanel;
+    std::unique_ptr<PropertiesPanel> propertiesPanel;
     void openPropertiesWindow();
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

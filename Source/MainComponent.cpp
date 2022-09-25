@@ -21,12 +21,18 @@ MainComponent::MainComponent()
 
     // Initialise Tapedeck UI
     tapedeckUI = std::make_unique<Tapedeck>(getWidth(), getHeight() - 30, tapedeckModel->params->sampleRate);
-    
     mainMenuBar.reset(new juce::MenuBarComponent(this));
+    // Initialise Command Manager
     commandManager = std::make_shared<juce::ApplicationCommandManager>();
     setApplicationCommandManagerToWatch(commandManager.get());
     commandManager->registerAllCommandsForTarget(this);
     addKeyListener(commandManager->getKeyMappings());
+
+    //Initialise Properties Window
+    propertiesPanel.reset(new PropertiesPanel(deviceManager));
+    propertiesWindow.reset(new PropertiesWindow(commandManager, "Properties", juce::Colours::black));
+    propertiesWindow->setContentComponent(propertiesPanel.get());
+    addChildComponent(propertiesWindow.get());
 
     addAndMakeVisible(mainMenuBar.get());
     addAndMakeVisible(tapedeckUI.get());
@@ -57,9 +63,10 @@ void MainComponent::resized()
     {
         tapedeckUI->setBounds(0, curY, getWidth(), getHeight() - 15);
     }
-    else {
-        //Do nothing, Tapedeck should be initialised in MainComponent constructor.
+    if (propertiesWindow->isVisible()) {
+        propertiesWindow->setBounds(80, 80, 700, 700);
     }
+
 }
 //======== MenuBar Function Overrides ==========//
 juce::StringArray MainComponent::getMenuBarNames()
@@ -128,11 +135,12 @@ bool MainComponent::perform(const InvocationInfo &info)
     case CommandIDs::saveSession:
         break;
     case CommandIDs::togglePropertiesWindow:
-        if (propertiesWindow == nullptr) {
-            openPropertiesWindow();
+        if (propertiesWindow->isVisible()) {
+            propertiesWindow->setVisible(false);
         }
         else {
-            propertiesWindow.reset();
+            propertiesWindow->setVisible(true);
+            resized();
         }
         break;
     default:
@@ -142,17 +150,6 @@ bool MainComponent::perform(const InvocationInfo &info)
     return true;
 }
 // ======= Command Functions =========//
-
-void MainComponent::openPropertiesWindow() {
-    if (commandManager == nullptr || deviceManager == nullptr) {
-        return; //These must be initialised...
-    }
-    propertiesPanel.reset(new PropertiesPanel(deviceManager));
-    propertiesWindow.reset(new PropertiesWindow(propertiesPanel, commandManager, "Properties", juce::Colours::black));
-    propertiesWindow->setSize(700, 700);
-    propertiesWindow->setCentrePosition(getBounds().getCentreX(), getBounds().getCentreY());
-    addAndMakeVisible(propertiesWindow.get());
-}
 
 void MainComponent::initialiseSession(std::string sessionName)
 {

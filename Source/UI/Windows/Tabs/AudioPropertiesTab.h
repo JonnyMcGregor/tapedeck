@@ -27,4 +27,7 @@ public:
 
 private:
     std::shared_ptr<juce::AudioDeviceSelectorComponent> deviceSelector;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPropertiesTab)
 };
+
