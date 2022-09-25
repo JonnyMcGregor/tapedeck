@@ -5,12 +5,23 @@
 MainComponent::MainComponent()
 {
     juce::LookAndFeel::setDefaultLookAndFeel(&lf);
+    setWantsKeyboardFocus(true);
     // Initialise logger for tracking app issues
     //juce::FileLogger *logger = juce::FileLogger::createDateStampedLogger("Tapedeck/logs", "TapedeckLogger_", "txt", "//========= TAPEDECK LOGS =========//");
+    
     logger = juce::FileLogger::createDefaultAppLogger("Tapedeck/logs", "TapedeckLogger.txt", "//========= TAPEDECK LOGS =========//");
     juce::FileLogger::setCurrentLogger(logger);
-    tapedeck = std::make_unique<Tapedeck>(getWidth(), getHeight() - 30);
+    
+    // Initialise Tapedeck Model
+    deviceManager = std::make_shared<juce::AudioDeviceManager>();
+    tapedeckModel = make_shared<AudioManager>(deviceManager, false, "test_session");
+    jassert(deviceManager != nullptr); //Device manager is not initialising properly, check the device logs...
 
+    initialiseSession("test_session");
+
+    // Initialise Tapedeck UI
+    tapedeckUI = std::make_unique<Tapedeck>(getWidth(), getHeight() - 30, tapedeckModel->params->sampleRate);
+    
     mainMenuBar.reset(new juce::MenuBarComponent(this));
     commandManager = std::make_shared<juce::ApplicationCommandManager>();
     setApplicationCommandManagerToWatch(commandManager.get());
@@ -18,7 +29,7 @@ MainComponent::MainComponent()
     addKeyListener(commandManager->getKeyMappings());
 
     addAndMakeVisible(mainMenuBar.get());
-    addAndMakeVisible(tapedeck.get());
+    addAndMakeVisible(tapedeckUI.get());
     setSize(1440, 800);
 }
 
@@ -42,9 +53,9 @@ void MainComponent::resized()
         mainMenuBar->setBounds(0, curY, getWidth(), 30);
     }
     curY += 15; //should be 30 but for some reason 30 creates a gap between tapedeck widget and top menu
-    if(tapedeck)
+    if(tapedeckUI)
     {
-        tapedeck->setBounds(0, curY, getWidth(), getHeight() - 15);
+        tapedeckUI->setBounds(0, curY, getWidth(), getHeight() - 15);
     }
     else {
         //Do nothing, Tapedeck should be initialised in MainComponent constructor.
@@ -93,7 +104,7 @@ void MainComponent::getCommandInfo(juce::CommandID commandID, juce::ApplicationC
     switch (commandID) {
     case CommandIDs::loadSession:
         result.setInfo("Open", "Loads a Tapedeck session from an xml file", "Menu", 0);
-        result.addDefaultKeypress('l', juce::ModifierKeys::ctrlModifier);
+        result.addDefaultKeypress('o', juce::ModifierKeys::ctrlModifier);
         break;
     case CommandIDs::saveSession:
         result.setInfo("Save As", "Saves Tapedeck session to an xml file", "Menu", 0);
@@ -130,10 +141,25 @@ bool MainComponent::perform(const InvocationInfo &info)
 
     return true;
 }
+// ======= Command Functions =========//
 
 void MainComponent::openPropertiesWindow() {
-    propertiesWindow = std::make_unique<PropertiesWindow>("Properties", ColourPalette::colourDark, PropertiesWindow::TitleBarButtons::closeButton, commandManager);
-    propertiesWindow->setSize(300, 500);
-    propertiesWindow->setTopLeftPosition(30, 30);
+    if (commandManager == nullptr || deviceManager == nullptr) {
+        return; //These must be initialised...
+    }
+    propertiesPanel.reset(new PropertiesPanel(deviceManager));
+    propertiesWindow.reset(new PropertiesWindow(propertiesPanel, commandManager, "Properties", juce::Colours::black));
+    propertiesWindow->setSize(700, 700);
+    propertiesWindow->setCentrePosition(getBounds().getCentreX(), getBounds().getCentreY());
     addAndMakeVisible(propertiesWindow.get());
+}
+
+void MainComponent::initialiseSession(std::string sessionName)
+{
+    if (filesystem::exists(sessionName)) {
+        // Here we should add check for setting up loading functionality
+        // For now to test the project we'll clear out the directory and start from scratch
+        filesystem::remove_all(sessionName);
+    }
+    tapedeckModel->session->sessionXml->createXmlDocument();
 }

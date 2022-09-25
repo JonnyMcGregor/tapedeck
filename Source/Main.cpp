@@ -60,7 +60,7 @@ public:
     public:
         MainWindow (juce::String name)
             : DocumentWindow (name,
-                              juce::Colours::OuterSpaceCrayola,
+                              juce::Colours::black,
                               DocumentWindow::allButtons)
         {
             setUsingNativeTitleBar (true);

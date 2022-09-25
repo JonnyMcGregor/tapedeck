@@ -1,12 +1,17 @@
 #include "Tapedeck.hpp"
 
-Tapedeck::Tapedeck(int width, int height) {
+Tapedeck::Tapedeck(int width, int height, int sampleRate) {
     setSize(width, height);
     tapedeckWindow = std::make_unique<DecoratedWindow>("TAPEDECK", getWidth(), getHeight());
     tapedeckWindow->backgroundColour = ColourPalette::colourGreyDark;
     tapedeckWindow->outlineColour = ColourPalette::colourTextDark;
-    initialiseSession("test_session");
     
+    timeRuler = make_shared<TimeRuler>(sampleRate);
+    trackStack = make_shared<TrackStack>(timeRuler);
+    /*for (int i = 0; i < 4; i++) {
+        createTrack();
+    }*/
+
 	playhead = std::make_unique<juce::DrawableRectangle>();
     playhead->setFill(ColourPalette::colourGreyLight);
     
@@ -17,34 +22,19 @@ Tapedeck::Tapedeck(int width, int height) {
     addAndMakeVisible(timeRuler.get());
 
     updatePlayheadPosition();
-    selectedTrack = trackStack->subWidgets.front().get();
-    selectedTrack->isSelected = true;
+    /*selectedTrack = trackStack->subWidgets.front().get();
+    selectedTrack->isSelected = true;*/
     resized();
 }
 
 Tapedeck::~Tapedeck() {}
 
-void Tapedeck::initialiseSession(std::string sessionName) {
-    this->sessionName = sessionName;
-    if (filesystem::exists(sessionName)) {
-        // Here we should add check for setting up loading functionality
-        // For now to test the project we'll clear out the directory and start from scratch
-        filesystem::remove_all(sessionName);
-    } 
-    audioManager = make_unique<AudioManager>(false, sessionName, "");
-    session = audioManager->session;
-    session->sessionXml->createXmlDocument();
-    timeRuler = make_shared<TimeRuler>(audioManager->params->sampleRate);
-    trackStack = make_shared<TrackStack>(timeRuler);
-    for (int i = 0; i < 4; i++) {
-        createTrack();
-    }
-}
+
 
 bool keyStateChanged(bool isKeyDown, juce::Component *originatingComponent) { return true; }
 
 bool Tapedeck::keyPressed(const juce::KeyPress &key) {
-    session->sessionXml->refreshXmlDocument(*session->playhead, session->tracks);
+    //session->sessionXml->refreshXmlDocument(*session->playhead, session->tracks);
 
     /// Flip bool for selected track in case it changes
     if (selectedTrack != nullptr) {
@@ -107,25 +97,25 @@ bool Tapedeck::keyPressed(const juce::KeyPress &key) {
     }
     if (key.getKeyCode() == ',') {
         // scrub_backward
-        session->playhead->movePlayhead(-0.5f);
+        //session->playhead->movePlayhead(-0.5f);
         updatePlayheadPosition();
         retreatClipWindow();
     }
     if (key.getKeyCode() == '.') {
         // scrub_forward
-        session->playhead->movePlayhead(0.5f);
+        //session->playhead->movePlayhead(0.5f);
         updatePlayheadPosition();
         advanceClipWindow();
     }
     if (key.getKeyCode() == ',' && key.getModifiers() == juce::ModifierKeys::shiftModifier) {
         // big_scrub_backward
-        session->playhead->movePlayhead((-0.5f * 4.0f));
+        //session->playhead->movePlayhead((-0.5f * 4.0f));
         updatePlayheadPosition();
         retreatClipWindow();
     }
     if (key.getKeyCode() == '.' && key.getModifiers() == juce::ModifierKeys::shiftModifier) {
         // big_scrub_forward
-        session->playhead->movePlayhead((0.5f * 4.0f));
+        //session->playhead->movePlayhead((0.5f * 4.0f));
         updatePlayheadPosition();
         advanceClipWindow();
     }
@@ -160,7 +150,7 @@ bool Tapedeck::keyPressed(const juce::KeyPress &key) {
     }
     if (key == juce::KeyPress::spaceKey) {
         // play/pause
-        if (audioManager) {
+       /* if (audioManager) {
             if (isPlaying) {
                 audioManager->stopAudioStream();
                 isPlaying = false;
@@ -171,7 +161,7 @@ bool Tapedeck::keyPressed(const juce::KeyPress &key) {
                 isPlaying = true;
                 startTimerHz(30);
             }
-        }
+        }*/
     }
     if (selectedTrack != nullptr) {
         selectedTrack->isSelected = true;
@@ -232,28 +222,28 @@ void Tapedeck::selectNextClip() {
     }
 }
 void Tapedeck::advanceClipWindow() {
-    if (session->getCurrentTimeInSamples() > timeRuler->startTimeOnScreenInSamples + timeRuler->windowSizeInSamples) {
+    /*if (session->getCurrentTimeInSamples() > timeRuler->startTimeOnScreenInSamples + timeRuler->windowSizeInSamples) {
         timeRuler->startTimeOnScreenInSamples = session->getCurrentTimeInSamples();
-    }
+    }*/
 }
 void Tapedeck::retreatClipWindow() {
-    if (session->getCurrentTimeInSamples() < timeRuler->startTimeOnScreenInSamples) {
+    /*if (session->getCurrentTimeInSamples() < timeRuler->startTimeOnScreenInSamples) {
         timeRuler->startTimeOnScreenInSamples = session->getCurrentTimeInSamples() - timeRuler->windowSizeInSamples;
         if (timeRuler->startTimeOnScreenInSamples < 0) {
             timeRuler->startTimeOnScreenInSamples = 0;
         }
-    }
+    }*/
 }
 void Tapedeck::createTrack() {
-    session->createTrack();
+    /*session->createTrack();
     trackStack->createTrackSubWidgets(session->tracks.back());
     if (trackStack->subWidgets.size() == 1) {
         selectedTrack = trackStack->subWidgets.back().get();
     }
-    trackStack->resized();
+    trackStack->resized();*/
 }
 void Tapedeck::removeTrack() {
-    std::vector<std::unique_ptr<TrackWidget>>::iterator widgetIterator = trackStack->subWidgets.begin();
+    /*std::vector<std::unique_ptr<TrackWidget>>::iterator widgetIterator = trackStack->subWidgets.begin();
     for (int i = 0; i < trackStack->subWidgets.size(); i++) {
         if (selectedTrack == trackStack->subWidgets[i].get()) {
             selectedTrack = nullptr;
@@ -262,7 +252,7 @@ void Tapedeck::removeTrack() {
             session->deleteTrack(i);
         }
     }
-    trackStack->resized();
+    trackStack->resized();*/
 }
 void Tapedeck::paint(juce::Graphics &screen) {
 
@@ -288,14 +278,15 @@ void Tapedeck::resized() {
 }
 
 void Tapedeck::timerCallback() {
-    if (playhead->getX() != playheadXPosition()) {
+    int currentTimeSamples = 0;//session->getCurrentTimeInSamples();
+    if (playhead->getX() != playheadXPosition(currentTimeSamples)) {
         updatePlayheadPosition();
     }
 }
 
-int Tapedeck::playheadXPosition() {
+int Tapedeck::playheadXPosition(int currentTimeSamples) {
     int x_pos = trackStack->timeRuler->getX();
-    x_pos += (session->getCurrentTimeInSamples() - timeRuler->startTimeOnScreenInSamples) / timeRuler->samplesPerCell();
+    x_pos += (currentTimeSamples - timeRuler->startTimeOnScreenInSamples) / timeRuler->samplesPerCell();
     if (x_pos >= getWidth() - (getWidth() * 0.9 * 0.5) && isPlaying) {
         x_pos = getWidth() - (getWidth() * 0.9 * 0.5);
         updateClipWindow();
@@ -303,10 +294,11 @@ int Tapedeck::playheadXPosition() {
     return x_pos;
 }
 void Tapedeck::updatePlayheadPosition() {
-    juce::Rectangle<float> r = { (float)playheadXPosition(), (float)trackStack->getY(), 2.0f, (float)trackStack->getHeight() };
+    int currentTimeSamples = 1; // session->getCurrentTimeInSamples();
+    juce::Rectangle<float> r = { (float)playheadXPosition(currentTimeSamples), (float)trackStack->getY(), 2.0f, (float)trackStack->getHeight() };
     playhead->setRectangle(juce::Parallelogram<float>(r));
     trackStack->repaint();
 }
 void Tapedeck::updateClipWindow() {
-    timeRuler->startTimeOnScreenInSamples = session->getCurrentTimeInSamples() - timeRuler->windowSizeInSamples / 2;
+    //timeRuler->startTimeOnScreenInSamples = session->getCurrentTimeInSamples() - timeRuler->windowSizeInSamples / 2;
 }

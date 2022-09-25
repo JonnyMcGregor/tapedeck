@@ -6,12 +6,14 @@
 class AudioManager : juce::AudioIODeviceCallback 
 {
 public:
-    AudioManager(bool isLoadingFromXml, std::string projectName = "", filesystem::path xmlPath = "") {
+    AudioManager(std::shared_ptr<juce::AudioDeviceManager> deviceManager, bool isLoadingFromXml, std::string projectName = "", filesystem::path xmlPath = "")
+    {
         //Setup Audio Devices and Parameters
-        deviceManager.initialiseWithDefaultDevices(1, 2);
-        juce::AudioIODevice* currentDevice = deviceManager.getCurrentAudioDevice();
+        deviceManager->initialiseWithDefaultDevices(1, 2);
+        juce::AudioIODevice* currentDevice = deviceManager->getCurrentAudioDevice();
         params = std::make_unique<AudioParams>(currentDevice->getCurrentSampleRate(), 
                     currentDevice->getCurrentBufferSizeSamples(), 1, 2);
+        this->deviceManager = deviceManager;
         if (isLoadingFromXml) {
             this->sessionName = xmlPath.stem().string();
         } else {
@@ -21,7 +23,7 @@ public:
         //Setup Output Log
         audioDeviceLog = std::make_unique<juce::File>(juce::File::getCurrentWorkingDirectory().getFullPathName() + "\\" +  projectName + "_audio_device_log.txt");
         audioDeviceLog->appendText(juce::Time::getCurrentTime().toString(true, true, false, true) + " Audio Device Initialised:\n" + 
-                        deviceManager.getCurrentAudioDevice()->getName() + "\n\tNum Input Channels: " + juce::String(params->numInputChannels) + 
+                        deviceManager->getCurrentAudioDevice()->getName() + "\n\tNum Input Channels: " + juce::String(params->numInputChannels) + 
                         "\n\tNum Output Channels: " + juce::String(params->numOutputChannels) + "\n\tSample rate: " + juce::String(params->sampleRate) + 
                         "\n\tBuffer Size: " + juce::String(params->bufferSize) + "\n==========\n");
     }
@@ -62,11 +64,11 @@ public:
         //Else playback audio
         else { session->playState = Session::Play_State::Playing; }
         
-        deviceManager.addAudioCallback(this);
+        deviceManager->addAudioCallback(this);
     }
 
     void stopAudioStream() {
-        deviceManager.removeAudioCallback(this);
+        deviceManager->removeAudioCallback(this);
         session->playState = Session::Play_State::Stopping;
         session->createFilesFromRecordedClips();
         assert(session->tracks.size() > 0);
@@ -79,7 +81,7 @@ public:
 
 private:
     std::string sessionName;
-    juce::AudioDeviceManager deviceManager;
+    std::shared_ptr<juce::AudioDeviceManager> deviceManager;
     std::unique_ptr<juce::File> audioDeviceLog;
 };
 

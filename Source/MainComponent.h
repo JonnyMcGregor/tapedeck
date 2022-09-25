@@ -1,9 +1,10 @@
 #pragma once
 
 #include "UI/Widgets/Tapedeck.hpp"
-#include "UI/PropertiesWindow.h"
+#include "UI/Windows/PropertiesWindow.h"
 #include "TPDK_LookAndFeel.h"
 #include "defs_UI.h"
+#include "defs.h"
 #include <JuceHeader.h>
 
 //==============================================================================
@@ -23,13 +24,18 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
 
+    // Sets up the session wih a given session name
+    void initialiseSession(std::string sessionName);
+
 private:
     //==============================================================================
     // Your private member variables go here...
-    std::unique_ptr<Tapedeck> tapedeck;
+    std::unique_ptr<Tapedeck> tapedeckUI;
+    std::shared_ptr<AudioManager> tapedeckModel;
+
     juce::FileLogger* logger;
     TPDK_LookAndFeel lf;
-    
+    std::shared_ptr<juce::AudioDeviceManager> deviceManager;
     //Use this to handle application commands
     std::shared_ptr<juce::ApplicationCommandManager> commandManager;
     //Top Menu bar component
@@ -49,6 +55,7 @@ private:
     bool perform(const InvocationInfo &info) override;
 
     //Properties Window
-    std::unique_ptr<PropertiesWindow> propertiesWindow;
+    std::unique_ptr<juce::DocumentWindow> propertiesWindow;
+    std::shared_ptr<PropertiesPanel> propertiesPanel;
     void openPropertiesWindow();
 };

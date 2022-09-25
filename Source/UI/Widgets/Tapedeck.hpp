@@ -12,11 +12,9 @@
 class Tapedeck : public juce::Component, private juce::Timer 
 {
 public:
-    Tapedeck(int width, int height);
+    Tapedeck(int width, int height, int sampleRate);
     ~Tapedeck();
-    // Sets up the session wih a given session name
-    void initialiseSession(std::string sessionName);
-
+    
     //Manages all cases of keyboard input
     bool keyPressed(const juce::KeyPress &key) override;
 
@@ -31,7 +29,7 @@ public:
     /** Draws all elements on the main screen */
     void paint(juce::Graphics &screen) override;
     void resized() override;
-    int playheadXPosition();
+    int playheadXPosition(int currentTimeSamples);
     void updateClipWindow();
     void updatePlayheadPosition();
     bool closeUIThread = false;
@@ -47,7 +45,6 @@ private:
     TrackWidget *selectedTrack = nullptr;
     ClipWidget *selectedClip = nullptr;
     std::string sessionName;
-    std::unique_ptr<AudioManager> audioManager;
-    std::shared_ptr<Session> session;
+    //std::shared_ptr<Session> session;
     bool isPlaying = false;
 };

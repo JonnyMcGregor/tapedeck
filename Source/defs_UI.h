@@ -35,8 +35,3 @@ namespace ColourPalette {
 
 }
 
-enum CommandIDs {
-    loadSession = 1,
-    saveSession,
-    togglePropertiesWindow,
-};

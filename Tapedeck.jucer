@@ -5,11 +5,16 @@
               companyName="Spaghetti Van Ltd" cppLanguageStandard="20">
   <MAINGROUP id="bnCUsk" name="Tapedeck">
     <GROUP id="{9F6D7309-D982-C545-BE48-4A8F1E20435E}" name="Source">
+      <FILE id="PWXTg0" name="defs.h" compile="0" resource="0" file="Source/defs.h"/>
       <FILE id="fwANg1" name="defs_UI.h" compile="0" resource="0" file="Source/defs_UI.h"/>
       <GROUP id="{029C02AF-225D-CD25-6861-0A6EF5E7D00D}" name="UI">
         <GROUP id="{76A0D7D7-38AF-9794-A478-693ABBFA0324}" name="Windows">
-          <FILE id="SDXaZB" name="PropertiesWindow.h" compile="0" resource="0"
-                file="Source/UI/PropertiesWindow.h"/>
+          <GROUP id="{3DFA23C6-41EB-7AB2-D45E-4450F7044272}" name="Tabs">
+            <FILE id="guhQYM" name="AudioPropertiesTab.h" compile="0" resource="0"
+                  file="Source/UI/Windows/Tabs/AudioPropertiesTab.h"/>
+          </GROUP>
+          <FILE id="aZvU6J" name="PropertiesWindow.h" compile="0" resource="0"
+                file="Source/UI/Windows/PropertiesWindow.h"/>
         </GROUP>
         <GROUP id="{EBF3BBED-20EA-7FC4-C967-A6C7A940C319}" name="Widgets">
           <FILE id="iqbVz0" name="ClipWidget.hpp" compile="0" resource="0" file="Source/UI/Widgets/ClipWidget.hpp"/>
@@ -18,9 +23,6 @@
           <FILE id="d3B7YR" name="Label.hpp" compile="0" resource="0" file="Source/UI/Widgets/Label.hpp"/>
           <FILE id="hXlJhX" name="PlayheadWidget.hpp" compile="0" resource="0"
                 file="Source/UI/Widgets/PlayheadWidget.hpp"/>
-          <FILE id="sLw35N" name="StackLayout.hpp" compile="0" resource="0" file="Source/UI/Widgets/StackLayout.hpp"/>
-          <FILE id="KjU37d" name="TabbedLayout.hpp" compile="0" resource="0"
-                file="Source/UI/Widgets/TabbedLayout.hpp"/>
           <FILE id="hTEYgi" name="Tapedeck.cpp" compile="1" resource="0" file="Source/UI/Widgets/Tapedeck.cpp"/>
           <FILE id="ZznzsM" name="Tapedeck.hpp" compile="0" resource="0" file="Source/UI/Widgets/Tapedeck.hpp"/>
           <FILE id="vgT6II" name="TimeRuler.hpp" compile="0" resource="0" file="Source/UI/Widgets/TimeRuler.hpp"/>
@@ -28,7 +30,6 @@
           <FILE id="vn1Ntv" name="TrackToggleButton.h" compile="0" resource="0"
                 file="Source/UI/Widgets/TrackToggleButton.h"/>
           <FILE id="rOvEY3" name="TrackWidget.hpp" compile="0" resource="0" file="Source/UI/Widgets/TrackWidget.hpp"/>
-          <FILE id="yKlGKe" name="VboxLayout.hpp" compile="0" resource="0" file="Source/UI/Widgets/VboxLayout.hpp"/>
         </GROUP>
       </GROUP>
       <GROUP id="{51958BA8-8482-AD24-2C79-33D506D5EC1F}" name="Model">
@@ -79,16 +80,24 @@
         <MODULEPATH id="juce_gui_basics" path="../JUCE/modules"/>
         <MODULEPATH id="juce_graphics" path="../JUCE/modules"/>
         <MODULEPATH id="juce_data_structures" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../Juce/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../Juce/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../JUCE/modules"/>
       </MODULEPATHS>
     </VS2022>
   </EXPORTFORMATS>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
   </MODULES>
 </JUCERPROJECT>
