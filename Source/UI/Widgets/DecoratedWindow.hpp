@@ -3,7 +3,7 @@
 #include <optional>
 #include <string>
 
-struct DecoratedWindow : juce::Component {
+struct DecoratedWindow : public juce::Component {
     std::string title;
     juce::Colour backgroundColour = juce::Colours::black;
     juce::Colour outlineColour = juce::Colours::white;
@@ -25,4 +25,8 @@ struct DecoratedWindow : juce::Component {
         screen.drawRect(area);
         if(title != "") { screen.drawText(title, 0, 8, getWidth(), getHeight() * 0.05, juce::Justification::centred, false); }
     };
+
+    void mouseDown(const juce::MouseEvent& m) override {
+
+    }
 };

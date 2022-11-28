@@ -20,6 +20,7 @@ public:
 
     void createTrack();
     void deleteTrack(int index);
+    void deleteTrack(std::shared_ptr<Track> track);
 
     void prepareAudio();
     void processAudioBlock(Buffer &inputBuffer, Buffer &outputBuffer);
@@ -27,6 +28,7 @@ public:
 
     void createFilesFromRecordedClips();
 
+    void setCurrentTimeInSamples(int newTimeInSamples);
     float getCurrentTimeInSeconds();
     u_int getCurrentTimeInSamples();
 
@@ -37,6 +39,8 @@ public:
     void loadTracks(int numberOfTracks);
     void loadClips(int numberOfClips);
     int numRecordArmedTracks();
+    
+    std::vector<std::shared_ptr<Track>> getSelectedTracks(); 
 
     enum struct Play_State {
         ToPlay,

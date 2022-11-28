@@ -14,7 +14,6 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
     std::unique_ptr<TrackToggleButton> but_solo;
     std::unique_ptr<TrackToggleButton> but_mute;
 
-    bool isSelected = false;
     TrackWidget(std::shared_ptr<Track> track, std::shared_ptr<TimeRuler> timeRuler) {
         this->track = track;
         for (int i = 0; i < track->clips.size(); i++) {
@@ -24,7 +23,7 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
         this->timeRuler = timeRuler;
         trackBar = std::make_unique<DecoratedWindow>(track->name, getWidth() * 0.1, getHeight());
         clipArea = std::make_unique<DecoratedWindow>(getWidth() * 0.9, getHeight());
-
+        clipArea->setInterceptsMouseClicks(false, false);
         but_recordArm = std::make_unique<TrackToggleButton>();
         but_recordArm->setButtonText("R");
         but_recordArm->setColour(juce::ToggleButton::ColourIds::tickColourId, ColourPalette::colourGreyDark);
@@ -43,9 +42,9 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
         addAndMakeVisible(but_recordArm.get());
         addAndMakeVisible(but_solo.get());
         addAndMakeVisible(but_mute.get());
-		
+        setInterceptsMouseClicks(false, true);
     }
-
+    
     void updateClipWidgets() {
         clipWidgets.clear();
         for (int i = 0; i < track->clips.size(); i++) {
@@ -83,12 +82,10 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
     }
 
     void paint(juce::Graphics &screen) override {
-        trackBar->backgroundColour = isSelected ? ColourPalette::colourPrimary : ColourPalette::colourAlternate;
+        trackBar->backgroundColour = track->isSelected ? ColourPalette::colourPrimary : ColourPalette::colourAlternate;
         trackBar->outlineColour = ColourPalette::colourDark;
         clipArea->backgroundColour = ColourPalette::colourAlternate;
         clipArea->outlineColour = ColourPalette::colourGreyLight;
-
-
     }
 
     void resized() override {
@@ -126,7 +123,7 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
         }
     }
     int calculateClipWidth(int clipIndex) {
-        return (calculateClipEndSample(clipIndex) - calculateClipStartSample(clipIndex)) / timeRuler->samplesPerCell();
+        return (calculateClipEndSample(clipIndex) - calculateClipStartSample(clipIndex)) / timeRuler->samplesPerPixel();
     }
 
     int calculateClipStartSample(int clipIndex) {
@@ -137,6 +134,11 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
     }
 
     int calculateClipX(int clipIndex) {
-        return max((int)(track->clipMetadata[clipIndex].startTime - timeRuler->startTimeOnScreenInSamples) / timeRuler->samplesPerCell(), 0);
+        return max((int)(track->clipMetadata[clipIndex].startTime - timeRuler->startTimeOnScreenInSamples) / timeRuler->samplesPerPixel(), 0);
+    }
+    void mouseDown(const juce::MouseEvent &e) override
+    {    
+        track->isSelected = true;
+        repaint();
     }
 };

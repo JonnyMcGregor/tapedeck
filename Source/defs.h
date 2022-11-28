@@ -15,4 +15,12 @@ enum CommandIDs {
     loadSession = 1,
     saveSession,
     togglePropertiesWindow,
+
+    createTrack,
+    deleteSelectedTracks,
+
+    togglePlayback,
+    recordPlayback,
+
+    updatePlayheadInModel,
 };

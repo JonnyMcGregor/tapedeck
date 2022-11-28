@@ -14,6 +14,7 @@ public:
         params = std::make_unique<AudioParams>(currentDevice->getCurrentSampleRate(), 
                     currentDevice->getCurrentBufferSizeSamples(), 1, 2);
         this->deviceManager = deviceManager;
+        //
         if (isLoadingFromXml) {
             this->sessionName = xmlPath.stem().string();
         } else {
@@ -69,15 +70,18 @@ public:
 
     void stopAudioStream() {
         deviceManager->removeAudioCallback(this);
+        if (session->playState == Session::Play_State::Recording) {
+            jassert(session->tracks.size() > 0);
+            session->createFilesFromRecordedClips();
+        }
         session->playState = Session::Play_State::Stopping;
-        session->createFilesFromRecordedClips();
-        assert(session->tracks.size() > 0);
         session->sessionXml->refreshXmlDocument(*session->playhead, session->tracks);
         session->playState = Session::Play_State::Stopped;
     }
 
     std::shared_ptr<Session> session;
     std::unique_ptr<AudioParams> params;
+    bool isPlaying = false;
 
 private:
     std::string sessionName;

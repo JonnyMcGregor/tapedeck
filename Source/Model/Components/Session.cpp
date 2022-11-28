@@ -1,11 +1,8 @@
 #include "Session.hpp"
-Session::Session(std::string sessionName, AudioParams params) {
+Session::Session(std::string sessionName, AudioParams params) : sessionName(sessionName), sampleRate(params.sampleRate), bufferSize(params.bufferSize),
+                                                                numInputChannels(params.numInputChannels), numOutputChannels(params.numOutputChannels)
+{
     juce::FileLogger::getCurrentLogger()->writeToLog("Creating Session...");
-    this->sessionName = sessionName;
-    this->sampleRate = params.sampleRate;
-    this->bufferSize = params.bufferSize;
-    this->numInputChannels = params.numInputChannels;
-    this->numOutputChannels = params.numOutputChannels;
     juce::FileLogger::getCurrentLogger()->writeToLog("Session name: " + this->sessionName);
     juce::FileLogger::getCurrentLogger()->writeToLog("Sample Rate: " + juce::String(this->sampleRate));
     juce::FileLogger::getCurrentLogger()->writeToLog("Buffer Size: " + juce::String(this->bufferSize));
@@ -61,8 +58,17 @@ void Session::deleteTrack(int index) {
     advance(trackIterator, index);
     tracks.erase(trackIterator);
 }
+void Session::deleteTrack(std::shared_ptr<Track> trackToDelete)
+{
+    for (auto it = tracks.begin(); it != tracks.end(); it++) {
+        if ((*it).get() == trackToDelete.get()) {
+            tracks.erase(it);
+        }
+    }
+}
 
-void Session::prepareAudio() {
+void Session::prepareAudio()
+{
     // Create new clip if track is record armed...
     for (auto &track : tracks) {
         if (track->recordArmed) {
@@ -111,7 +117,6 @@ bool Session::isSoloEnabled() {
 }
 
 void Session::createFilesFromRecordedClips() {
-    assert(playState == Play_State::Stopping);
     for (auto &track : tracks) {
         if (track->recordArmed) {
             for (int i = 0; i < track->clips.size(); i++) {
@@ -146,6 +151,22 @@ u_int Session::getCurrentTimeInSamples() {
     return 0;
 }
 
-float Session::getCurrentTimeInSeconds() {
+void Session::setCurrentTimeInSamples(int newTimeInSamples)
+{
+    playhead->currentTimeInSamples = newTimeInSamples;
+}
+
+float Session::getCurrentTimeInSeconds()
+{
     return 1.0f * playhead->currentTimeInSamples / sampleRate;
+}
+
+std::vector<std::shared_ptr<Track>> Session::getSelectedTracks() {
+    std::vector<std::shared_ptr<Track>> selectedTracks;
+    for (auto& track : tracks) {
+        if (track->isSelected) {
+            selectedTracks.push_back(track);
+        }
+    }
+    return selectedTracks;
 }

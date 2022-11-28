@@ -12,6 +12,12 @@ MainComponent::MainComponent()
     logger = juce::FileLogger::createDefaultAppLogger("Tapedeck/logs", "TapedeckLogger.txt", "//========= TAPEDECK LOGS =========//");
     juce::FileLogger::setCurrentLogger(logger);
     
+    // Initialise Command Manager
+    commandManager = std::make_shared<juce::ApplicationCommandManager>();
+    setApplicationCommandManagerToWatch(commandManager.get());
+    commandManager->registerAllCommandsForTarget(this);
+    addKeyListener(commandManager->getKeyMappings());
+
     // Initialise Tapedeck Model
     deviceManager = std::make_shared<juce::AudioDeviceManager>();
     tapedeckModel = make_shared<AudioManager>(deviceManager, false, "test_session");
@@ -20,13 +26,14 @@ MainComponent::MainComponent()
     initialiseSession("test_session");
 
     // Initialise Tapedeck UI
-    tapedeckUI = std::make_unique<Tapedeck>(getWidth(), getHeight() - 30, tapedeckModel->params->sampleRate);
+    tapedeckUI = std::make_unique<Tapedeck>(getWidth(), getHeight() - 30, tapedeckModel->params->sampleRate, commandManager);
     mainMenuBar.reset(new juce::MenuBarComponent(this));
-    // Initialise Command Manager
-    commandManager = std::make_shared<juce::ApplicationCommandManager>();
-    setApplicationCommandManagerToWatch(commandManager.get());
-    commandManager->registerAllCommandsForTarget(this);
-    addKeyListener(commandManager->getKeyMappings());
+    
+    
+    // Start with 4 tracks...
+    for (int i = 0; i < 4; i++) {
+        perform(createTrack);
+    }
 
     //Initialise Properties Window
     propertiesPanel.reset(new PropertiesPanel(deviceManager));
@@ -68,22 +75,38 @@ void MainComponent::resized()
     }
 
 }
+
+//======== Timer Function Overrides ==========//
+void MainComponent::timerCallback()
+{
+    if (!tapedeckUI->getTrackStack()) {
+        return;
+    }
+    int currentTimeSamples = tapedeckModel->session->getCurrentTimeInSamples();
+    tapedeckUI->getTrackStack()->updatePlayheadPosition(currentTimeSamples, false);
+}
+
 //======== MenuBar Function Overrides ==========//
 juce::StringArray MainComponent::getMenuBarNames()
 {
-    return {"File"};
+    return {"File", "Edit"};
 }
 
 juce::PopupMenu MainComponent::getMenuForIndex(int menuIndex, const juce::String &menuName)
 {
     juce::PopupMenu menu;
 
-    if (menuIndex == 0) {
+    if (menuName == "File") {
         menu.addCommandItem(commandManager.get(), CommandIDs::loadSession);
         menu.addCommandItem(commandManager.get(), CommandIDs::saveSession);
         menu.addCommandItem(commandManager.get(), CommandIDs::togglePropertiesWindow);
     }
-    
+    if (menuName == "Edit") {
+        menu.addCommandItem(commandManager.get(), CommandIDs::createTrack);
+        menu.addCommandItem(commandManager.get(), CommandIDs::deleteSelectedTracks);
+        menu.addCommandItem(commandManager.get(), CommandIDs::togglePlayback);
+        menu.addCommandItem(commandManager.get(), CommandIDs::recordPlayback);
+    }
     return menu;
 }
 
@@ -101,8 +124,14 @@ void MainComponent::menuItemSelected(int menuItemID, int topLevelMenuIndex)
 void MainComponent::getAllCommands(juce::Array<juce::CommandID> &commandIDs)
 {
     juce::Array<juce::CommandID> commands{CommandIDs::loadSession,
-                              CommandIDs::saveSession,
-                              CommandIDs::togglePropertiesWindow};
+                            CommandIDs::saveSession,
+                            CommandIDs::togglePropertiesWindow,
+                            CommandIDs::createTrack,
+                            CommandIDs::deleteSelectedTracks,
+                            CommandIDs::togglePlayback,
+                            CommandIDs::recordPlayback,
+                            CommandIDs::updatePlayheadInModel,
+    };
     commandIDs.addArray(commands);
 }
 
@@ -122,6 +151,28 @@ void MainComponent::getCommandInfo(juce::CommandID commandID, juce::ApplicationC
         result.setTicked(!result.isTicked);
         result.addDefaultKeypress('p', juce::ModifierKeys::ctrlModifier);
         break;
+    case CommandIDs::createTrack:
+        result.setInfo("Create Track", "Creates a new track", "Menu", 0);
+        result.setTicked(!result.isTicked);
+        result.addDefaultKeypress('t', juce::ModifierKeys::ctrlModifier);
+        break;
+    case CommandIDs::deleteSelectedTracks:
+        result.setInfo("Delete Track", "Deletes the selected tracks", "Menu", 0);
+        result.setTicked(!result.isTicked);
+        result.addDefaultKeypress(juce::KeyPress::deleteKey, juce::ModifierKeys::ctrlModifier);
+        break;
+    case CommandIDs::togglePlayback:
+        result.setInfo("Play", "Starts Playback", "Menu", 0);
+        result.addDefaultKeypress(juce::KeyPress::spaceKey, juce::ModifierKeys::noModifiers);
+        break;
+    case CommandIDs::recordPlayback:
+        result.setInfo("Record", "Starts recording any record armed tracks", "Menu", 0);
+        result.setTicked(!result.isTicked);
+        result.addDefaultKeypress(juce::KeyPress::spaceKey, juce::ModifierKeys::ctrlModifier);
+        break;
+    case CommandIDs::updatePlayheadInModel:
+        result.setInfo("Update Playhead", "Updates the playhead in Model to match the UI position", "Internal", 0);
+        break;
     default:
         break;
     }
@@ -133,6 +184,7 @@ bool MainComponent::perform(const InvocationInfo &info)
     case CommandIDs::loadSession :
         break;
     case CommandIDs::saveSession:
+        //tapedeckModel->session->sessionXml->
         break;
     case CommandIDs::togglePropertiesWindow:
         if (propertiesWindow->isVisible()) {
@@ -143,6 +195,37 @@ bool MainComponent::perform(const InvocationInfo &info)
             resized();
         }
         break;
+    case CommandIDs::createTrack:
+        tapedeckModel->session->createTrack();
+        tapedeckUI->createTrackWidget(tapedeckModel->session->tracks.back());
+        
+        break;
+    case CommandIDs::deleteSelectedTracks:
+        deleteSelectedTracks();
+        break;
+    case CommandIDs::togglePlayback:
+        if (tapedeckModel) {
+            if (tapedeckModel->isPlaying) {
+                tapedeckModel->stopAudioStream();
+                tapedeckModel->isPlaying = false;
+                tapedeckUI->updateTrackStack();
+                stopTimer();
+            }
+            else {
+                tapedeckModel->startAudioStream();
+                tapedeckModel->isPlaying = true;
+                startTimerHz(30);
+            }
+        }
+        break;
+    case CommandIDs::recordPlayback:
+        break;
+    case CommandIDs::updatePlayheadInModel: {
+        int newTimeInSamples = tapedeckUI->getTrackStack()->timeRuler->xPositionToTimeInSamples(tapedeckUI->getTrackStack()->getPlayheadXPosition());
+        tapedeckModel->session->setCurrentTimeInSamples(newTimeInSamples);
+        break;
+    }
+        
     default:
         return false;
     }
@@ -159,4 +242,14 @@ void MainComponent::initialiseSession(std::string sessionName)
         filesystem::remove_all(sessionName);
     }
     tapedeckModel->session->sessionXml->createXmlDocument();
+}
+
+void MainComponent::deleteSelectedTracks() {
+    auto selectedTrackWidgets = tapedeckUI->getSelectedTracks();
+    for (auto it = selectedTrackWidgets.begin(); it != selectedTrackWidgets.end(); it++) {
+        selectedTrackWidgets.erase(it);
+    }
+    for (auto &track : tapedeckModel->session->getSelectedTracks()) {
+        tapedeckModel->session->deleteTrack(track);
+    }
 }

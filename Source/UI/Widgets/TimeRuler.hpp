@@ -2,8 +2,8 @@
 //#include "../Components/Widget.hpp"
 #include <memory>
 struct TimeRuler : juce::Component {
-    float cellsPerSecond = 60.0f;
-    int cellsPerTimeMarker = 20;
+    float pixelsPerSecond = 60.0f;
+    int pixelsPerTimeMarker = 20;
     int startTimeOnScreenInSamples = 0;
     int sampleRate = 0;
     int windowSizeInSamples = 0;
@@ -14,13 +14,13 @@ struct TimeRuler : juce::Component {
     }
 
     void paint(juce::Graphics &screen) override {
-        windowSizeInSamples = getWidth() * samplesPerCell();
+        windowSizeInSamples = getWidth() * samplesPerPixel();
 
-        cellsPerTimeMarker = getWidth()/5;
+        pixelsPerTimeMarker = getWidth()/5;
         int cells_per_micro_marker = getWidth() / 15;
         for (int x = 0; x < getWidth(); x++) {
-            if (x % cellsPerTimeMarker == 0) {
-                std::string time = to_string((1.0 * x / cellsPerSecond) + (1.0 * startTimeOnScreenInSamples / sampleRate));
+            if (x % pixelsPerTimeMarker == 0) {
+                std::string time = to_string((1.0 * x / pixelsPerSecond) + (1.0 * startTimeOnScreenInSamples / sampleRate));
                 time.resize(time.find(".") + 2);
                 screen.setColour(juce::Colours::white);
                 screen.drawText(time, x, 0, 10, 10, juce::Justification::centred);
@@ -31,7 +31,15 @@ struct TimeRuler : juce::Component {
         }
     }
 
-    int samplesPerCell() {
-        return (sampleRate / cellsPerSecond);
+    int samplesPerPixel() {
+        return (sampleRate / pixelsPerSecond);
+    }
+
+    int xPositionToTimeInSamples(int xPosition) {
+        return (xPosition * samplesPerPixel()) + startTimeOnScreenInSamples;
+    }
+
+    int timeInSamplesToXPosition(int timeInSamples) {
+        return (timeInSamples - startTimeOnScreenInSamples) / samplesPerPixel();
     }
 };

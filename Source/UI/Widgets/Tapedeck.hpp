@@ -9,42 +9,37 @@
 #include <optional>
 #include <string>
 
-class Tapedeck : public juce::Component, private juce::Timer 
+class Tapedeck : public juce::Component 
 {
 public:
-    Tapedeck(int width, int height, int sampleRate);
+    Tapedeck(int width, int height, int sampleRate, std::shared_ptr<juce::ApplicationCommandManager> cmdManager);
     ~Tapedeck();
     
-    //Manages all cases of keyboard input
-    bool keyPressed(const juce::KeyPress &key) override;
-
     void selectPreviousTrack();
     void selectNextTrack();
     void selectPreviousClip();
     void selectNextClip();
     void advanceClipWindow();
     void retreatClipWindow();
-    void createTrack();
+    void createTrackWidget(std::shared_ptr<Track> track);
     void removeTrack();
+    void updateTrackStack();
     /** Draws all elements on the main screen */
     void paint(juce::Graphics &screen) override;
     void resized() override;
     int playheadXPosition(int currentTimeSamples);
     void updateClipWindow();
-    void updatePlayheadPosition();
+    void updatePlayheadPosition(int currentTimeSamples);
     bool closeUIThread = false;
+    std::vector<std::shared_ptr<TrackWidget>> getSelectedTracks();
+    std::shared_ptr<TrackStack> getTrackStack();
 
 private:
-    void timerCallback() override;
 
     std::unique_ptr<DecoratedWindow> tapedeckWindow;
     std::shared_ptr<TrackStack> trackStack;
     std::shared_ptr<TimeRuler> timeRuler;
-    std::unique_ptr<juce::DrawableRectangle> playhead;
-
-    TrackWidget *selectedTrack = nullptr;
-    ClipWidget *selectedClip = nullptr;
+    std::shared_ptr<juce::ApplicationCommandManager> cmdManager;
     std::string sessionName;
     //std::shared_ptr<Session> session;
-    bool isPlaying = false;
 };

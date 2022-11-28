@@ -10,7 +10,7 @@ struct Track {
     std::vector<ClipMetadata> clipMetadata;
     std::string name; // a user-provided name for display purposes
     bool recordArmed = false, solo = false, mute = false;
-
+    bool isSelected = false;
     Track() {
     }
 

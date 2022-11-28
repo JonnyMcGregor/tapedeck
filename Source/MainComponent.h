@@ -12,7 +12,10 @@
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainComponent : public juce::Component, public juce::MenuBarModel, public juce::ApplicationCommandTarget
+class MainComponent : public juce::Component, 
+                      public juce::MenuBarModel, 
+                      public juce::ApplicationCommandTarget,
+                      public juce::Timer
 
 {
 public:
@@ -26,6 +29,8 @@ public:
 
     // Sets up the session wih a given session name
     void initialiseSession(std::string sessionName);
+
+    void deleteSelectedTracks();
 
 private:
     //==============================================================================
@@ -41,6 +46,8 @@ private:
     //Top Menu bar component
     std::unique_ptr<juce::MenuBarComponent> mainMenuBar;
 
+    // Inherited via Timer
+    void timerCallback() override;
 
     // Inherited via MenuBarModel
     juce::StringArray getMenuBarNames() override;
@@ -56,7 +63,6 @@ private:
     //Properties Window
     std::unique_ptr<juce::DocumentWindow> propertiesWindow;
     std::unique_ptr<PropertiesPanel> propertiesPanel;
-    void openPropertiesWindow();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
