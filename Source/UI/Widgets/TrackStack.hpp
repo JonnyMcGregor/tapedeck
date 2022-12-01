@@ -1,14 +1,12 @@
 #pragma once
 #include "TrackWidget.hpp"
 #include "../../defs.h"
-struct TrackStack : public juce::Viewport, public juce::MouseListener {
+struct TrackStack : public juce::Component, public juce::MouseListener {
     
     TrackStack(int sampleRate, std::shared_ptr<juce::ApplicationCommandManager> cmdManager) 
     {
-        
         this->cmdManager = cmdManager;
-        
-        setViewedComponent(&trackArea);
+
         timeRuler = make_shared<TimeRuler>(sampleRate);
         addAndMakeVisible(timeRuler.get());
 
@@ -17,7 +15,10 @@ struct TrackStack : public juce::Viewport, public juce::MouseListener {
         playhead->setAlwaysOnTop(true);
         addAndMakeVisible(playhead.get());
 
-        trackArea.addMouseListener(this, true);
+        scrollableViewport.setViewedComponent(&trackArea);
+        scrollableViewport.addMouseListener(this, true);
+        scrollableViewport.setScrollBarsShown(true, false);
+        addAndMakeVisible(&scrollableViewport);
     }
 
     void createTrackWidget(std::shared_ptr<Track> track) {
@@ -43,19 +44,19 @@ struct TrackStack : public juce::Viewport, public juce::MouseListener {
     void resized() override
     {
         auto bounds = getBounds();
-
         u_int widgetY = 0;
         u_int widgetHeight = 150;
-        timeRuler->setBounds(getX() + (getWidth() * 0.1), 0, getWidth() * 0.9, 30);
 
-        widgetY += 30;
+        scrollableViewport.setBounds(0, 30, getWidth(), getHeight() - 30);
+        
         for(auto &subWidget : trackWidgets)
         {
             subWidget->setBounds(0, widgetY, getWidth(), widgetHeight);
             widgetY += widgetHeight;
         }
 
-        trackArea.setBounds(0, 30, getWidth(), widgetY);
+        trackArea.setBounds(0, 0, getWidth(), widgetY);
+        timeRuler->setBounds(trackWidgets[0]->clipArea->getX(), 0, getWidth() * 0.9, 30);
     }
 
     void mouseDown(const juce::MouseEvent &e) override
@@ -84,7 +85,7 @@ struct TrackStack : public juce::Viewport, public juce::MouseListener {
     {
         return playhead->getX() - trackWidgets[0]->trackBar->getWidth();
     }
-
+    juce::Viewport scrollableViewport;
     juce::Component trackArea;
     std::unique_ptr<juce::DrawableRectangle> playhead;
     juce::Colour backgroundColour = ColourPalette::colourDark;

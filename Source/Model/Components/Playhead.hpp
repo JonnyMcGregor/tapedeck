@@ -20,14 +20,14 @@ struct Playhead {
         }
     }
     void movePlayhead(float timeInSeconds) {
-        if ((currentTimeInSamples + seconds_to_samples(timeInSeconds)) < 0) {
+        if ((currentTimeInSamples + secondsToSamples(timeInSeconds)) < 0) {
             currentTimeInSamples = 0;
         } else {
-            currentTimeInSamples += seconds_to_samples(timeInSeconds);
+            currentTimeInSamples += secondsToSamples(timeInSeconds);
         }
     }
 
-    int seconds_to_samples(float timeInSeconds)
+    int secondsToSamples(float timeInSeconds)
     {
         return timeInSeconds * sampleRate;
     }
