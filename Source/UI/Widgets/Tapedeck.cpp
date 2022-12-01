@@ -31,7 +31,7 @@ void Tapedeck::updateTrackStack()
 std::vector<std::shared_ptr<TrackWidget>> Tapedeck::getSelectedTracks()
 {
     std::vector<std::shared_ptr<TrackWidget>> selectedTracks;
-    for (auto &trackWidget : trackStack->subWidgets) {
+    for (auto &trackWidget : trackStack->trackWidgets) {
         if (trackWidget->track->isSelected) {
             selectedTracks.push_back(trackWidget);
         }
@@ -104,8 +104,7 @@ void Tapedeck::retreatClipWindow() {
     }*/
 }
 void Tapedeck::createTrackWidget(std::shared_ptr<Track> track) {
-    trackStack->createTrackSubWidgets(track);
-    trackStack->resized();
+    trackStack->createTrackWidget(track);
 }
 void Tapedeck::removeTrack() {
     /*std::vector<std::unique_ptr<TrackWidget>>::iterator widgetIterator = trackStack->subWidgets.begin();

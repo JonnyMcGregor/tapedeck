@@ -32,6 +32,6 @@ namespace ColourPalette {
     const juce::Colour colourGreyDark {0xffF1EFDC};
     const juce::Colour colourDark {0xffF1EFDC};
     const juce::Colour colourTextDark{0xff411530};
-
+    const juce::Colour colourTextLight{0xfff6f6f6};
 }
 

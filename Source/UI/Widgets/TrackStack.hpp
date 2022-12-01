@@ -1,10 +1,14 @@
 #pragma once
 #include "TrackWidget.hpp"
 #include "../../defs.h"
-struct TrackStack : public juce::Component {
+struct TrackStack : public juce::Viewport, public juce::MouseListener {
     
     TrackStack(int sampleRate, std::shared_ptr<juce::ApplicationCommandManager> cmdManager) 
     {
+        
+        this->cmdManager = cmdManager;
+        
+        setViewedComponent(&trackArea);
         timeRuler = make_shared<TimeRuler>(sampleRate);
         addAndMakeVisible(timeRuler.get());
 
@@ -12,59 +16,65 @@ struct TrackStack : public juce::Component {
         playhead->setFill(ColourPalette::colourGreyLight);
         playhead->setAlwaysOnTop(true);
         addAndMakeVisible(playhead.get());
-        this->cmdManager = cmdManager;
+
+        trackArea.addMouseListener(this, true);
     }
 
-    void createTrackSubWidgets(std::shared_ptr<Track> track) {
-        this->subWidgets.push_back(std::make_unique<TrackWidget>(track, timeRuler));
-        addAndMakeVisible(subWidgets.back().get());
+    void createTrackWidget(std::shared_ptr<Track> track) {
+        this->trackWidgets.push_back(std::make_unique<TrackWidget>(track, timeRuler));
+        trackArea.addAndMakeVisible(trackWidgets.back().get());
         resized();
     }
     
     void process() {
-        for (int i = 0; i < subWidgets.size(); i++) {
-            subWidgets[i]->updateClipWidgets();
+        for (int i = 0; i < trackWidgets.size(); i++) {
+            trackWidgets[i]->updateClipWidgets();
         }
     }
 
     void paint(juce::Graphics &screen) override{
-        for (auto &subwidget : subWidgets) {
-            subwidget->repaint();
+        screen.fillAll(ColourPalette::colourPrimary);
+        for (auto &trackWidget : trackWidgets) {
+            trackWidget->repaint();
         }
         playhead->repaint();
     }
+
     void resized() override
     {
         auto bounds = getBounds();
-        u_int widgetY = 0;
-        u_int widgetHeight = this->subWidgets.size() > 0 ? this->getHeight() / this->subWidgets.size() : this->getHeight();
 
-        for(auto &subWidget : subWidgets)
+        u_int widgetY = 0;
+        u_int widgetHeight = 150;
+        timeRuler->setBounds(getX() + (getWidth() * 0.1), 0, getWidth() * 0.9, 30);
+
+        widgetY += 30;
+        for(auto &subWidget : trackWidgets)
         {
             subWidget->setBounds(0, widgetY, getWidth(), widgetHeight);
             widgetY += widgetHeight;
         }
-        timeRuler->setBounds(getX() + (getWidth() * 0.1), getY() - (getHeight() * 0.03), getWidth() * 0.9, getHeight() * 0.1);
+
+        trackArea.setBounds(0, 30, getWidth(), widgetY);
     }
 
     void mouseDown(const juce::MouseEvent &e) override
     {
-        for (auto &track : subWidgets) {
+        for (auto &track : trackWidgets) {
             track->track->isSelected = false;
         }
 
         // when in clip area, update playhead position
-        if (e.getPosition().getX() > subWidgets[0]->trackBar->getWidth()) {
+        if (e.getPosition().getX() > trackWidgets[0]->trackBar->getWidth()) {
             updatePlayheadPosition(e.getPosition().getX(), true);
             cmdManager->invokeDirectly(CommandIDs::updatePlayheadInModel, true); // Updates the current playhead time in the model
         }
 
         repaint();
     }
-
- 
+    //Updates the UI Position of the playhead either using Samples or Pixels
     void updatePlayheadPosition(int xPosition, bool usingPixelPosition) {
-        float playheadX = usingPixelPosition ? xPosition : subWidgets[0]->trackBar->getWidth() + timeRuler->timeInSamplesToXPosition(xPosition);
+        float playheadX = usingPixelPosition ? xPosition : trackWidgets[0]->trackBar->getWidth() + timeRuler->timeInSamplesToXPosition(xPosition);
         juce::Rectangle<float> r = {playheadX, 0, 2.0f, (float)getHeight()};
         playhead->setRectangle(juce::Parallelogram<float>(r));
         repaint();
@@ -72,12 +82,13 @@ struct TrackStack : public juce::Component {
     //Gets The Playhead X Position in the Clip Area
     int getPlayheadXPosition()
     {
-        return playhead->getX() - subWidgets[0]->trackBar->getWidth();
+        return playhead->getX() - trackWidgets[0]->trackBar->getWidth();
     }
 
+    juce::Component trackArea;
     std::unique_ptr<juce::DrawableRectangle> playhead;
     juce::Colour backgroundColour = ColourPalette::colourDark;
-    std::vector<std::shared_ptr<TrackWidget>> subWidgets;
+    std::vector<std::shared_ptr<TrackWidget>> trackWidgets;
     std::shared_ptr<TimeRuler> timeRuler;
     std::shared_ptr<juce::ApplicationCommandManager> cmdManager;
 };
