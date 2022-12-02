@@ -23,7 +23,6 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
         this->timeRuler = timeRuler;
         trackBar = std::make_unique<DecoratedWindow>(track->name, getWidth() * 0.1, getHeight());
         clipArea = std::make_unique<DecoratedWindow>(getWidth() * 0.9, getHeight());
-        clipArea->setInterceptsMouseClicks(false, false);
         but_recordArm = std::make_unique<TrackToggleButton>();
         but_recordArm->setButtonText("R");
         but_recordArm->setColour(juce::ToggleButton::ColourIds::tickColourId, ColourPalette::colourGreyDark);

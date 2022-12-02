@@ -4,10 +4,12 @@
 #include "DecoratedWindow.hpp"
 #include "TimeRuler.hpp"
 #include "TrackStack.hpp"
+#include "LevelMeter.h"
 
 #include <iostream>
 #include <optional>
 #include <string>
+#include <array>
 
 class Tapedeck : public juce::Component 
 {
@@ -31,8 +33,10 @@ public:
     void updateClipWindow();
     void updatePlayheadPosition(int currentTimeSamples);
     bool closeUIThread = false;
+    
     std::vector<std::shared_ptr<TrackWidget>> getSelectedTracks();
     std::shared_ptr<TrackStack> getTrackStack();
+    LevelMeter masterMeter[2] = {LevelMeter(), LevelMeter()};
 
 private:
 
@@ -41,5 +45,4 @@ private:
     std::shared_ptr<TimeRuler> timeRuler;
     std::shared_ptr<juce::ApplicationCommandManager> cmdManager;
     std::string sessionName;
-    //std::shared_ptr<Session> session;
 };

@@ -22,8 +22,9 @@ public:
     void deleteTrack(int index);
     void deleteTrack(std::shared_ptr<Track> track);
 
-    void prepareAudio();
-    void processAudioBlock(Buffer &inputBuffer, Buffer &outputBuffer);
+    void prepareAudio(int sampleRate, int bufferSize);
+    void processAudioBlock(juce::AudioBuffer<float> inputBuffer, juce::AudioBuffer<float> outputBuffer);
+    void closeAudio();
     bool isSoloEnabled();
 
     void createFilesFromRecordedClips();
@@ -40,6 +41,8 @@ public:
     void loadClips(int numberOfClips);
     int numRecordArmedTracks();
     
+    float getOutputDB(int channel);
+
     std::vector<std::shared_ptr<Track>> getSelectedTracks(); 
 
     enum struct Play_State {
@@ -60,6 +63,9 @@ private:
     u_int sampleRate = 0, bufferSize = 0,
           numInputChannels = 0, numOutputChannels = 0, bitDepth = 16;
     ofstream wavFileStreamer;
+
+    juce::LinearSmoothedValue<float> outputDBL = -100, outputDBR = -100;
+
     std::string sessionName;
     bool isSoloEnabledTracks = false;
 };

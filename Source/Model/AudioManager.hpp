@@ -32,16 +32,18 @@ public:
     ~AudioManager() {
     }
 
-    void audioDeviceIOCallback(const float **inputChannelData, int numInputChannels, float **outputChannelData, int numOutputChannels, int numSamples) {
+    void audioDeviceIOCallback(const float **inputChannelData, int numInputChannels, float **outputChannelData, int numOutputChannels, int numSamples)
+    {
 
-        Buffer outBuffer = {outputChannelData};
-        Buffer inBuffer = {inputChannelData};
+        juce::AudioBuffer<float> outBuffer = {outputChannelData, numOutputChannels, numSamples};
+        juce::AudioBuffer<float> inBuffer = {(float* const*)inputChannelData, numInputChannels, numSamples};
 
         session->processAudioBlock(inBuffer, outBuffer);
     }
 
     void audioDeviceAboutToStart(juce::AudioIODevice *device) {
         audioDeviceLog->appendText(juce::Time::getCurrentTime().toString(false, true, true, true) +  "\tAudio Device Started: " + device->getName() + "\n");
+        
     }
 
     /** Called to indicate that the device has stopped. */
@@ -55,11 +57,9 @@ public:
     }
 
     void startAudioStream() {
-        if (session->tracks.size() == 0) { return; }
-        
+        if (session->tracks.size() == 0) { return; }      
         session->playState = Session::Play_State::ToPlay;
-        session->prepareAudio();
-        
+        session->prepareAudio(deviceManager->getCurrentAudioDevice()->getCurrentSampleRate(), deviceManager->getCurrentAudioDevice()->getCurrentBufferSizeSamples());
         //If tracks are armed, record audio
         if (session->numRecordArmedTracks() > 0) { session->playState = Session::Play_State::Recording; }
         //Else playback audio
@@ -75,6 +75,7 @@ public:
             session->createFilesFromRecordedClips();
         }
         session->playState = Session::Play_State::Stopping;
+        session->closeAudio();
         session->sessionXml->refreshXmlDocument(*session->playhead, session->tracks);
         session->playState = Session::Play_State::Stopped;
     }

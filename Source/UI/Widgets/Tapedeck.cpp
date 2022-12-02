@@ -10,9 +10,12 @@ Tapedeck::Tapedeck(int width, int height, int sampleRate, std::shared_ptr<juce::
     trackStack->setName("Track Stack");
     this->cmdManager = cmdManager;
     
+
     //Initialise main ui components
     addAndMakeVisible(tapedeckWindow.get());
     addAndMakeVisible(trackStack.get());
+    addAndMakeVisible(&masterMeter[0]);
+    addAndMakeVisible(&masterMeter[1]);
 
     //updatePlayheadPosition();
     /*selectedTrack = trackStack->subWidgets.front().get();
@@ -42,6 +45,7 @@ std::shared_ptr<TrackStack> Tapedeck::getTrackStack()
 {
     return trackStack;
 }
+
 //void Tapedeck::selectPreviousTrack()
 //{
 //    for (int i = 0; i < trackStack->subWidgets.size(); i++) {
@@ -135,7 +139,10 @@ void Tapedeck::paint(juce::Graphics &screen) {
 void Tapedeck::resized() {
     if (tapedeckWindow) {
         tapedeckWindow->setBounds(getBounds());
-        trackStack->setBounds(getWidth() * 0.01, getHeight() * 0.2, getWidth() * 0.98, getHeight() * 0.75);
+        trackStack->setBounds(15, getHeight() * 0.2, getWidth() - 75, getHeight() * 0.75);
+        masterMeter[0].setBounds(getWidth() - 50, trackStack->getBottom() - 200, 15, 200);
+        masterMeter[1].setBounds(getWidth() - 30, trackStack->getBottom() - 200, 15, 200);
+
     }
 }
 

@@ -20,7 +20,7 @@
           <FILE id="iqbVz0" name="ClipWidget.hpp" compile="0" resource="0" file="Source/UI/Widgets/ClipWidget.hpp"/>
           <FILE id="FPJVBL" name="DecoratedWindow.hpp" compile="0" resource="0"
                 file="Source/UI/Widgets/DecoratedWindow.hpp"/>
-          <FILE id="d3B7YR" name="Label.hpp" compile="0" resource="0" file="Source/UI/Widgets/Label.hpp"/>
+          <FILE id="VkWM6B" name="LevelMeter.h" compile="0" resource="0" file="Source/UI/Widgets/LevelMeter.h"/>
           <FILE id="hXlJhX" name="PlayheadWidget.hpp" compile="0" resource="0"
                 file="Source/UI/Widgets/PlayheadWidget.hpp"/>
           <FILE id="hTEYgi" name="Tapedeck.cpp" compile="1" resource="0" file="Source/UI/Widgets/Tapedeck.cpp"/>

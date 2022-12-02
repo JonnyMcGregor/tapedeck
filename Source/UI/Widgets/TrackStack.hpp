@@ -38,7 +38,6 @@ struct TrackStack : public juce::Component, public juce::MouseListener {
         for (auto &trackWidget : trackWidgets) {
             trackWidget->repaint();
         }
-        playhead->repaint();
     }
 
     void resized() override
@@ -57,6 +56,7 @@ struct TrackStack : public juce::Component, public juce::MouseListener {
 
         trackArea.setBounds(0, 0, getWidth(), widgetY);
         timeRuler->setBounds(trackWidgets[0]->clipArea->getX(), 0, getWidth() * 0.9, 30);
+
     }
 
     void mouseDown(const juce::MouseEvent &e) override
@@ -64,11 +64,11 @@ struct TrackStack : public juce::Component, public juce::MouseListener {
         for (auto &track : trackWidgets) {
             track->track->isSelected = false;
         }
-
+        int positionX = e.getEventRelativeTo(&scrollableViewport).getPosition().getX();
         // when in clip area, update playhead position
-        if (e.getPosition().getX() > trackWidgets[0]->trackBar->getWidth()) {
-            updatePlayheadPosition(e.getPosition().getX(), true);
-            cmdManager->invokeDirectly(CommandIDs::updatePlayheadInModel, true); // Updates the current playhead time in the model
+        if (positionX >= trackWidgets[0]->clipArea->getX()) {
+            updatePlayheadPosition(positionX, true);
+            cmdManager->invokeDirectly(CommandIDs::updatePlayheadInModel, false); // Updates the current playhead time in the model
         }
 
         repaint();
@@ -78,7 +78,7 @@ struct TrackStack : public juce::Component, public juce::MouseListener {
         float playheadX = usingPixelPosition ? xPosition : trackWidgets[0]->trackBar->getWidth() + timeRuler->timeInSamplesToXPosition(xPosition);
         juce::Rectangle<float> r = {playheadX, 0, 2.0f, (float)getHeight()};
         playhead->setRectangle(juce::Parallelogram<float>(r));
-        repaint();
+        playhead->repaint();
     }
     //Gets The Playhead X Position in the Clip Area
     int getPlayheadXPosition()

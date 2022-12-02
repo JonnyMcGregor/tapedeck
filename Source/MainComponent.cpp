@@ -43,11 +43,14 @@ MainComponent::MainComponent()
 
     addAndMakeVisible(mainMenuBar.get());
     addAndMakeVisible(tapedeckUI.get());
+    startTimerHz(30);
+
     setSize(1440, 800);
 }
 
 MainComponent::~MainComponent()
 {
+    stopTimer();
     juce::LookAndFeel::setDefaultLookAndFeel(nullptr);
     juce::FileLogger::setCurrentLogger(nullptr);
     delete logger; //Should probably use unique_ptr instead
@@ -82,8 +85,14 @@ void MainComponent::timerCallback()
     if (!tapedeckUI->getTrackStack()) {
         return;
     }
+    // Update Playhead Position
     int currentTimeSamples = tapedeckModel->session->getCurrentTimeInSamples();
     tapedeckUI->getTrackStack()->updatePlayheadPosition(currentTimeSamples, false);
+    //Update Master Meter Values
+    tapedeckUI->masterMeter[0].setLevel(tapedeckModel->session->getOutputDB(0));
+    tapedeckUI->masterMeter[1].setLevel(tapedeckModel->session->getOutputDB(1));
+    tapedeckUI->masterMeter[0].repaint();
+    tapedeckUI->masterMeter[1].repaint();
 }
 
 //======== MenuBar Function Overrides ==========//
@@ -209,12 +218,10 @@ bool MainComponent::perform(const InvocationInfo &info)
                 tapedeckModel->stopAudioStream();
                 tapedeckModel->isPlaying = false;
                 tapedeckUI->updateTrackStack();
-                stopTimer();
             }
             else {
                 tapedeckModel->startAudioStream();
                 tapedeckModel->isPlaying = true;
-                startTimerHz(30);
             }
         }
         break;

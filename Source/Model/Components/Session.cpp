@@ -21,6 +21,7 @@ Session::~Session() {
     //Clears the Audio clips from temp memory
     clearAllAudioClips();
 }
+
 void Session::createProjectFileStructure() {
     if (!filesystem::exists(sessionName))
         filesystem::create_directory(sessionName);
@@ -67,8 +68,21 @@ void Session::deleteTrack(std::shared_ptr<Track> trackToDelete)
     }
 }
 
-void Session::prepareAudio()
+void Session::prepareAudio(int sampleRate, int bufferSize)
 {
+    if (this->sampleRate != sampleRate) {
+        this->sampleRate = sampleRate;
+    }
+    if (this->bufferSize != bufferSize) {
+        this->bufferSize = bufferSize;
+    }
+
+    outputDBL.reset(sampleRate, 0.5);
+    outputDBR.reset(sampleRate, 0.5);
+
+    outputDBL.setCurrentAndTargetValue(-100);
+    outputDBR.setCurrentAndTargetValue(-100);
+
     // Create new clip if track is record armed...
     for (auto &track : tracks) {
         if (track->recordArmed) {
@@ -78,7 +92,7 @@ void Session::prepareAudio()
 }
 
 // Main audio processing callback for engine...
-void Session::processAudioBlock(Buffer &inputBuffer, Buffer &outputBuffer) {
+void Session::processAudioBlock(juce::AudioBuffer<float> inputBuffer, juce::AudioBuffer<float> outputBuffer) {
     if (!&inputBuffer || !&outputBuffer) {
         
     }
@@ -105,6 +119,27 @@ void Session::processAudioBlock(Buffer &inputBuffer, Buffer &outputBuffer) {
             outputBuffer.setSample(channel, sample, outputSample.value);
         }
     }
+    outputDBL.skip(bufferSize);
+    outputDBR.skip(bufferSize);
+    auto value = juce::Decibels::gainToDecibels(outputBuffer.getRMSLevel(0, 0, bufferSize));
+    if (value < outputDBL.getCurrentValue()) {
+        outputDBL.setTargetValue(value);
+    }
+    else {
+        outputDBL.setCurrentAndTargetValue(value);
+    }
+    value = juce::Decibels::gainToDecibels(outputBuffer.getRMSLevel(1, 0, bufferSize));
+    if (value < outputDBR.getCurrentValue()) {
+        outputDBR.setTargetValue(value);
+    }
+    else {
+        outputDBR.setCurrentAndTargetValue(value);
+    }
+}
+void Session::closeAudio()
+{
+    outputDBR.setTargetValue(-100);
+    outputDBL.setTargetValue(-100);
 }
 
 bool Session::isSoloEnabled() {
@@ -142,6 +177,20 @@ int Session::numRecordArmedTracks() {
         }
     }
     return numRecordArmedTracks;
+}
+float Session::getOutputDB(int channel)
+{
+    if (channel == 0 || channel == 1) {
+        if (playState == Play_State::Stopped) {
+            outputDBL.skip(sampleRate / 30);
+            outputDBR.skip(sampleRate / 30);
+        }
+        return channel == 0 ? outputDBL.getCurrentValue() : outputDBR.getCurrentValue();
+    }
+    else {
+        // handle surround at some point
+        jassertfalse;
+    }
 }
 u_int Session::getCurrentTimeInSamples() {
 	if (playhead)
