@@ -25,7 +25,7 @@ public:
 		}
 		else
 		{
-            g.setColour(shouldDrawButtonAsHighlighted ? ColourPalette::colourPrimary.darker() : juce::Colours::transparentWhite);
+            g.setColour(shouldDrawButtonAsHighlighted ? ColourPalette::buttonHover : ColourPalette::buttonInactive);
 		}
 
 		g.fillRect(area);

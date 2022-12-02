@@ -3,8 +3,8 @@
 Tapedeck::Tapedeck(int width, int height, int sampleRate, std::shared_ptr<juce::ApplicationCommandManager> cmdManager) {
     setSize(width, height);
     tapedeckWindow = std::make_unique<DecoratedWindow>("TAPEDECK", getWidth(), getHeight());
-    tapedeckWindow->backgroundColour = ColourPalette::colourGreyDark;
-    tapedeckWindow->outlineColour = ColourPalette::colourTextDark;
+    tapedeckWindow->backgroundColour = ColourPalette::mainBackground;
+    tapedeckWindow->outlineColour = ColourPalette::textColour;
     
     trackStack = make_shared<TrackStack>(sampleRate, cmdManager);
     trackStack->setName("Track Stack");

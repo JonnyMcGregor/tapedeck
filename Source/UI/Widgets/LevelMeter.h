@@ -17,9 +17,12 @@ public:
     ~LevelMeter() {}
     void paint(juce::Graphics &g) {
         auto bounds = getLocalBounds().toFloat();
+        
 
         g.setColour(juce::Colours::black);
         g.fillRect(bounds);
+        g.setColour(ColourPalette::playheadColour);
+        g.drawRect(bounds, 1);
 
         g.setColour(juce::Colours::white);
         float barHeight = juce::jmap(level, -100.0f, 6.0f, 0.0f, (float)getHeight());

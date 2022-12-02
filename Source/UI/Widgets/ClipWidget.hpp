@@ -43,7 +43,7 @@ struct ClipWidget : juce::Component
             }
 
             if (isSelected) {
-                screen.fillAll(ColourPalette::colourSecondary);
+                screen.fillAll(ColourPalette::waveformColour.brighter(0.6));
 
             } else {
                 screen.fillAll(backgroundColour);
@@ -68,7 +68,7 @@ struct ClipWidget : juce::Component
     bool isSelected = false;
 private:
     
-    juce::Colour backgroundColour = ColourPalette::colourPrimary;
-    juce::Colour waveformColour = juce::Colours::white;
+    juce::Colour backgroundColour = ColourPalette::clipBackground;
+    juce::Colour waveformColour = ColourPalette::waveformColour;
 };
 

@@ -20,7 +20,7 @@ public:
         propertiesTabs.reset(new juce::TabbedComponent(juce::TabbedButtonBar::Orientation::TabsAtLeft));
         propertiesTabs->setColour(juce::TabbedComponent::ColourIds::backgroundColourId, juce::Colours::azure);
         audioPropertiesTab.reset(new AudioPropertiesTab(deviceManager));
-        propertiesTabs->addTab("Audio Devices", ColourPalette::colourAlternate, audioPropertiesTab.get(), true, 1);
+        propertiesTabs->addTab("Audio Devices", ColourPalette::mainBackground, audioPropertiesTab.get(), true, 1);
         addAndMakeVisible(propertiesTabs.get());
     }
     ~PropertiesPanel(){};

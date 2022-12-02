@@ -11,7 +11,7 @@ struct TrackStack : public juce::Component, public juce::MouseListener {
         addAndMakeVisible(timeRuler.get());
 
         playhead = std::make_unique<juce::DrawableRectangle>();
-        playhead->setFill(ColourPalette::colourGreyLight);
+        playhead->setFill(ColourPalette::playheadColour);
         playhead->setAlwaysOnTop(true);
         addAndMakeVisible(playhead.get());
 
@@ -34,7 +34,7 @@ struct TrackStack : public juce::Component, public juce::MouseListener {
     }
 
     void paint(juce::Graphics &screen) override{
-        screen.fillAll(ColourPalette::colourPrimary);
+        screen.fillAll(ColourPalette::mainBackground);
         for (auto &trackWidget : trackWidgets) {
             trackWidget->repaint();
         }
@@ -88,7 +88,7 @@ struct TrackStack : public juce::Component, public juce::MouseListener {
     juce::Viewport scrollableViewport;
     juce::Component trackArea;
     std::unique_ptr<juce::DrawableRectangle> playhead;
-    juce::Colour backgroundColour = ColourPalette::colourDark;
+    juce::Colour backgroundColour = ColourPalette::mainBackground;
     std::vector<std::shared_ptr<TrackWidget>> trackWidgets;
     std::shared_ptr<TimeRuler> timeRuler;
     std::shared_ptr<juce::ApplicationCommandManager> cmdManager;

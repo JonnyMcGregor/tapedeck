@@ -25,13 +25,15 @@ namespace juce {
 }
 
 namespace ColourPalette {
-    const juce::Colour colourPrimary{0xFFD36B00};
-    const juce::Colour colourSecondary{0xffF5DFBC};
-    const juce::Colour colourAlternate{0xffF1A661};
-    const juce::Colour colourGreyLight {0xffCEE7E6};
-    const juce::Colour colourGreyDark {0xffF1EFDC};
-    const juce::Colour colourDark {0xffF1EFDC};
-    const juce::Colour colourTextDark{0xff411530};
-    const juce::Colour colourTextLight{0xfff6f6f6};
+    const juce::Colour mainBackground{0xFF000000};
+    const juce::Colour trackBarBackground {0xff3f3f3f};
+    const juce::Colour clipAreaBackground {0xff222222};
+    const juce::Colour clipBackground {0xffF5DFBC};
+    const juce::Colour waveformColour {0xff0000f3};
+    const juce::Colour textColour {0xffffffff};
+    const juce::Colour buttonActive {0xffff0000};
+    const juce::Colour buttonInactive {0xff000000};
+    const juce::Colour buttonHover {0x0000ff};
+    const juce::Colour playheadColour{0xfff8f8f8};
 }
 

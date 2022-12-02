@@ -25,15 +25,15 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
         clipArea = std::make_unique<DecoratedWindow>(getWidth() * 0.9, getHeight());
         but_recordArm = std::make_unique<TrackToggleButton>();
         but_recordArm->setButtonText("R");
-        but_recordArm->setColour(juce::ToggleButton::ColourIds::tickColourId, ColourPalette::colourGreyDark);
+        but_recordArm->setColour(juce::ToggleButton::ColourIds::tickColourId, ColourPalette::buttonActive);
         but_recordArm->addListener(this);
         but_solo = std::make_unique<TrackToggleButton>();
         but_solo->setButtonText("S");
-        but_solo->setColour(juce::ToggleButton::ColourIds::tickColourId, ColourPalette::colourGreyDark);
+        but_solo->setColour(juce::ToggleButton::ColourIds::tickColourId, ColourPalette::buttonActive);
         but_solo->addListener(this);
         but_mute = std::make_unique<TrackToggleButton>();
         but_mute->setButtonText("M");
-        but_mute->setColour(juce::ToggleButton::ColourIds::tickColourId, ColourPalette::colourGreyDark);
+        but_mute->setColour(juce::ToggleButton::ColourIds::tickColourId, ColourPalette::buttonActive);
         but_mute->addListener(this);
 
         addAndMakeVisible(trackBar.get());
@@ -81,10 +81,10 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
     }
 
     void paint(juce::Graphics &screen) override {
-        trackBar->backgroundColour = track->isSelected ? ColourPalette::colourPrimary : ColourPalette::colourAlternate;
-        trackBar->outlineColour = ColourPalette::colourDark;
-        clipArea->backgroundColour = ColourPalette::colourAlternate;
-        clipArea->outlineColour = ColourPalette::colourGreyLight;
+        trackBar->backgroundColour = track->isSelected ? ColourPalette::trackBarBackground : ColourPalette::trackBarBackground.brighter();
+        trackBar->outlineColour = ColourPalette::textColour;
+        clipArea->backgroundColour = ColourPalette::clipAreaBackground;
+        clipArea->outlineColour = ColourPalette::clipAreaBackground;
     }
 
     void resized() override {
