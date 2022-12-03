@@ -13,11 +13,13 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
     std::unique_ptr<TrackToggleButton> but_recordArm;
     std::unique_ptr<TrackToggleButton> but_solo;
     std::unique_ptr<TrackToggleButton> but_mute;
+    int mouseDownWithinClip = 0; //used for clip dragging
 
     TrackWidget(std::shared_ptr<Track> track, std::shared_ptr<TimeRuler> timeRuler) {
         this->track = track;
         for (int i = 0; i < track->clips.size(); i++) {
             clipWidgets.push_back(std::make_shared<ClipWidget>(track->clips[i], timeRuler, track->clipMetadata[i].startTime));
+            clipWidgets.back()->addMouseListener(this, true);
             addAndMakeVisible(clipWidgets.back().get());
         }
         this->timeRuler = timeRuler;
@@ -41,13 +43,13 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
         addAndMakeVisible(but_recordArm.get());
         addAndMakeVisible(but_solo.get());
         addAndMakeVisible(but_mute.get());
-        setInterceptsMouseClicks(false, true);
     }
     
     void updateClipWidgets() {
         clipWidgets.clear();
         for (int i = 0; i < track->clips.size(); i++) {
             clipWidgets.emplace_back(std::make_shared<ClipWidget>(track->clips[i], timeRuler, track->clipMetadata[i].startTime));
+            clipWidgets.back()->addMouseListener(this, true);
             addAndMakeVisible(clipWidgets.back().get());
         }
         resized();
@@ -121,6 +123,7 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
             return true;
         }
     }
+
     int calculateClipWidth(int clipIndex) {
         return (calculateClipEndSample(clipIndex) - calculateClipStartSample(clipIndex)) / timeRuler->samplesPerPixel();
     }
@@ -135,9 +138,39 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
     int calculateClipX(int clipIndex) {
         return max((int)(track->clipMetadata[clipIndex].startTime - timeRuler->startTimeOnScreenInSamples) / timeRuler->samplesPerPixel(), 0);
     }
+
     void mouseDown(const juce::MouseEvent &e) override
     {    
         track->isSelected = true;
+        if (e.originalComponent->getX() >= clipArea->getX()) {
+            for (int i = 0; i < clipWidgets.size(); i++) {
+                if (clipWidgets[i].get() == e.originalComponent) {
+                    clipWidgets[i]->isSelected = true;
+                    mouseDownWithinClip = e.getMouseDownX();
+                }
+                else {
+                    clipWidgets[i]->isSelected = false;
+                }
+            }
+        }
         repaint();
+    }
+
+    void mouseDrag(const juce::MouseEvent& e) override {
+        //if a clip is dragged horizontally, change clip start time...
+        if (e.originalComponent->getX() >= clipArea->getX()) {
+            for (int i = 0; i < clipWidgets.size(); i++) {
+                if (clipWidgets[i].get() == e.originalComponent) {
+                    int clipXInClipArea = e.getEventRelativeTo(this).getPosition().getX() - mouseDownWithinClip - clipArea->getX();
+                    track->clipMetadata[i].startTime = timeRuler->xPositionToTimeInSamples(clipXInClipArea); 
+                    break;
+                }
+            }
+        }
+        resized();
+    }
+
+    void mouseUp(const juce::MouseEvent& e) override {
+        
     }
 };

@@ -1,7 +1,7 @@
 #pragma once
 #include "TrackWidget.hpp"
 #include "../../defs.h"
-struct TrackStack : public juce::Component, public juce::MouseListener {
+struct TrackStack : public juce::Component {
     
     TrackStack(int sampleRate, std::shared_ptr<juce::ApplicationCommandManager> cmdManager) 
     {
@@ -72,6 +72,39 @@ struct TrackStack : public juce::Component, public juce::MouseListener {
         }
 
         repaint();
+    }
+    void mouseUp(const juce::MouseEvent &e) override {
+        if (e.mouseWasDraggedSinceMouseDown()) {
+            auto relativeEvent = e.getEventRelativeTo(this);
+            // Clip Vertical Dragging Logic - done in trackstack as clip will be dragged between tracks
+            if (auto currentClip = dynamic_cast<ClipWidget *>(e.originalComponent)) { // Check if original component is a ClipWidget
+                auto parentTrack = static_cast<TrackWidget *>(currentClip->getParentComponent()); //Get parent TrackWidget component
+                
+                for (int t = 0; t < trackWidgets.size(); t++) {
+                    // Check if clip is dragged to a different track
+                    if (parentTrack != trackWidgets[t].get() &&
+                        (trackWidgets[t]->getY() < relativeEvent.getPosition().getY() && 
+                        trackWidgets[t]->getBottom() > relativeEvent.getPosition().getY())) {
+
+                        for (int c = 0; c < parentTrack->clipWidgets.size(); c++) {
+                            if (parentTrack->clipWidgets[c].get() == currentClip) {
+                                auto clipCopy = (parentTrack->track->clips[c]);
+                                auto clipMetadataCopy = (parentTrack->track->clipMetadata[c]);
+                                trackWidgets[t]->track->clips.push_back(clipCopy);
+                                trackWidgets[t]->track->clipMetadata.push_back(clipMetadataCopy);
+                                parentTrack->track->deleteClip(c);
+
+                                trackWidgets[t]->updateClipWidgets();
+                                trackWidgets[t]->resized();
+                                parentTrack->updateClipWidgets();
+                                parentTrack->resized();
+                            }  
+                        }
+                    }
+                }
+            }
+        }
+       
     }
     //Updates the UI Position of the playhead either using Samples or Pixels
     void updatePlayheadPosition(int xPosition, bool usingPixelPosition) {

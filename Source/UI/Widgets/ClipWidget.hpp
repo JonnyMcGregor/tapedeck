@@ -10,6 +10,7 @@ struct ClipWidget : juce::Component
     std::shared_ptr<Clip> clip;
     std::shared_ptr<TimeRuler> timeRuler; 
     u_int clipStartTime;
+
     ClipWidget(std::shared_ptr<Clip> clip, std::shared_ptr<TimeRuler> timeRuler, u_int clipStartTime) {
         this->clip = clip;
         this->timeRuler = timeRuler;

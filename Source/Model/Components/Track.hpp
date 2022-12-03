@@ -40,8 +40,12 @@ struct Track {
     void deleteClip(int clipIndex) {
         jassert(clipIndex >= 0);
         std::vector<std::shared_ptr<Clip>>::iterator it = clips.begin();
+        std::vector<ClipMetadata>::iterator it2 = clipMetadata.begin();
+
         advance(it, clipIndex);
+        advance(it2, clipIndex);
         clips.erase(it);
+        clipMetadata.erase(it2);
     }
 
     void moveClip(u_int index, u_int newStartTime) {
