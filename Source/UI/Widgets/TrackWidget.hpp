@@ -114,10 +114,10 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
     }
 
     bool clipIsDrawable(int clipIndex) {
-        if (timeRuler->startTimeOnScreenInSamples + timeRuler->windowSizeInSamples <= track->clipMetadata[clipIndex].startTime ||
-            track->clipMetadata[clipIndex].startTime + track->clips[clipIndex]->size() <= timeRuler->startTimeOnScreenInSamples) {
+        if (timeRuler->getStartTimeOnScreenInSamples() + timeRuler->getWindowSizeInSamples() <= track->clipMetadata[clipIndex].startTime ||
+            track->clipMetadata[clipIndex].startTime + track->clips[clipIndex]->size() <= timeRuler->getStartTimeOnScreenInSamples()) {
             return false;
-        } else if (calculateClipWidth(clipIndex) == 0) {
+        } else if (calculateClipWidth(clipIndex) <= 0) {
             return false;
         } else {
             return true;
@@ -129,14 +129,14 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
     }
 
     int calculateClipStartSample(int clipIndex) {
-        return max((int)track->clipMetadata[clipIndex].startTime, timeRuler->startTimeOnScreenInSamples);
+        return max((int)track->clipMetadata[clipIndex].startTime, timeRuler->getStartTimeOnScreenInSamples());
     }
     int calculateClipEndSample(int clipIndex) {
-        return min((int)(track->clipMetadata[clipIndex].startTime + track->clips[clipIndex]->size()), timeRuler->startTimeOnScreenInSamples + timeRuler->windowSizeInSamples);
+        return min((int)(track->clipMetadata[clipIndex].startTime + track->clips[clipIndex]->size()), timeRuler->getStartTimeOnScreenInSamples() + timeRuler->getWindowSizeInSamples());
     }
 
     int calculateClipX(int clipIndex) {
-        return max((int)(track->clipMetadata[clipIndex].startTime - timeRuler->startTimeOnScreenInSamples) / timeRuler->samplesPerPixel(), 0);
+        return max(timeRuler->timeInSamplesToXPosition(track->clipMetadata[clipIndex].startTime), 0);
     }
 
     void mouseDown(const juce::MouseEvent &e) override

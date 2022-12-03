@@ -139,7 +139,7 @@ void MainComponent::getAllCommands(juce::Array<juce::CommandID> &commandIDs)
                             CommandIDs::deleteSelectedTracks,
                             CommandIDs::togglePlayback,
                             CommandIDs::recordPlayback,
-                            CommandIDs::updatePlayheadInModel,
+                            CommandIDs::updatePlayheadInModel
     };
     commandIDs.addArray(commands);
 }
@@ -182,6 +182,7 @@ void MainComponent::getCommandInfo(juce::CommandID commandID, juce::ApplicationC
     case CommandIDs::updatePlayheadInModel:
         result.setInfo("Update Playhead", "Updates the playhead in Model to match the UI position", "Internal", 0);
         break;
+ 
     default:
         break;
     }
@@ -232,7 +233,7 @@ bool MainComponent::perform(const InvocationInfo &info)
         tapedeckModel->session->setCurrentTimeInSamples(newTimeInSamples);
         break;
     }
-        
+
     default:
         return false;
     }

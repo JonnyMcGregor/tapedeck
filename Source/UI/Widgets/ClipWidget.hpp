@@ -22,8 +22,11 @@ struct ClipWidget : juce::Component
 		if (getWidth() > 0)
 		{
             // Look into startTimeOnScreenInSamples - somethings going wrong here...
-            int firstSampleToDraw = juce::jmax(0, (int)timeRuler->startTimeOnScreenInSamples - (int)clipStartTime);
-            int lastSampleToDraw = juce::jmin((int)(clip->size() - 1), (timeRuler->startTimeOnScreenInSamples + timeRuler->windowSizeInSamples - (int)clipStartTime));
+            int firstSampleToDraw = juce::jmax(0, (int)timeRuler->getStartTimeOnScreenInSamples() - (int)clipStartTime);
+            int lastSampleToDraw = juce::jmin((int)(clip->size() - 1), (timeRuler->getStartTimeOnScreenInSamples() + timeRuler->getWindowSizeInSamples() - (int)clipStartTime));
+            if (firstSampleToDraw > lastSampleToDraw) {
+                return;
+            }
 
             u_int bucketSize = (lastSampleToDraw - firstSampleToDraw) / getWidth();
             juce::Path waveform;
