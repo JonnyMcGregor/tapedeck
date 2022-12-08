@@ -54,6 +54,8 @@ MainComponent::~MainComponent()
     juce::LookAndFeel::setDefaultLookAndFeel(nullptr);
     juce::FileLogger::setCurrentLogger(nullptr);
     delete logger; //Should probably use unique_ptr instead
+
+    setApplicationCommandManagerToWatch(nullptr);
 }
 
 //==============================================================================
@@ -219,10 +221,19 @@ bool MainComponent::perform(const InvocationInfo &info)
                 tapedeckModel->stopAudioStream();
                 tapedeckModel->isPlaying = false;
                 tapedeckUI->updateTrackStack();
+                for (auto trackWidget : tapedeckUI->getTrackStack()->trackWidgets) {
+                        trackWidget->isRecording = false;
+                    }
             }
             else {
                 tapedeckModel->startAudioStream();
                 tapedeckModel->isPlaying = true;
+                for (auto trackWidget : tapedeckUI->getTrackStack()->trackWidgets) {
+
+                    if (trackWidget->but_recordArm->getToggleState()) {
+                        trackWidget->isRecording = true;
+                    }
+                }
             }
         }
         break;

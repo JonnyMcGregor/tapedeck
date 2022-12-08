@@ -105,23 +105,22 @@ struct TrackStack : public juce::Component {
                 }
             }
         }
-       
     }
     void mouseWheelMove(const juce::MouseEvent& e, const juce::MouseWheelDetails& wheel) override {
         int scrollThreshold = 0;
         if (wheel.deltaX > scrollThreshold || wheel.deltaX < scrollThreshold) {
             //if horizontal scrolling
-            timeRuler->setStartTimeOnScreenInSamples(timeRuler->getStartTimeOnScreenInSamples() + timeRuler->samplesPerPixel() * wheel.deltaX * -15);
-            //cmdManager->invokeDirectly(CommandIDs::updateTimeWindowInModel, false); // Updates the current time window in the model
+            int scrollingModifier = -30;
+            timeRuler->setStartTimeOnScreenInSamples(timeRuler->getStartTimeOnScreenInSamples() + timeRuler->samplesPerPixel() * wheel.deltaX * scrollingModifier);
             timeRuler->repaint();
+            updatePlayheadPosition(playhead->getX(), true);
             resized();
         }
-     
     }
     //Updates the UI Position of the playhead either using Samples or Pixels
     void updatePlayheadPosition(int xPosition, bool usingPixelPosition) {
         float playheadX = usingPixelPosition ? xPosition : trackWidgets[0]->trackBar->getWidth() + timeRuler->timeInSamplesToXPosition(xPosition);
-        juce::Rectangle<float> r = {playheadX, 0, 2.0f, (float)getHeight()};
+        juce::Rectangle<float> r = {max(playheadX, (float)trackWidgets[0]->clipArea->getX()), 0, 2.0f, (float)getHeight()};
         playhead->setRectangle(juce::Parallelogram<float>(r));
         playhead->repaint();
     }

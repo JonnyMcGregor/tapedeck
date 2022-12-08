@@ -13,6 +13,8 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
     std::unique_ptr<TrackToggleButton> but_recordArm;
     std::unique_ptr<TrackToggleButton> but_solo;
     std::unique_ptr<TrackToggleButton> but_mute;
+
+    bool isRecording = false;
     int mouseDownWithinClip = 0; //used for clip dragging
 
     TrackWidget(std::shared_ptr<Track> track, std::shared_ptr<TimeRuler> timeRuler) {
@@ -87,6 +89,9 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
         trackBar->outlineColour = ColourPalette::textColour;
         clipArea->backgroundColour = ColourPalette::clipAreaBackground;
         clipArea->outlineColour = ColourPalette::clipAreaBackground;
+        if (isRecording) {
+            clipArea->backgroundColour = ColourPalette::buttonActive;
+        }
     }
 
     void resized() override {
@@ -113,15 +118,16 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
         }
     }
 
-    bool clipIsDrawable(int clipIndex) {
-        if (timeRuler->getStartTimeOnScreenInSamples() + timeRuler->getWindowSizeInSamples() <= track->clipMetadata[clipIndex].startTime ||
-            track->clipMetadata[clipIndex].startTime + track->clips[clipIndex]->size() <= timeRuler->getStartTimeOnScreenInSamples()) {
+    bool clipIsDrawable(int clipIndex)
+    {
+        if (calculateClipWidth(clipIndex) <= 0) {
             return false;
-        } else if (calculateClipWidth(clipIndex) <= 0) {
-            return false;
-        } else {
+        }
+        if (timeRuler->getStartTimeOnScreenInSamples() + timeRuler->getWindowSizeInSamples() > track->clipMetadata[clipIndex].startTime ||
+            track->clipMetadata[clipIndex].startTime + track->clips[clipIndex]->size() >= timeRuler->getStartTimeOnScreenInSamples()) {
             return true;
         }
+        return false;
     }
 
     int calculateClipWidth(int clipIndex) {
@@ -171,6 +177,8 @@ struct TrackWidget : public juce::Component, public juce::Button::Listener {
     }
 
     void mouseUp(const juce::MouseEvent& e) override {
-        
+        if (e.mouseWasDraggedSinceMouseDown()) {
+            updateClipWidgets();
+        }
     }
 };
