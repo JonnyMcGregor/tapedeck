@@ -10,16 +10,12 @@ Tapedeck::Tapedeck(int width, int height, int sampleRate, std::shared_ptr<juce::
     trackStack->setName("Track Stack");
     this->cmdManager = cmdManager;
     
-
     //Initialise main ui components
     addAndMakeVisible(tapedeckWindow.get());
     addAndMakeVisible(trackStack.get());
     addAndMakeVisible(&masterMeter[0]);
     addAndMakeVisible(&masterMeter[1]);
 
-    //updatePlayheadPosition();
-    /*selectedTrack = trackStack->subWidgets.front().get();
-    selectedTrack->isSelected = true;*/
     resized();
 }
 
@@ -46,67 +42,7 @@ std::shared_ptr<TrackStack> Tapedeck::getTrackStack()
     return trackStack;
 }
 
-//void Tapedeck::selectPreviousTrack()
-//{
-//    for (int i = 0; i < trackStack->subWidgets.size(); i++) {
-//        if (trackStack->subWidgets[i].get() == selectedTrack) {
-//            if (i != 0) {
-//                selectedTrack = trackStack->subWidgets[i - 1].get();
-//            } else {
-//                selectedTrack = trackStack->subWidgets.back().get();
-//                break;
-//            }
-//        }
-//    }
-//}
-//
-//void Tapedeck::selectNextTrack() {
-//    for (int i = 0; i < trackStack->subWidgets.size(); i++) {
-//        if (trackStack->subWidgets[i].get() == selectedTrack) {
-//            if (i + 1 == trackStack->subWidgets.size()) {
-//                selectedTrack = trackStack->subWidgets.front().get();
-//            } else {
-//                selectedTrack = trackStack->subWidgets[i + 1].get();
-//                break;
-//            }
-//        }
-//    }
-//}
-//void Tapedeck::selectPreviousClip() {
-//    for (int i = 0; i < selectedTrack->clipWidgets.size(); i++) {
-//        if (selectedTrack->clipWidgets[i].get() == selectedClip) {
-//            if (i != 0) {
-//                selectedClip = selectedTrack->clipWidgets[i - 1].get();
-//            }
-//        }
-//    }
-//}
-//void Tapedeck::selectNextClip() {
-//    for (int i = 0; i < selectedTrack->clipWidgets.size(); i++) {
-//        if (selectedTrack->clipWidgets[i].get() == selectedClip) {
-//            if (i + 1 != selectedTrack->clipWidgets.size()) {
-//                selectedClip = selectedTrack->clipWidgets[i + 1].get();
-//                break;
-//            }
-//        }
-//    }
-//    if (selectedClip == nullptr) {
-//        selectedClip = selectedTrack->clipWidgets[0].get();
-//    }
-//}
-void Tapedeck::advanceClipWindow() {
-    /*if (session->getCurrentTimeInSamples() > timeRuler->startTimeOnScreenInSamples + timeRuler->windowSizeInSamples) {
-        timeRuler->startTimeOnScreenInSamples = session->getCurrentTimeInSamples();
-    }*/
-}
-void Tapedeck::retreatClipWindow() {
-    /*if (session->getCurrentTimeInSamples() < timeRuler->startTimeOnScreenInSamples) {
-        timeRuler->startTimeOnScreenInSamples = session->getCurrentTimeInSamples() - timeRuler->windowSizeInSamples;
-        if (timeRuler->startTimeOnScreenInSamples < 0) {
-            timeRuler->startTimeOnScreenInSamples = 0;
-        }
-    }*/
-}
+
 void Tapedeck::createTrackWidget(std::shared_ptr<Track> track) {
     trackStack->createTrackWidget(track);
 }
@@ -124,16 +60,6 @@ void Tapedeck::removeTrack() {
 }
 void Tapedeck::paint(juce::Graphics &screen) {
 
-    // topBar.draw(Point(2, 1), "Key Commands:");
-    // topBar.draw(Point(2, 3), "Create/Delete track    '='/'-'");
-    // topBar.draw(Point(2, 4), "Navigate tracks        'Up'/'Down'");
-    // topBar.draw(Point(2, 5), "Scrub through time     ','/'.'");
-    // topBar.draw(Point(40, 3), "Record Arm Selected Track    'R'");
-    // topBar.draw(Point(40, 4), "Solo Selected Track          'S'");
-    // topBar.draw(Point(40, 5), "Mute Selected Track          'M'");
-    // topBar.draw(Point(78, 3), "Playback/Record/Stop Audio    'Space'");
-    // topBar.draw(Point(78, 4), "Zoom out/in                   '['/']'");
-    // topBar.draw(Point(78, 4), "Quit Tapedeck                 'Ctrl-Q'");
 }
 
 void Tapedeck::resized() {
@@ -142,7 +68,6 @@ void Tapedeck::resized() {
         trackStack->setBounds(15, getHeight() * 0.2, getWidth() - 75, getHeight() * 0.75);
         masterMeter[0].setBounds(getWidth() - 50, trackStack->getBottom() - 200, 15, 200);
         masterMeter[1].setBounds(getWidth() - 30, trackStack->getBottom() - 200, 15, 200);
-
     }
 }
 

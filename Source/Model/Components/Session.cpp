@@ -156,7 +156,7 @@ void Session::createFilesFromRecordedClips() {
         if (track->recordArmed) {
             for (int i = 0; i < track->clips.size(); i++) {
                 if (track->clips[i]->size() > 0) {
-                    wavFileStreamer.open(track->clipMetadata[i].referenceFilePath, ios::binary);
+                    wavFileStreamer.open(track->clips[i]->metadata.referenceFilePath, ios::binary);
                     wavFileGen.openWaveFile(wavFileStreamer);
                     for (int j = 0; j < track->clips[i]->size(); j++) {
                         wavFileGen.writeInputToFile(wavFileStreamer, track->clips[i]->getSample(j).value);
@@ -192,7 +192,7 @@ float Session::getOutputDB(int channel)
         jassertfalse;
     }
 }
-u_int Session::getCurrentTimeInSamples() {
+int Session::getCurrentTimeInSamples() {
 	if (playhead)
 	{
         return playhead->currentTimeInSamples;

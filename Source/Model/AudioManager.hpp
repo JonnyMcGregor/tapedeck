@@ -31,10 +31,9 @@ public:
 
     ~AudioManager() {
     }
-
-    void audioDeviceIOCallback(const float **inputChannelData, int numInputChannels, float **outputChannelData, int numOutputChannels, int numSamples)
+    // Audio IO Device Overrides
+    void audioDeviceIOCallbackWithContext(const float *const *inputChannelData, int numInputChannels, float *const *outputChannelData, int numOutputChannels, int numSamples, const juce::AudioIODeviceCallbackContext &context)
     {
-
         juce::AudioBuffer<float> outBuffer = {outputChannelData, numOutputChannels, numSamples};
         juce::AudioBuffer<float> inBuffer = {(float* const*)inputChannelData, numInputChannels, numSamples};
 
@@ -42,13 +41,14 @@ public:
     }
 
     void audioDeviceAboutToStart(juce::AudioIODevice *device) {
-        audioDeviceLog->appendText(juce::Time::getCurrentTime().toString(false, true, true, true) +  "\tAudio Device Started: " + device->getName() + "\n");
-        
+        audioDeviceLog->appendText(juce::Time::getCurrentTime().toString(false, true, true, true) +  "\tAudio Device Started: " + device->getName() + "\n");   
     }
 
     /** Called to indicate that the device has stopped. */
     void audioDeviceStopped(){
-        audioDeviceLog->appendText(juce::Time::getCurrentTime().toString(false, true, true, true) +  "\tAudio Device Stopped\n");
+        if (audioDeviceLog) {
+            audioDeviceLog->appendText(juce::Time::getCurrentTime().toString(false, true, true, true) + "\tAudio Device Stopped\n");
+        }
     }
 
     void audioDeviceError (const juce::String& errorMessage)

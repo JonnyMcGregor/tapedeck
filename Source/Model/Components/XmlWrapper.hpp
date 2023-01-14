@@ -54,15 +54,15 @@ struct XmlWrapper {
         trackElement->SetAttribute("number_of_clips", track.clips.size());
         sessionNode->InsertEndChild(trackElement);
         for (int i = 0; i < track.clips.size(); i++) {
-            addClipToTrackElement(*track.clips[i], track.clipMetadata[i]);
+            addClipToTrackElement(*track.clips[i], track.clips[i]->metadata);
         }
     }
 
     void addClipToTrackElement(Clip &clip, ClipMetadata &clip_metadata) {
         clipElement = xmlDoc.NewElement("clip");
         clipElement->SetAttribute("reference_file_path", (clip_metadata.referenceFilePath).c_str());
-        clipElement->SetAttribute("start_time_in_session", clip_metadata.startTime);
-        clipElement->SetAttribute("start_time_in_reference", clip_metadata.startTimeInReference);
+        clipElement->SetAttribute("start_time_in_session", clip_metadata.getStartTimeInSession());
+        clipElement->SetAttribute("start_time_in_reference", clip_metadata.getStartTimeInSourceFile());
         clipElement->SetAttribute("length_in_samples", clip.size());
         trackElement->InsertEndChild(clipElement);
     }
@@ -88,7 +88,7 @@ struct XmlWrapper {
     void loadTrackData(Track &track) {
         for (int i = 0; i < trackElement->FindAttribute("number_of_clips")->IntValue(); i++) {
             track.createClip(clipElement->FindAttribute("start_time_in_session")->IntValue(), (sessionName + "/recorded_audio/"));
-            loadAudioClip(track.clips.back(), track.clipMetadata.back());
+            loadAudioClip(track.clips.back(), track.clips[i]->metadata);
         }
         trackElement = trackElement->NextSiblingElement();
     }
@@ -99,7 +99,7 @@ struct XmlWrapper {
         for (int i = 0; i < clip->size(); i++) {
             int first_sample_index = 44;
             //each audio sample is 2 bytes therefore index is multiplied by 2 to get byte index of sample
-            int sample_pos = first_sample_index + metadata.startTimeInReference + (i * 2);
+            int sample_pos = first_sample_index + metadata.getStartTimeInSourceFile() + (i * 2);
             //as samples are stored as little endian, both bytes within sample must be retrieved individually
             double max_amplitude = wave_file.readBytePair(34);
             double raw_sample = wave_file.readBytePair(sample_pos);

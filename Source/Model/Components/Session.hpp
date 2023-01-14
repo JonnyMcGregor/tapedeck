@@ -31,7 +31,7 @@ public:
 
     void setCurrentTimeInSamples(int newTimeInSamples);
     float getCurrentTimeInSeconds();
-    u_int getCurrentTimeInSamples();
+    int getCurrentTimeInSamples();
 
     void loadAudioClip(Clip &clip, int startTimeInReference, int clipLength);
     static double bytesToDouble(unsigned char firstByte, unsigned char secondByte, double maxAmplitude);
@@ -60,7 +60,7 @@ public:
     std::unique_ptr<Playhead> playhead;
 
 private:
-    u_int sampleRate = 0, bufferSize = 0,
+    int sampleRate = 0, bufferSize = 0,
           numInputChannels = 0, numOutputChannels = 0, bitDepth = 16;
     ofstream wavFileStreamer;
 
