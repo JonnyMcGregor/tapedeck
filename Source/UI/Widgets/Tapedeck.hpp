@@ -17,21 +17,13 @@ public:
     Tapedeck(int width, int height, int sampleRate, std::shared_ptr<juce::ApplicationCommandManager> cmdManager);
     ~Tapedeck();
     
-    void selectPreviousTrack();
-    void selectNextTrack();
-    void selectPreviousClip();
-    void selectNextClip();
-    void advanceClipWindow();
-    void retreatClipWindow();
+   
     void createTrackWidget(std::shared_ptr<Track> track);
     void removeTrack();
     void updateTrackStack();
     /** Draws all elements on the main screen */
     void paint(juce::Graphics &screen) override;
     void resized() override;
-    int playheadXPosition(int currentTimeSamples);
-    void updateClipWindow();
-    void updatePlayheadPosition(int currentTimeSamples);
     bool closeUIThread = false;
     
     std::vector<std::shared_ptr<TrackWidget>> getSelectedTracks();

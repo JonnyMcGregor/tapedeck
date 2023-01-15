@@ -35,8 +35,13 @@ public:
 private:
     //==============================================================================
     // Your private member variables go here...
+    // 
+    //Everything pertaining to the UI begins with this component
     std::unique_ptr<Tapedeck> tapedeckUI;
+    //Everything pertaining to audio processing begins with this component
     std::shared_ptr<AudioManager> tapedeckModel;
+
+    std::vector<std::shared_ptr<Component>> selectedComponents;
 
     juce::FileLogger* logger;
     TPDK_LookAndFeel lf;
