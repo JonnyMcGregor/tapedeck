@@ -8,3 +8,7 @@ Tapedeck is a multi-track audio recording and playback application developed usi
 2. With the prerequisite of having JUCE installed, open the Tapedeck.jucer file.
 3. Add your relevent OS/IDE to the Exporter list. 
 4. Build and run the executable from your IDE.
+
+## License
+
+Please note that this project is covered under the GNU GPL 3.0 license. Please respect the terms of this license.
